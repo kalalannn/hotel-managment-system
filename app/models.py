@@ -160,20 +160,19 @@ class Payment(Base):
 class ReservationRoom(Base):
     __tablename__  = 'reservations_rooms'
 
+    id = Column(Integer, primary_key=True)
     date_from = Column(Date)
     date_to = Column(Date)
 
-    reservation_id = Column(Integer, ForeignKey('reservations.id'), primary_key=True)
-    room_id = Column(Integer, ForeignKey('rooms.id'), primary_key=True)
+    reservation_id = Column(Integer, ForeignKey('reservations.id'))
+    room_id = Column(Integer, ForeignKey('rooms.id'))
 
     reservation = relationship("Reservation", back_populates="rooms")
     room = relationship("Room", back_populates="reservations")
 
-    def __init__(self, date_from, date_to, reservation, room):
+    def __init__(self, date_from, date_to):
         self.date_from = date_from
         self.date_to = date_to
-        self.reservation = reservation
-        self.room = room
 
     def __repr__(self):
         return "<ReservationRoom(date_from='%s', date_to='%s')>" % (self.date_from, self.date_to)

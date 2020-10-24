@@ -29,8 +29,8 @@ class User(Base):
 
     role = relationship('Role', back_populates='user', uselist=False)
     hotels = relationship('Hotel', back_populates='owner')
-    reserv_cust = relationship('Reservation', back_populates='customer')
-    reserv_resept = relationship('Reservation', back_populates='receptionist')
+    reservs_cust = relationship('Reservation', foreign_keys='Reservation.customer_id', back_populates='customer')
+    reservs_recept = relationship('Reservation', foreign_keys='Reservation.receptionist_id', back_populates='receptionist')
     feedbacks = relationship("Feedback", back_populates="user")
 
     def __init__(self, username, password, first_name, last_name, email, birth_date, role):
@@ -41,6 +41,10 @@ class User(Base):
         self.email = email
         self.birth_date = birth_date
         self.role = role
+
+    def __repr__(self):
+        return "<User(username='%s', first_name='%s', last_name='%s', role='%s')>" % (
+            self.username, self.first_name, self.last_name, self.role)
 
 
 ''' Role model '''
@@ -54,6 +58,9 @@ class Role(Base):
 
     def __init__(self, name):
         self.name = name
+
+    def __repr__(self):
+        return "<Role(name='%s')>" % (self.name)
 
 
 ''' Feedback model '''
@@ -70,13 +77,14 @@ class Feedback(Base):
     user = relationship("User", back_populates="feedbacks")
     hotel = relationship("Hotel", back_populates="feedbacks")
 
-    def __init__(self, name, description, stars, address, owner):
-        self.name = name 
-        self.description = description 
-        self.owner = owner
-        self.stars = stars
-        self.address = address
-        self.owner = owner
+    def __init__(self, text, rating, user, hotel):
+        self.text = text
+        self.rating = rating
+        self.user = user
+        self.hotel = hotel
+
+    def __repr__(self):
+        return "<Feedback(text='%s', rating='%s')>" % (self.text, self.rating)
 
 
 ''' Hotel model '''
@@ -103,6 +111,9 @@ class Hotel(Base):
         self.address = address
         self.owner = owner
 
+    def __repr__(self):
+        return "<Hotel(name='%s', stars='%s')>" % (self.name, self.stars)
+
 
 ''' Status model '''
 class Status(Base):
@@ -115,6 +126,9 @@ class Status(Base):
 
     def __init__(self, name):
         self.name = name
+    
+    def __repr__(self):
+        return "<Status(name='%s')>" % (self.name)
 
 
 ''' Payment model '''
@@ -130,30 +144,39 @@ class Payment(Base):
 
     reservation = relationship("Reservation", back_populates="payment")
 
-    def __init__(self, name, description, stars, address, owner):
-        self.name = name 
-        self.description = description 
-        self.owner = owner
-        self.stars = stars
-        self.address = address
-        self.owner = owner
+    def __init__(self, block_amount, full_amount, tax, is_blocked=False, is_payed=False):
+        self.block_amount = block_amount
+        self.full_amount = full_amount
+        self.tax = tax
+        self.is_blocked = is_blocked
+        self.is_payed = is_payed
+
+    def __repr__(self):
+        return "<Payment(block_amount='%s', full_amount='%s', is_blocked='%s', is_payed='%s')>" % (
+            self.block_amount, self.full_amount, self.is_blocked, self.is_payed)
 
 
 ''' Reservation-room model '''
 class ReservationRoom(Base):
     __tablename__  = 'reservations_rooms'
 
-    reservation_id = Column(Integer, ForeignKey('reservations.id'), primary_key=True)
-    room_id = Column(Integer, ForeignKey('rooms.id'), primary_key=True)
     date_from = Column(Date)
     date_to = Column(Date)
+
+    reservation_id = Column(Integer, ForeignKey('reservations.id'), primary_key=True)
+    room_id = Column(Integer, ForeignKey('rooms.id'), primary_key=True)
 
     reservation = relationship("Reservation", back_populates="rooms")
     room = relationship("Room", back_populates="reservations")
 
-    def __init__(self, date_from, date_to):
+    def __init__(self, date_from, date_to, reservation, room):
         self.date_from = date_from
         self.date_to = date_to
+        self.reservation = reservation
+        self.room = room
+
+    def __repr__(self):
+        return "<ReservationRoom(date_from='%s', date_to='%s')>" % (self.date_from, self.date_to)
 
 
 ''' Reservation model '''
@@ -168,18 +191,19 @@ class Reservation(Base):
     payment_id = Column(Integer, ForeignKey('payments.id'))
 
     status = relationship('Status', back_populates='reservations')
-    customer = relationship('User', back_populates='reserv_cust')
-    receptionist = relationship('User', back_populates='reserv_recept')
+    customer = relationship('User', foreign_keys=customer_id, back_populates='reservs_cust')
+    receptionist = relationship('User', foreign_keys=receptionist_id, back_populates='reservs_recept')
     payment = relationship('Payment', back_populates="reservation", uselist=False)
     rooms = relationship('ReservationRoom', back_populates='reservation')
 
-    def __init__(self, name, description, stars, address, owner):
-        self.name = name 
-        self.description = description 
-        self.owner = owner
-        self.stars = stars
-        self.address = address
-        self.owner = owner
+    def __init__(self, status, customer, receptionist, payment):
+        self.status = status
+        self.customer = customer
+        self.receptionist = receptionist
+        self.payment = payment
+        
+    def __repr__(self):
+        return "<Reservation(id='%s')>" % (self.id)
 
 
 ''' Room-equipment association '''
@@ -206,6 +230,9 @@ class Room(Base):
         self.beds = beds
         self.room_category = room_category
 
+    def __repr__(self):
+        return "<Room(id='%s', beds='%s')>" % (self.id, self.beds)
+
 
 ''' Room category model '''
 class RoomCategory(Base):
@@ -225,6 +252,9 @@ class RoomCategory(Base):
         self.price = price
         self.hotel = hotel
 
+    def __repr__(self):
+        return "<RoomCategory(type='%s', price='%s')>" % (self.type, self.price)
+
 
 ''' Equipment model '''
 class Equipment(Base):
@@ -237,3 +267,6 @@ class Equipment(Base):
 
     def __init__(self, name):
         self.name = name
+
+    def __repr__(self):
+        return "<Equipment(name='%s')>" % (self.name)

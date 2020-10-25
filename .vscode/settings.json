@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "venv\\Scripts\\python.exe",
+    "python.pythonPath": "c:\\Users\\hg0035649\\Documents\\myFolder\\iis-hotel\\venv\\Scripts\\python.exe",
 
     "python.linting.pylintArgs": [
         "--load-plugins",

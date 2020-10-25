@@ -12,7 +12,10 @@ from app import db
 from app.mod_auth.forms import LoginForm
 
 # Import module models (i.e. User)
-from app.mod_auth.models import User
+from app.models import User, Session
+
+# db session
+session = Session()
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_auth = Blueprint('auth', __name__, url_prefix='/auth')
@@ -26,12 +29,14 @@ def signin():
 
     # Verify the sign in form
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = session.query(User).filter_by(email=form.email.data).first()
+        session.close()
+        print(user)
 
         # if user and check_password_hash(user.password, form.password.data):
         if user and user.password == form.password.data:
-            session['user_id'] = user.id
-            flash('Welcome %s' % user.name)
+            # session['user_id'] = user.id
+            flash('Welcome %s' % user.first_name)
             return redirect(url_for('auth.home'))
 
         flash('Wrong email or password', 'error-message')
@@ -39,9 +44,9 @@ def signin():
 
 @mod_auth.route('/home/', methods=['GET'])
 def home():
-    if session['user_id']:
-        user = User.query.filter_by(id=session['user_id']).first()
-        if user:
-            return render_template("auth/home.html", user=user)
-        else:
-            return redirect(url_for('auth.signin'))
+    # if session['user_id']:
+    user = session.query(User).first()
+    if user:
+        return render_template("auth/home.html", user=user)
+    else:
+        return redirect(url_for('auth.signin'))

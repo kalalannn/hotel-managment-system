@@ -5,7 +5,8 @@ from flask_bootstrap import Bootstrap
 # from datetime import datetime
 
 app = Flask(__name__)
-# app.config.from_object('config')
+app.config.from_object('config')
+
 db = SQLAlchemy(app)
 Bootstrap(app)
 
@@ -16,3 +17,9 @@ def index():
 @app.errorhandler(404)
 def not_found(error):
     return 'Not Found ...', 404
+
+# Import a module / component using its blueprint handler variable (mod_auth)
+from app.mod_auth.controllers import mod_auth as auth_module
+
+# Register blueprint(s)
+app.register_blueprint(auth_module)

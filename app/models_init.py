@@ -6,10 +6,13 @@ from datetime import datetime
 # CREATE SCHEMA public;
 
 # creates all tables
+print ('Creating schema')
 Base.metadata.create_all(engine)
+
 # creates new Session object using the configuration we’ve given the factory class
 session = Session()
 
+print ('Inserting data')
 role1 = Role('admin')
 role2 = Role('manager')
 role3 = Role('user')
@@ -84,6 +87,7 @@ session.add(room4)
 session.add(room5)
 session.add(room6)
 session.commit()
+print('COMMIT. OK')
 
 session.close()
 

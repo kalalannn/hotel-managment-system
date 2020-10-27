@@ -1,14 +1,22 @@
 from flask import Flask, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
-# from flask_moment import Moment
-# from datetime import datetime
 
 app = Flask(__name__)
 app.config.from_object('config')
 
 db = SQLAlchemy(app)
 Bootstrap(app)
+
+# It is important that you import your models after initializing the db object, 
+# since in your models.py you also need to import the db object from this module.
+from .models import *
+db.drop_all()
+db.create_all()
+
+# Example data for database
+from .models_data import load_models_data
+load_models_data()
 
 @app.route('/')
 def index():
@@ -18,8 +26,6 @@ def index():
 def not_found(error):
     return 'Not Found ...', 404
 
-# Import a module / component using its blueprint handler variable (mod_auth)
-from app.mod_auth.controllers import mod_auth as auth_module
-
-# Register blueprint(s)
-app.register_blueprint(auth_module)
+# Blueprints
+from .auth import auth as auth_blueprint
+app.register_blueprint(auth_blueprint)

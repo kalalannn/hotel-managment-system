@@ -1,37 +1,24 @@
-from sqlalchemy import create_engine, Column, ForeignKey, Table
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
-
-from sqlalchemy import Date, Text, String, Integer, Numeric, Boolean
-
-
-# creates engine for provided database path
-engine = create_engine('postgresql://postgres:postgres@localhost:5432/mydb')
-# creates configured "Session" factory class
-Session = sessionmaker(bind=engine)
-
-Base = declarative_base()
-
+from app import db
 
 ''' User model '''
-class User(Base):
+class User(db.Model):
     __tablename__  = 'users'
 
-    id = Column(Integer, primary_key=True)
-    username = Column(String(32), nullable=False)
-    password = Column(String(255), nullable=False)
-    first_name = Column(String(255))
-    last_name = Column(String(255))
-    email = Column(String(255))
-    birth_date = Column(Date)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(32), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    first_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
+    email = db.Column(db.String(255))
+    birth_date = db.Column(db.Date)
 
-    role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
 
-    role = relationship('Role', back_populates='user', uselist=False)
-    hotels = relationship('Hotel', back_populates='owner')
-    reservs_cust = relationship('Reservation', foreign_keys='Reservation.customer_id', back_populates='customer')
-    reservs_recept = relationship('Reservation', foreign_keys='Reservation.receptionist_id', back_populates='receptionist')
-    feedbacks = relationship("Feedback", back_populates="user")
+    role = db.relationship('Role', back_populates='user', uselist=False)
+    hotels = db.relationship('Hotel', back_populates='owner')
+    reservs_cust = db.relationship('Reservation', foreign_keys='Reservation.customer_id', back_populates='customer')
+    reservs_recept = db.relationship('Reservation', foreign_keys='Reservation.receptionist_id', back_populates='receptionist')
+    feedbacks = db.relationship("Feedback", back_populates="user")
 
     def __init__(self, username, password, first_name, last_name, email, birth_date, role):
         self.username = username
@@ -48,13 +35,13 @@ class User(Base):
 
 
 ''' Role model '''
-class Role(Base):
+class Role(db.Model):
     __tablename__  = 'roles'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(32))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
 
-    user = relationship("User", back_populates="role")
+    user = db.relationship("User", back_populates="role")
 
     def __init__(self, name):
         self.name = name
@@ -64,18 +51,18 @@ class Role(Base):
 
 
 ''' Feedback model '''
-class Feedback(Base):
+class Feedback(db.Model):
     __tablename__  = 'feedbacks'
 
-    id = Column(Integer, primary_key=True)
-    text = Column(Text)
-    rating = Column(Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text)
+    rating = db.Column(db.Integer)
 
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    hotel_id = Column(Integer, ForeignKey('hotels.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    hotel_id = db.Column(db.Integer, db.ForeignKey('hotels.id'), nullable=False)
 
-    user = relationship("User", back_populates="feedbacks")
-    hotel = relationship("Hotel", back_populates="feedbacks")
+    user = db.relationship("User", back_populates="feedbacks")
+    hotel = db.relationship("Hotel", back_populates="feedbacks")
 
     def __init__(self, text, rating, user, hotel):
         self.text = text
@@ -88,20 +75,20 @@ class Feedback(Base):
 
 
 ''' Hotel model '''
-class Hotel(Base):
+class Hotel(db.Model):
     __tablename__  = 'hotels'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255))
-    description = Column(Text)
-    stars = Column(Integer)
-    address = Column(Text)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    stars = db.Column(db.Integer)
+    address = db.Column(db.Text)
 
-    owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    owner = relationship("User", back_populates="hotels")
-    feedbacks = relationship("Feedback", back_populates="hotel")
-    room_categories = relationship('RoomCategory', back_populates='hotel')
+    owner = db.relationship("User", back_populates="hotels")
+    feedbacks = db.relationship("Feedback", back_populates="hotel")
+    room_categories = db.relationship('RoomCategory', back_populates='hotel')
 
     def __init__(self, name, description, stars, address, owner):
         self.name = name 
@@ -116,13 +103,13 @@ class Hotel(Base):
 
 
 ''' Status model '''
-class Status(Base):
+class Status(db.Model):
     __tablename__  = 'statuses'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(32))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
 
-    reservations = relationship("Reservation", back_populates="status")
+    reservations = db.relationship("Reservation", back_populates="status")
 
     def __init__(self, name):
         self.name = name
@@ -132,17 +119,17 @@ class Status(Base):
 
 
 ''' Payment model '''
-class Payment(Base):
+class Payment(db.Model):
     __tablename__  = 'payments'
 
-    id = Column(Integer, primary_key=True)
-    block_amount = Column(Numeric)
-    full_amount = Column(Numeric)
-    tax = Column(Numeric)
-    is_blocked = Column(Boolean)
-    is_payed = Column(Boolean)
+    id = db.Column(db.Integer, primary_key=True)
+    block_amount = db.Column(db.Numeric)
+    full_amount = db.Column(db.Numeric)
+    tax = db.Column(db.Numeric)
+    is_blocked = db.Column(db.Boolean)
+    is_payed = db.Column(db.Boolean)
 
-    reservation = relationship("Reservation", back_populates="payment")
+    reservation = db.relationship("Reservation", back_populates="payment")
 
     def __init__(self, block_amount, full_amount, tax, is_blocked=False, is_payed=False):
         self.block_amount = block_amount
@@ -157,18 +144,18 @@ class Payment(Base):
 
 
 ''' Reservation-room model '''
-class ReservationRoom(Base):
+class ReservationRoom(db.Model):
     __tablename__  = 'reservations_rooms'
 
-    id = Column(Integer, primary_key=True)
-    date_from = Column(Date)
-    date_to = Column(Date)
+    id = db.Column(db.Integer, primary_key=True)
+    date_from = db.Column(db.Date)
+    date_to = db.Column(db.Date)
 
-    reservation_id = Column(Integer, ForeignKey('reservations.id'))
-    room_id = Column(Integer, ForeignKey('rooms.id'))
+    reservation_id = db.Column(db.Integer, db.ForeignKey('reservations.id'))
+    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
 
-    reservation = relationship("Reservation", back_populates="rooms")
-    room = relationship("Room", back_populates="reservations")
+    reservation = db.relationship("Reservation", back_populates="rooms")
+    room = db.relationship("Room", back_populates="reservations")
 
     def __init__(self, date_from, date_to):
         self.date_from = date_from
@@ -179,21 +166,21 @@ class ReservationRoom(Base):
 
 
 ''' Reservation model '''
-class Reservation(Base):
+class Reservation(db.Model):
     __tablename__  = 'reservations'
 
-    id = Column(Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
 
-    status_id = Column(Integer, ForeignKey('statuses.id'))
-    customer_id = Column(Integer, ForeignKey('users.id'))
-    receptionist_id = Column(Integer, ForeignKey('users.id'))
-    payment_id = Column(Integer, ForeignKey('payments.id'))
+    status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'))
+    customer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    payment_id = db.Column(db.Integer, db.ForeignKey('payments.id'))
 
-    status = relationship('Status', back_populates='reservations')
-    customer = relationship('User', foreign_keys=customer_id, back_populates='reservs_cust')
-    receptionist = relationship('User', foreign_keys=receptionist_id, back_populates='reservs_recept')
-    payment = relationship('Payment', back_populates="reservation", uselist=False)
-    rooms = relationship('ReservationRoom', back_populates='reservation')
+    status = db.relationship('Status', back_populates='reservations')
+    customer = db.relationship('User', foreign_keys=customer_id, back_populates='reservs_cust')
+    receptionist = db.relationship('User', foreign_keys=receptionist_id, back_populates='reservs_recept')
+    payment = db.relationship('Payment', back_populates="reservation", uselist=False)
+    rooms = db.relationship('ReservationRoom', back_populates='reservation')
 
     def __init__(self, status, customer, receptionist, payment):
         self.status = status
@@ -206,24 +193,24 @@ class Reservation(Base):
 
 
 ''' Room-equipment association '''
-rooms_equipments = Table('rooms_equipments', Base.metadata,
-    Column('room_id', Integer, ForeignKey('rooms.id')),
-    Column('equipment_id', Integer, ForeignKey('equipments.id'))
+rooms_equipments = db.Table('rooms_equipments', db.metadata,
+    db.Column('room_id', db.Integer, db.ForeignKey('rooms.id')),
+    db.Column('equipment_id', db.Integer, db.ForeignKey('equipments.id'))
 )
 
 
 ''' Room model '''
-class Room(Base):
+class Room(db.Model):
     __tablename__  = 'rooms'
 
-    id = Column(Integer, primary_key=True)
-    beds = Column(Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    beds = db.Column(db.Integer)
 
-    room_category_id = Column(Integer, ForeignKey('room_categories.id'))
+    room_category_id = db.Column(db.Integer, db.ForeignKey('room_categories.id'))
 
-    room_category = relationship('RoomCategory', back_populates='rooms')
-    reservations = relationship('ReservationRoom', back_populates='room')
-    equipments = relationship('Equipment', secondary=rooms_equipments, back_populates='rooms')
+    room_category = db.relationship('RoomCategory', back_populates='rooms')
+    reservations = db.relationship('ReservationRoom', back_populates='room')
+    equipments = db.relationship('Equipment', secondary=rooms_equipments, back_populates='rooms')
 
     def __init__(self, beds, room_category):
         self.beds = beds
@@ -234,17 +221,17 @@ class Room(Base):
 
 
 ''' Room category model '''
-class RoomCategory(Base):
+class RoomCategory(db.Model):
     __tablename__  = 'room_categories'
 
-    id = Column(Integer, primary_key=True)
-    type = Column(String(32))
-    price = Column(Numeric)
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(32))
+    price = db.Column(db.Numeric)
 
-    hotel_id = Column(Integer, ForeignKey('hotels.id'))
+    hotel_id = db.Column(db.Integer, db.ForeignKey('hotels.id'))
 
-    hotel = relationship('Hotel', back_populates='room_categories')
-    rooms = relationship('Room', back_populates='room_category')
+    hotel = db.relationship('Hotel', back_populates='room_categories')
+    rooms = db.relationship('Room', back_populates='room_category')
 
     def __init__(self, type, price, hotel):
         self.type = type
@@ -256,13 +243,13 @@ class RoomCategory(Base):
 
 
 ''' Equipment model '''
-class Equipment(Base):
+class Equipment(db.Model):
     __tablename__  = 'equipments'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
 
-    rooms = relationship('Room', secondary=rooms_equipments, back_populates='equipments')
+    rooms = db.relationship('Room', secondary=rooms_equipments, back_populates='equipments')
 
     def __init__(self, name):
         self.name = name

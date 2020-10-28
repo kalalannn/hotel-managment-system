@@ -1,4 +1,5 @@
 from app import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 ''' User model '''
 class User(db.Model):
@@ -6,7 +7,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), nullable=False)
-    password = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255))
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
     email = db.Column(db.String(255))
@@ -20,9 +21,20 @@ class User(db.Model):
     reservs_recept = db.relationship('Reservation', foreign_keys='Reservation.receptionist_id', back_populates='receptionist')
     feedbacks = db.relationship("Feedback", back_populates="user")
 
+    @property
+    def password(self):
+        raise AttributeError('password is not readable attribute')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def veify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
     def __init__(self, username, password, first_name, last_name, email, birth_date, role):
         self.username = username
-        self.password = password
+        self.password_hash = generate_password_hash(password)
         self.first_name = first_name
         self.last_name = last_name
         self.email = email

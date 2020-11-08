@@ -53,7 +53,6 @@ class User(UserMixin, db.Model):
         return "<User(username='%s', first_name='%s', last_name='%s', role='%s')>" % (
             self.username, self.first_name, self.last_name, self.role)
 
-
 ''' Role model '''
 class Role(db.Model):
     __tablename__  = 'roles'
@@ -68,7 +67,6 @@ class Role(db.Model):
 
     def __repr__(self):
         return "<Role(name='%s')>" % (self.name)
-
 
 ''' Feedback model '''
 class Feedback(db.Model):
@@ -92,7 +90,6 @@ class Feedback(db.Model):
 
     def __repr__(self):
         return "<Feedback(text='%s', rating='%s')>" % (self.text, self.rating)
-
 
 ''' Hotel model '''
 class Hotel(db.Model):
@@ -121,7 +118,6 @@ class Hotel(db.Model):
     def __repr__(self):
         return "<Hotel(name='%s', stars='%s')>" % (self.name, self.stars)
 
-
 ''' Status model '''
 class Status(db.Model):
     __tablename__  = 'statuses'
@@ -136,7 +132,6 @@ class Status(db.Model):
     
     def __repr__(self):
         return "<Status(name='%s')>" % (self.name)
-
 
 ''' Payment model '''
 class Payment(db.Model):
@@ -161,7 +156,6 @@ class Payment(db.Model):
     def __repr__(self):
         return "<Payment(block_amount='%s', full_amount='%s', is_blocked='%s', is_payed='%s')>" % (
             self.block_amount, self.full_amount, self.is_blocked, self.is_payed)
-
 
 ''' Reservation-room model '''
 class ReservationRoom(db.Model):

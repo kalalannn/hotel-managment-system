@@ -3,13 +3,28 @@
 {% block navbar %}
 <nav class="navbar navbar-top">
     <ul class="nav navbar-nav">
-        {% if not current_user.is_authenticated %}
-        <li><a href="{{ url_for('index') }}">Index</a></li>
-        <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+        <li><a href="{{ url_for('index') }}"> Index </a></li>
+
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('auth.home') }}"> Auth Home </a></li>
+        {% endif %}
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Hotels
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{{ url_for('hotels.list') }}"> List </a>
+                <!-- if admin -->
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ url_for('hotels.new') }}"> New Hotel </a>
+            </div>
+        </li>
+
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('auth.login') }}"> Log In </a></li>
         {% else %}
-        <li><a href="{{ url_for('index') }}">Index</a></li>
-        <li><a href="{{ url_for('auth.home') }}">Auth Home</a></li>
-        <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+            <li><a href="{{ url_for('auth.logout') }}"> Log Out </a></li>
         {% endif %}
     </ul>
 </nav>
@@ -18,12 +33,12 @@
 {% block content %}
 {# Flash messages #}
 {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
+    {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+            <li> {{ message }} </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 {% endwith %}
 {% endblock %}

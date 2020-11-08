@@ -17,6 +17,7 @@ def restart():
         # Recreate database
         db.drop_all()
         db.create_all()
+
         # Load example data for database
         load_models_data()
 

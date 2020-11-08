@@ -241,13 +241,13 @@ class Reservation(db.Model):
         return "<Reservation(id='%s')>" \
             % (self.id)
 
-# rooms_equipments = db.Table('rooms_equipments', db.metadata,
-#     db.Column('room_id',        db.Integer, \
-#         db.ForeignKey('rooms.id')),
+rooms_equipments = db.Table('rooms_equipments', db.metadata,
+    db.Column('room_id',        db.Integer, \
+        db.ForeignKey('rooms.id')),
 
-#     db.Column('equipment_id',   db.Integer, \
-#         db.ForeignKey('equipments.id'))
-# )
+    db.Column('equipment_id',   db.Integer, \
+        db.ForeignKey('equipments.id'))
+)
 
 class Room(db.Model):
     __tablename__  = 'rooms'
@@ -265,9 +265,9 @@ class Room(db.Model):
     reservations    = db.relationship('ReservationRoom', \
         back_populates='room')
 
-    # equipments      = db.relationship('Equipment', \
-    #     secondary=rooms_equipments, \
-    #     back_populates='rooms')
+    equipments      = db.relationship('Equipment', \
+        secondary=rooms_equipments, \
+        back_populates='rooms')
 
     def __init__(self, _number, _beds, _room_category):
         self.number         = _number
@@ -305,21 +305,21 @@ class RoomCategory(db.Model):
             % (self.type, self.price)
 
 
-# class Equipment(db.Model):
-#     __tablename__  = 'equipments'
+class Equipment(db.Model):
+    __tablename__  = 'equipments'
 
-#     id      = db.Column(db.Integer, primary_key=True)
-#     type    = db.Column(db.Text)
-#     name    = db.Column(db.Text)
+    id      = db.Column(db.Integer, primary_key=True)
+    type    = db.Column(db.Text)
+    name    = db.Column(db.Text)
 
-#     rooms   = db.relationship('Room', \
-#         secondary = rooms_equipments, \
-#         back_populates = 'equipments')
+    rooms   = db.relationship('Room', \
+        secondary = rooms_equipments, \
+        back_populates = 'equipments')
 
-#     def __init__(self, _type, _name):
-#         self.type = _type
-#         self.name = _name
+    def __init__(self, _type, _name):
+        self.type = _type
+        self.name = _name
 
-#     def __repr__(self):
-#         return "<Equipment(type='%s', name='%s')>" \
-#             % (self.type, self.name)
+    def __repr__(self):
+        return "<Equipment(type='%s', name='%s')>" \
+            % (self.type, self.name)

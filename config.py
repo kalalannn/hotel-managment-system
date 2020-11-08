@@ -18,7 +18,7 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://' + \
 DATABASE_CONNECT_OPTIONS = {}
 
 # Suppress warning
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 # Enable protection agains *Cross-site Request Forgery (CSRF)*
 CSRF_ENABLED = True

@@ -8,6 +8,16 @@
     <h1>Auth Home page!</h1>
     {% if current_user.is_authenticated %}
     <h3>Hello, {{ current_user.first_name }}!</h3>
+    <div>
+        <ul>
+        <li>E-mail: {{ current_user.email }}</li>
+        <form action="{{ url_for('auth.new_password') }}" method="GET">
+        <li>Change password?
+            <button type="submit">Click!</button>
+        </li>
+        </form>
+        </ul>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

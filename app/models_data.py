@@ -1,49 +1,34 @@
 from app import db
 from datetime import datetime, timedelta, date
-from .models import User, Role, Feedback, Hotel, Status, Payment, Reservation, ReservationRoom, Room, RoomCategory #, Equipment
+from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, RoomCategory
 
 def load_models_data():
     print ('Inserting data')
 
-    # ROLES
-    # def __init__(self, _name):
-
-    role_admin          = Role('ADMIN')
-    role_director       = Role('DIRECTOR')
-    role_receptionist   = Role('RECEPTIONIST')
-    role_customer       = Role('CUSTOMER')
-    role_anon           = Role('ANON')
-
-    db.session.add_all([
-        role_admin,
-        role_director, role_receptionist,
-        role_customer, role_anon
-    ])
-
     # USERS
-    # def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date, _role):
+    # def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date):
 
     # 1 ADMIN, 3 DIRECTORS; 4 RECEPTIONISTS, 8 CUSTOMERS
-    admin_0 = User('Admin', 'Admin 0', 'admin@gmail.com', 'a_0_qwerty', role_admin)
+    admin_0 = User('admin_0', 'a_0_qwerty', 'Admin', 'Admin 0', 'admin@gmail.com', date(1980, 1, 1), 'ADMIN')
 
-    director_0 = User('Ivan', 'Director 0', 'director_0@gmail.com', 'd_0_qwerty', role_director)
-    director_1 = User('Ivan', 'Director 1', 'director_1@gmail.com', 'd_1_qwerty', role_director)
-    director_2 = User('Ivan', 'Director 2', 'director_2@gmail.com', 'd_2_qwerty', role_director)
+    director_0 = User('director_0', 'd_0_qwerty', 'Ivan', 'Director 0', 'director_0@gmail.com', date(1981, 1, 1), 'DIRECTOR')
+    director_1 = User('director_1', 'd_1_qwerty', 'Ivan', 'Director 1', 'director_1@gmail.com', date(1981, 2, 2), 'DIRECTOR')
+    director_2 = User('director_2', 'd_2_qwerty', 'Ivan', 'Director 2', 'director_2@gmail.com', date(1981, 3, 3), 'DIRECTOR')
 
-    receptionist_0 = User('Oleg', 'Receptionist 0', 'receptionist_0@gmail.com', 'r_0_qwerty', role_receptionist)
-    receptionist_1 = User('Oleg', 'Receptionist 1', 'receptionist_1@gmail.com', 'r_1_qwerty', role_receptionist)
-    receptionist_2 = User('Oleg', 'Receptionist 2', 'receptionist_2@gmail.com', 'r_2_qwerty', role_receptionist)
-    receptionist_3 = User('Oleg', 'Receptionist 3', 'receptionist_3@gmail.com', 'r_3_qwerty', role_receptionist)
+    receptionist_0 = User('receptionist_0', 'r_0_qwerty', 'Oleg', 'Receptionist 0', 'receptionist_0@gmail.com', date(1982, 1, 1), 'RECEPTIONIST')
+    receptionist_1 = User('receptionist_1', 'r_1_qwerty', 'Oleg', 'Receptionist 1', 'receptionist_1@gmail.com', date(1982, 2, 2), 'RECEPTIONIST')
+    receptionist_2 = User('receptionist_2', 'r_2_qwerty', 'Oleg', 'Receptionist 2', 'receptionist_2@gmail.com', date(1982, 3, 3), 'RECEPTIONIST')
+    receptionist_3 = User('receptionist_3', 'r_3_qwerty', 'Oleg', 'Receptionist 3', 'receptionist_3@gmail.com', date(1982, 4, 4), 'RECEPTIONIST')
 
-    customer_0 = User('Vasia', 'Customer 0', 'customer_0@gmail.com', 'c_0_qwerty', role_customer)
-    customer_1 = User('Vasia', 'Customer 1', 'customer_1@gmail.com', 'c_1_qwerty', role_customer)
-    customer_2 = User('Vasia', 'Customer 2', 'customer_2@gmail.com', 'c_2_qwerty', role_customer)
-    customer_3 = User('Vasia', 'Customer 3', 'customer_3@gmail.com', 'c_3_qwerty', role_customer)
+    customer_0 = User('customer_0', 'c_0_qwerty', 'Vasia', 'Customer 0', 'customer_0@gmail.com', date(1985, 1, 1), 'CUSTOMER')
+    customer_1 = User('customer_1', 'c_1_qwerty', 'Vasia', 'Customer 1', 'customer_1@gmail.com', date(1985, 2, 2), 'CUSTOMER')
+    customer_2 = User('customer_2', 'c_2_qwerty', 'Vasia', 'Customer 2', 'customer_2@gmail.com', date(1985, 3, 3), 'CUSTOMER')
+    customer_3 = User('customer_3', 'c_3_qwerty', 'Vasia', 'Customer 3', 'customer_3@gmail.com', date(1985, 4, 4), 'CUSTOMER')
 
-    customer_4 = User('Vasia', 'Customer 4', 'customer_4@gmail.com', 'c_4_qwerty', role_customer)
-    customer_5 = User('Vasia', 'Customer 5', 'customer_5@gmail.com', 'c_5_qwerty', role_customer)
-    customer_6 = User('Vasia', 'Customer 6', 'customer_6@gmail.com', 'c_6_qwerty', role_customer)
-    customer_7 = User('Vasia', 'Customer 7', 'customer_7@gmail.com', 'c_7_qwerty', role_customer)
+    customer_4 = User('customer_4', 'c_4_qwerty', 'Vasia', 'Customer 4', 'customer_4@gmail.com', date(1985, 5, 5), 'CUSTOMER')
+    customer_5 = User('customer_5', 'c_5_qwerty', 'Vasia', 'Customer 5', 'customer_5@gmail.com', date(1985, 6, 6), 'CUSTOMER')
+    customer_6 = User('customer_6', 'c_6_qwerty', 'Vasia', 'Customer 6', 'customer_6@gmail.com', date(1985, 7, 7), 'CUSTOMER')
+    customer_7 = User('customer_7', 'c_7_qwerty', 'Vasia', 'Customer 7', 'customer_7@gmail.com', date(1985, 8, 8), 'CUSTOMER')
 
     db.session.add_all([
         admin_0,
@@ -53,28 +38,33 @@ def load_models_data():
         customer_4, customer_5, customer_6, customer_7,
     ])
 
+    address_0 = Address('Czech Republic', 'Brno', '602 00', 'Masarykova', '21')
+    address_1 = Address('Czech Republic', 'Praha-Vinohrady', '120 00', 'Korunni', '691')
+    address_2 = Address('Czech Republic', 'Brno', '602 00', 'Benesova', '605')
+
     # HOTELS
     # def __init__(self, _name, _description, _stars, _address, _owner):
 
     hotel_0 = Hotel('Jizni Morava International',
         'Luxusni hotel v Brne pro podnikatele',
-        5, 'Masarykova 1, Brno 602 00', director_0)
+        5, address_0, director_0)
 
     hotel_1 = Hotel('Praha President Hotel',
         'Nejlepsi hotel v Praze pro prezidenty',
-        4, 'Korunni 691, Praha-Vinohrady 120 00', director_1)
+        4, address_1, director_1)
 
     hotel_2 = Hotel('Brno Grand Hotel',
         'Kolem hotelu je vzdycky hodne opilcu, bezdomovcu a vselijakych sebrancu',
-        3, 'Benesova 605, Brno 602 00', director_2)
+        3, address_2, director_2)
 
-    db.session.add_all([hotel_0, hotel_1, hotel_2])
+    address_0.hotel_id = hotel_0.id
+    address_1.hotel_id = hotel_1.id
+    address_2.hotel_id = hotel_2.id
 
-    # status1 = Status('created')
-    # status2 = Status('booked')
-    # status3 = Status('canceled')
-
-    # db.session.add_all([status1, status2, status3])
+    db.session.add_all([
+        address_0, address_1, address_2,
+        hotel_0, hotel_1, hotel_2
+    ])
 
     # payment1 = Payment(21.44, 30.5, 4.08)
     # payment2 = Payment(5.4, 10.5, 1.22)

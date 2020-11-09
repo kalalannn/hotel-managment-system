@@ -2,22 +2,20 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
 from wtforms.validators import Required
 
-STARS_SELECT = [
-    ('5', '*****'),
-    ('4', '****'),
-    ('3', '***'),
-    ('2', '**'),
-    ('1', '*'),
-]
-
 class SearchForm(FlaskForm):
     name    = StringField('Name')
-    stars   = SelectField('Stars', choices = STARS_SELECT)
+    stars   = SelectField('Stars')
     submit  = SubmitField('Search')
 
-class NewHotelForm(FlaskForm):
+class HotelForm(FlaskForm):
     name       = StringField('Name',        validators=[Required()])
-    description= StringField('Description', validators=[Required()])
-    stars      = SelectField('Stars',       validators=[Required()], choices=STARS_SELECT)
+    stars      = SelectField('Stars',       validators=[Required()])
     address    = StringField('Address',     validators=[Required()])
+    owner      = SelectField('Owner',       validators=[Required()])
+    description= StringField('Description', validators=[Required()])
     submit     = SubmitField('Create')
+
+    def director(self):
+        self.owner = StringField('Owner', readonly="readonly")
+        self.name.readonly = 'readonly'
+        self.stars.readonly = 'readonly'

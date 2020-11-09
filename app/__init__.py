@@ -1,14 +1,14 @@
 from flask import Flask, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 
 def create_app(config_name):
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_name)
 
     db.init_app(app)

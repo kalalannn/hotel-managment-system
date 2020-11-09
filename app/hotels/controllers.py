@@ -11,7 +11,7 @@ from app.helpers import Helper
 @hotels.route('/list/', methods=['GET', 'POST'])
 def list():
     form = SearchForm()
-    choises = Helper.dictToArrayOfTuples(Hotel.starses)
+    choises = Helper.dictToListOfTuples(Hotel._starses)
     choises.insert(0, ('',''))
     form.stars.choices = choises
 
@@ -39,31 +39,33 @@ def list():
 
     return render_template('hotels/list.html', form=form, hotels=_hotels)
 
+
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
 def update(hotel_id=None):
     # print (current_user)
     # print ('Auth: {}'.format(current_user.is_authenticated))
     # return render_template('hotels/update.html', form=HotelForm())
+    form = HotelForm()
 
-    if request.method == 'GET':
-        # EDIT
-        if hotel_id and current_user.have_role('DIRECTOR'):
-            hotel = Hotel.query.filter_by(id=hotel_id).one()
-            form = HotelForm(obj=hotel)
-            if current_user.have_role('ADMIN'):
-                form.owner.choices = Helper.toArrayOfTuples(User.by_role('DIRECTOR'), \
-                    ' ', "first_name", "last_name")
-            else:
-                form.director()
-                form.owner = '{} {}'.format(hotel.owner.first_name, hotel.owner.last_name)
-        # NEW
-        elif current_user.have_role('ADMIN'):
-            form = HotelForm()
-            form.owner.choices = Helper.toArrayOfTuples(User.by_role('DIRECTOR'), \
+    # EDIT
+    if hotel_id and User.has_role(current_user, 'DIRECTOR'):
+        hotel = Hotel.query.filter_by(id=hotel_id).one()
+        form = HotelForm(obj=hotel)
+        if User.has_role(current_user, 'ADMIN'):
+            form.owner.choices = Helper.listObjToListOfTuples(User.by_role('DIRECTOR'), \
                 ' ', "first_name", "last_name")
+        else:
+            form.director()
+            form.owner = '{} {}'.format(hotel.owner.first_name, hotel.owner.last_name)
+    # NEW
+    elif User.has_role(current_user, 'ADMIN'):
+        form.stars.choices = Helper.dictToListOfTuples(Hotel._starses)
+        form.owner.choices = Helper.listObjToListOfTuples(User.by_role('DIRECTOR'), \
+            ' ', "first_name", "last_name")
+
     # POST
-    elif form.validate_on_submit():
+    if form.validate_on_submit():
         # EDIT
         if hotel_id:
             hotel = Hotel.query.filter_by(id=hotel_id).one()

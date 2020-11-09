@@ -2,6 +2,7 @@ from app import db
 from sqlalchemy import CheckConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from app.helpers import Helper
 from . import login_manager
 
 @login_manager.user_loader
@@ -22,20 +23,21 @@ class User(UserMixin, db.Model):
         'DIRECTOR':     2,
         'RECEPTIONIST': 3,
         'CUSTOMER':     4,
-        'ANON':         5,
+        # 'ANON':         5,
     }
 
     role            = db.Column(db.Text, \
-        CheckConstraint('role IN ('+ \
-            ','.join(map(lambda x: '\'{}\''.format(x), _roles.keys())) \
-        +')'))
+        CheckConstraint(Helper.sqlIN('role', _roles.keys())))
 
     @staticmethod
     def by_role(role): # -> list
         return User.query.filter_by(role = role)
 
-    def have_role(self, role):
-        return self._roles[self.role] <= self._roles[role]
+    @staticmethod
+    def has_role(user, role):
+        if not user.is_authenticated:
+            return False
+        return User._roles[user.role] <= User._roles[role]
 
     hotels          = db.relationship('Hotel', \
         back_populates='owner')
@@ -70,8 +72,8 @@ class User(UserMixin, db.Model):
         self.role           = _role
 
     def __repr__(self):
-        return "<User(id='%s', username='%s', first_name='%s', last_name='%s', role='%s')>" % (
-            self.id, self.username, self.first_name, self.last_name, self.role)
+        return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (
+            self.id, self.email, self.first_name, self.last_name, self.role)
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'
@@ -80,7 +82,7 @@ class Hotel(db.Model):
     name            = db.Column(db.Text)
     description     = db.Column(db.Text)
 
-    starses = { 
+    _starses = { 
         '5': '*****',
         '4': '****',
         '3': '***',
@@ -88,11 +90,8 @@ class Hotel(db.Model):
         '1': '*',
     }
 
-    stars           = db.Column(db.Integer,
-        CheckConstraint('stars IN ('+ \
-            ','.join(map(lambda x: '\{}\''.format(x), starses.keys() ))
-        )
-    )
+    stars           = db.Column(db.Integer, \
+        CheckConstraint(Helper.sqlIN('stars', _starses.keys())))
 
     address         = db.relationship('Address', \
         back_populates='hotel', \
@@ -188,9 +187,7 @@ class RoomCategory(db.Model):
     }
 
     type        = db.Column(db.Text, \
-        CheckConstraint('type IN ('+ \
-            ','.join(map(lambda x: '\'{}\''.format(x), _types.keys())) \
-        +')'))
+        CheckConstraint(Helper.sqlIN('type', _types.keys())))
 
     price       = db.Column(db.Numeric)
 

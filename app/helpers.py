@@ -3,7 +3,7 @@ class Helper(object):
     # _list -> list of objects _obj
     # *args     -> ['first_name', 'second_name', ... ]
     @staticmethod
-    def toArrayOfTuples(_list, delimiter, *args):
+    def listObjToListOfTuples(_list, delimiter, *args):
         return [tuple for tuple in                                 \
             map(lambda _obj:                                       \
                 ( getattr(_obj, "id"),                             \
@@ -14,8 +14,19 @@ class Helper(object):
             , _list) ]
     
     @staticmethod
-    def dictToArrayOfTuples(_dict):
-        # print(_dict, _dict.keys())
-        return [(key, _dict[key]) for key in _dict.keys()]
+    def dictToListOfTuples(_dict, only_keys=False, only_values=False):
+        # print(_dict, _dict.keys(), _dict.values())
+        if only_keys:
+            return [(key, key) for key in _dict.keys()]
+        elif only_values:
+            return [(val, val) for val in _dict.values()]
+        else:
+            return [(key, _dict[key]) for key in _dict.keys()]
+    
+    @staticmethod
+    def sqlIN(field_name, _list):
+        return '{} IN ('.format(field_name)+ \
+            ','.join(map(lambda x: '\'{}\''.format(x), _list)) \
+        +')'
 
 

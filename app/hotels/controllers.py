@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 
 from . import hotels
 from .forms import SearchForm, HotelForm
-from ..models import Hotel, User
+from ..models import Hotel, User, Role
 from app import db
 from app.helpers import Helper
 
@@ -52,7 +52,7 @@ def update(hotel_id=None):
         hotel = Hotel.query.filter_by(id=hotel_id).one()
         form = HotelForm(obj=hotel)
         if User.has_role(current_user, 'ADMIN'):
-            form.owner.choices = Helper.listObjToListOfTuples(User.by_role('DIRECTOR'), \
+            form.owner.choices = Helper.listObjToListOfTuples(Role.users_by_role('DIRECTOR'), \
                 ' ', "first_name", "last_name")
         else:
             form.director()
@@ -60,7 +60,7 @@ def update(hotel_id=None):
     # NEW
     elif User.has_role(current_user, 'ADMIN'):
         form.stars.choices = Helper.dictToListOfTuples(Hotel._starses)
-        form.owner.choices = Helper.listObjToListOfTuples(User.by_role('DIRECTOR'), \
+        form.owner.choices = Helper.listObjToListOfTuples(Role.users_by_role('DIRECTOR'), \
             ' ', "first_name", "last_name")
 
     # POST

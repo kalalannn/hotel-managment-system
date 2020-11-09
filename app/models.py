@@ -18,26 +18,16 @@ class User(UserMixin, db.Model):
     email           = db.Column(db.Text)
     password_hash   = db.Column(db.Text)
 
-    _roles = {
-        'ADMIN':        1,
-        'DIRECTOR':     2,
-        'RECEPTIONIST': 3,
-        'CUSTOMER':     4,
-        # 'ANON':         5,
-    }
-
-    role            = db.Column(db.Text, \
-        CheckConstraint(Helper.sqlIN('role', _roles.keys())))
+    role_id         = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    role            = db.relationship('Role', \
+        back_populates='users', \
+        uselist=False)
 
     @staticmethod
-    def by_role(role): # -> list
-        return User.query.filter_by(role = role)
-
-    @staticmethod
-    def has_role(user, role):
+    def has_role(user, role_name):
         if not user.is_authenticated:
             return False
-        return User._roles[user.role] <= User._roles[role]
+        return user.role.rate >= Role.query.filter_by(name=role_name).one().rate
 
     hotels          = db.relationship('Hotel', \
         back_populates='owner')
@@ -74,6 +64,28 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (
             self.id, self.email, self.first_name, self.last_name, self.role)
+
+class Role(db.Model):
+    __tablename__  = 'roles'
+
+    id      = db.Column(db.Integer, primary_key=True)
+    name    = db.Column(db.Text)
+    rate    = db.Column(db.Integer, nullable=False)
+
+    users    = db.relationship("User", \
+        back_populates="role")
+
+    def __init__(self, _name, _rate):
+        self.name = _name
+        self.rate = _rate
+
+    def __repr__(self):
+        return "<Role(name='%s', rate='%s')>" \
+            % (self.name, self.rate)
+    
+    @staticmethod
+    def users_by_role(role_name):
+        return Role.query.filter_by(name=role_name).one().users
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'
@@ -261,7 +273,10 @@ class Reservation(db.Model):
     __tablename__  = 'reservations'
 
     id              = db.Column(db.Integer, primary_key=True)
-    status          = db.Column(db.Text)
+
+    status_id       = db.Column(db.Integer, db.ForeignKey('statuses.id'))
+    status          = db.relationship('Status', \
+        back_populates='reservations')
 
     rooms           = db.relationship('ReservationRoom', \
         back_populates='reservation')
@@ -291,6 +306,22 @@ class Reservation(db.Model):
     def __repr__(self):
         return "<Reservation(id='%s')>" \
             % (self.id)
+
+class Status(db.Model):
+    __tablename__  = 'statuses'
+
+    id              = db.Column(db.Integer, primary_key=True)
+    name            = db.Column(db.Text)
+
+    reservations    = db.relationship("Reservation", \
+        back_populates="status")
+
+    def __init__(self, _name):
+        self.name = _name
+
+    def __repr__(self):
+        return "<Status(name='%s')>" \
+            % (self.name)
 
 class Payment(db.Model):
     __tablename__  = 'payments'

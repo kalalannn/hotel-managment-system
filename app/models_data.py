@@ -1,34 +1,49 @@
 from app import db
 from datetime import datetime, timedelta, date
-from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, RoomCategory
+from .models import User, Role, Feedback, Hotel, Status, Address, Payment, Reservation, ReservationRoom, Room, RoomCategory
 
 def load_models_data():
     print ('Inserting data')
+
+    # ROLES
+    # def __init__(self, _name):
+
+    role_admin          = Role('ADMIN', 99)
+    role_director       = Role('DIRECTOR', 50)
+    role_receptionist   = Role('RECEPTIONIST', 25)
+    role_customer       = Role('CUSTOMER', 10)
+    # role_anon           = Role('ANON', )
+
+    db.session.add_all([
+        role_admin,
+        role_director, role_receptionist,
+        role_customer #, role_anon
+    ])
 
     # USERS
     # def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date):
 
     # 1 ADMIN, 3 DIRECTORS; 4 RECEPTIONISTS, 8 CUSTOMERS
-    admin_0 = User('Admin', 'Admin 0', 'admin@gmail.com', 'a_0_qwerty', 'ADMIN')
+    admin_0 = User('Admin', 'Admin 0', 'admin@gmail.com', 'a_0_qwerty',role_admin)
 
-    director_0 = User('Ivan', 'Director 0', 'director_0@gmail.com', 'd_0_qwerty', 'DIRECTOR')
-    director_1 = User('Ivan', 'Director 1', 'director_1@gmail.com', 'd_1_qwerty', 'DIRECTOR')
-    director_2 = User('Ivan', 'Director 2', 'director_2@gmail.com', 'd_2_qwerty', 'DIRECTOR')
+    director_0 = User('Ivan', 'Director 0', 'director_0@gmail.com', 'd_0_qwerty', role_director)
+    director_1 = User('Ivan', 'Director 1', 'director_1@gmail.com', 'd_1_qwerty', role_director)
+    director_2 = User('Ivan', 'Director 2', 'director_2@gmail.com', 'd_2_qwerty', role_director)
 
-    receptionist_0 = User('Oleg', 'Receptionist 0', 'receptionist_0@gmail.com', 'r_0_qwerty', 'RECEPTIONIST')
-    receptionist_1 = User('Oleg', 'Receptionist 1', 'receptionist_1@gmail.com', 'r_1_qwerty', 'RECEPTIONIST')
-    receptionist_2 = User('Oleg', 'Receptionist 2', 'receptionist_2@gmail.com', 'r_2_qwerty', 'RECEPTIONIST')
-    receptionist_3 = User('Oleg', 'Receptionist 3', 'receptionist_3@gmail.com', 'r_3_qwerty', 'RECEPTIONIST')
+    receptionist_0 = User('Oleg', 'Receptionist 0', 'receptionist_0@gmail.com', 'r_0_qwerty', role_receptionist)
+    receptionist_1 = User('Oleg', 'Receptionist 1', 'receptionist_1@gmail.com', 'r_1_qwerty', role_receptionist)
+    receptionist_2 = User('Oleg', 'Receptionist 2', 'receptionist_2@gmail.com', 'r_2_qwerty', role_receptionist)
+    receptionist_3 = User('Oleg', 'Receptionist 3', 'receptionist_3@gmail.com', 'r_3_qwerty', role_receptionist)
 
-    customer_0 = User('Vasia', 'Customer 0', 'customer_0@gmail.com', 'c_0_qwerty', 'CUSTOMER')
-    customer_1 = User('Vasia', 'Customer 1', 'customer_1@gmail.com', 'c_1_qwerty', 'CUSTOMER')
-    customer_2 = User('Vasia', 'Customer 2', 'customer_2@gmail.com', 'c_2_qwerty', 'CUSTOMER')
-    customer_3 = User('Vasia', 'Customer 3', 'customer_3@gmail.com', 'c_3_qwerty', 'CUSTOMER')
+    customer_0 = User('Vasia', 'Customer 0', 'customer_0@gmail.com', 'c_0_qwerty', role_customer)
+    customer_1 = User('Vasia', 'Customer 1', 'customer_1@gmail.com', 'c_1_qwerty', role_customer)
+    customer_2 = User('Vasia', 'Customer 2', 'customer_2@gmail.com', 'c_2_qwerty', role_customer)
+    customer_3 = User('Vasia', 'Customer 3', 'customer_3@gmail.com', 'c_3_qwerty', role_customer)
 
-    customer_4 = User('Vasia', 'Customer 4', 'customer_4@gmail.com', 'c_4_qwerty', 'CUSTOMER')
-    customer_5 = User('Vasia', 'Customer 5', 'customer_5@gmail.com', 'c_5_qwerty', 'CUSTOMER')
-    customer_6 = User('Vasia', 'Customer 6', 'customer_6@gmail.com', 'c_6_qwerty', 'CUSTOMER')
-    customer_7 = User('Vasia', 'Customer 7', 'customer_7@gmail.com', 'c_7_qwerty', 'CUSTOMER')
+    customer_4 = User('Vasia', 'Customer 4', 'customer_4@gmail.com', 'c_4_qwerty', role_customer)
+    customer_5 = User('Vasia', 'Customer 5', 'customer_5@gmail.com', 'c_5_qwerty', role_customer)
+    customer_6 = User('Vasia', 'Customer 6', 'customer_6@gmail.com', 'c_6_qwerty', role_customer)
+    customer_7 = User('Vasia', 'Customer 7', 'customer_7@gmail.com', 'c_7_qwerty', role_customer)
 
     db.session.add_all([
         admin_0,

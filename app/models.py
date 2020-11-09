@@ -38,11 +38,16 @@ class User(UserMixin, db.Model):
         if not user.is_authenticated:
             return False
         return User._roles[user.role] <= User._roles[role]
+
     hotels          = db.relationship('Hotel', \
         back_populates='owner')
 
     reservs_cust    = db.relationship('Reservation', \
         foreign_keys='Reservation.customer_id', \
+        back_populates='customer')
+
+    reservs_recept  = db.relationship('Reservation', \
+        foreign_keys='Reservation.receptionist_id', \
         back_populates='receptionist')
 
     feedbacks       = db.relationship("Feedback", \

@@ -1,0 +1,9 @@
+nav#menu {
+    margin: 20px, 20px, 20px, 20px;
+    border: 2px solid black;
+}
+
+div#block_content {
+    margin: 20px, 20px, 20px, 20px;
+    border: 2px solid black;
+}

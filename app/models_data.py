@@ -9,6 +9,7 @@ def load_models_data():
     # def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date):
 
     # 1 ADMIN, 3 DIRECTORS; 4 RECEPTIONISTS, 8 CUSTOMERS
+
     admin_0 = User('admin_0', 'a_0_qwerty', 'Admin', 'Admin 0', 'admin@gmail.com', date(1980, 1, 1), 'ADMIN')
 
     director_0 = User('director_0', 'd_0_qwerty', 'Ivan', 'Director 0', 'director_0@gmail.com', date(1981, 1, 1), 'DIRECTOR')
@@ -29,6 +30,7 @@ def load_models_data():
     customer_5 = User('customer_5', 'c_5_qwerty', 'Vasia', 'Customer 5', 'customer_5@gmail.com', date(1985, 6, 6), 'CUSTOMER')
     customer_6 = User('customer_6', 'c_6_qwerty', 'Vasia', 'Customer 6', 'customer_6@gmail.com', date(1985, 7, 7), 'CUSTOMER')
     customer_7 = User('customer_7', 'c_7_qwerty', 'Vasia', 'Customer 7', 'customer_7@gmail.com', date(1985, 8, 8), 'CUSTOMER')
+
 
     db.session.add_all([
         admin_0,

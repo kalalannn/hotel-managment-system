@@ -12,12 +12,10 @@ class User(UserMixin, db.Model):
     __tablename__  = 'users'
 
     id              = db.Column(db.Integer, primary_key=True)
-    username        = db.Column(db.Text, nullable=False)
-    password_hash   = db.Column(db.Text)
     first_name      = db.Column(db.Text)
     last_name       = db.Column(db.Text)
     email           = db.Column(db.Text)
-    birth_date      = db.Column(db.Date)
+    password_hash   = db.Column(db.Text)
 
     _roles = {
         'ADMIN':        1,
@@ -64,18 +62,17 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date, _role):
-        self.username       = _username
-        self.password_hash  = generate_password_hash(_password)
+    def __init__(self, _first_name, _last_name, _email, _password, _role):
         self.first_name     = _first_name
         self.last_name      = _last_name
         self.email          = _email
-        self.birth_date     = _birth_date
+        self.password_hash  = generate_password_hash(_password)
         self.role           = _role
 
     def __repr__(self):
         return "<User(id='%s', username='%s', first_name='%s', last_name='%s', role='%s')>" % (
             self.id, self.username, self.first_name, self.last_name, self.role)
+
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'
@@ -322,3 +319,4 @@ class Payment(db.Model):
     def __repr__(self):
         return "<Payment(block_amount='%s', full_amount='%s', is_blocked='%s', is_payed='%s')>" \
             % (self.block_amount, self.full_amount, self.is_blocked, self.is_payed)
+

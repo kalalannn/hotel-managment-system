@@ -39,7 +39,6 @@ def list():
 
     return render_template('hotels/list.html', form=form, hotels=_hotels)
 
-
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
 def update(hotel_id=None):

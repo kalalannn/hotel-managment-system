@@ -4,22 +4,27 @@ from flask_login import current_user, login_user, logout_user, login_required
 
 from . import hotels
 from .forms import SearchForm, HotelForm
-from ..models import Hotel, User, Role
+from ..models import Hotel, User, HotelStars, UserRole
 from app import db
 from app.helpers import Helper
 
 @hotels.route('/list/', methods=['GET', 'POST'])
 def list():
     form = SearchForm()
-    choises = Helper.dictToListOfTuples(Hotel._starses)
-    choises.insert(0, ('',''))
-    form.stars.choices = choises
+
+    # TODO delete!
+    # choises = Helper.dictToListOfTuples(Hotel._starses)
+    # choises.insert(0, ('',''))
+    # form.stars.choices = choises
+
+    # енамы збс
+    choices =[(s.value, '*' * s.value) for s in HotelStars]
+    choices.insert(0, ('',''))
+    form.stars.choices = choices
 
     _hotels = None
-
     if request.method == 'GET':
         _hotels = Hotel.query.order_by(Hotel.stars).limit(10).all()
-
     # POST
     elif form.validate_on_submit():
         query = Hotel.query
@@ -31,11 +36,9 @@ def list():
             query = query.filter(form.stars.data == Hotel.stars)
 
         _hotels = query.all()
-
     # EMPTY FORM
     else:
         _hotels = Hotel.query.limit(10).all()
-
 
     return render_template('hotels/list.html', form=form, hotels=_hotels)
 
@@ -48,39 +51,44 @@ def update(hotel_id=None):
     form = HotelForm()
 
     # EDIT
-    if hotel_id and User.has_role(current_user, 'DIRECTOR'):
+    if hotel_id and current_user.role >= UserRole.DIRECTOR.value:
         hotel = Hotel.query.filter_by(id=hotel_id).one()
         form = HotelForm(obj=hotel)
-        if User.has_role(current_user, 'ADMIN'):
-            form.owner.choices = Helper.listObjToListOfTuples(Role.users_by_role('DIRECTOR'), \
-                ' ', "first_name", "last_name")
+        if current_user.role == UserRole.ADMIN.value:
+            # Вот так юзать
+            users = User.query.filter_by(role=UserRole.DIRECTOR.value).all()
+            form.owner.choices = [(u.id, u.first_name + ' ' +  u.last_name) for u in users]
+            # TODO delete!
+            # form.owner.choices = Helper.listObjToListOfTuples(Role.users_by_role('DIRECTOR'), \
+            #     ' ', "first_name", "last_name")
         else:
             form.director()
             form.owner = '{} {}'.format(hotel.owner.first_name, hotel.owner.last_name)
+    # TODO дальше по аналогии
     # NEW
-    elif User.has_role(current_user, 'ADMIN'):
-        form.stars.choices = Helper.dictToListOfTuples(Hotel._starses)
-        form.owner.choices = Helper.listObjToListOfTuples(Role.users_by_role('DIRECTOR'), \
-            ' ', "first_name", "last_name")
+    # elif User.has_role(current_user, 'ADMIN'):
+    #     form.stars.choices = Helper.dictToListOfTuples(Hotel._starses)
+    #     form.owner.choices = Helper.listObjToListOfTuples(Role.users_by_role('DIRECTOR'), \
+    #         ' ', "first_name", "last_name")
 
-    # POST
-    if form.validate_on_submit():
-        # EDIT
-        if hotel_id:
-            hotel = Hotel.query.filter_by(id=hotel_id).one()
-            form.populate_obj(hotel)
-            hotel.save()
+    # # POST
+    # if form.validate_on_submit():
+    #     # EDIT
+    #     if hotel_id:
+    #         hotel = Hotel.query.filter_by(id=hotel_id).one()
+    #         form.populate_obj(hotel)
+    #         hotel.save()
 
-        # NEW
-        else:
-            hotel = Hotel(
-                form.name.data,
-                form.description.data,
-                form.stars.data,
-                form.address.data,
-                form.owner.data,
-            )
-        return redirect(url_for('hotels.list'))
+    #     # NEW
+    #     else:
+    #         hotel = Hotel(
+    #             form.name.data,
+    #             form.description.data,
+    #             form.stars.data,
+    #             form.address.data,
+    #             form.owner.data,
+    #         )
+    #     return redirect(url_for('hotels.list'))
     return render_template('hotels/update.html', form=form)
 
 # There must be hotel_id to SHOW!

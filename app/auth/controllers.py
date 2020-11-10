@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from . import auth
 # Import needed forms and models
 from .forms import LoginForm, RegistrationForm, NewPasswordForm
-from ..models import User, Role
+from ..models import User, UserRole
 # Import database object
 from app import db
 from app.helpers import Helper
@@ -35,24 +35,23 @@ def logout():
 def register():
     form = RegistrationForm()
 
-    if User.has_role(current_user, 'ADMIN'):
-        choises = Helper.listObjToListOfTuples(Role.query.all(), '', 'name')
-        # choises.insert(0, ('','')) # If you want to add an empty option
-        form.role.choices = choises
-    else:
-        del form.role
+    # if User.role == UserRole.ADMIN.name:
+    #     choises = Helper.listObjToListOfTuples(Role.query.all(), '', 'name')
+    #     choises.insert(0, ('','')) # If you want to add an empty option
+    #     form.role.choices = choises
+    # else:
+    #     del form.role
 
     # POST
     if form.validate_on_submit():
-        role = Role.query.filter_by(name='CUSTOMER').one()
-        if User.has_role(current_user, 'ADMIN'):
-            role = Role.query.filter_by(id=form.role.data).one()
+        # role = Role.query.filter_by(name='CUSTOMER').one()
+        # if User.has_role(current_user, 'ADMIN'):
+        #     role = Role.query.filter_by(id=form.role.data).one()
         user = User(form.first_name.data,
                     form.last_name.data,
                     form.email.data,
                     form.password.data,
-                    role
-                    )
+                    UserRole.CUSTOMER.name)
         db.session.add(user)
         db.session.commit()
         flash('You can now log in.')

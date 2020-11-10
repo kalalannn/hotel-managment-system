@@ -1,13 +1,38 @@
 from app import db
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, column
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app.helpers import Helper
 from . import login_manager
+from enum import Enum
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+class UserRole(Enum):
+    ANON = 1
+    CUSTOMER = 2
+    RECEPTIONIST = 3
+    DIRECTOR = 4
+    ADMIN = 5
+
+class HotelStars(Enum):
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+
+class RoomType(Enum):
+    STANDARD = 1
+    LUX = 2
+    BUSINESS = 3
+
+class ReservationStatus(Enum):
+    CREATED = 1
+    BOOKED = 2
+    CANCELED = 3
 
 class User(UserMixin, db.Model):
     __tablename__  = 'users'
@@ -17,17 +42,8 @@ class User(UserMixin, db.Model):
     last_name       = db.Column(db.Text)
     email           = db.Column(db.Text)
     password_hash   = db.Column(db.Text)
-
-    role_id         = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
-    role            = db.relationship('Role', \
-        back_populates='users', \
-        uselist=False)
-
-    @staticmethod
-    def has_role(user, role_name):
-        if not user.is_authenticated:
-            return False
-        return user.role.rate >= Role.query.filter_by(name=role_name).one().rate
+    role            = db.Column(db.Integer, \
+        CheckConstraint('role in (%s)' % (', '.join(str(r.value) for r in UserRole))))
 
     hotels          = db.relationship('Hotel', \
         back_populates='owner')
@@ -65,27 +81,11 @@ class User(UserMixin, db.Model):
         return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (
             self.id, self.email, self.first_name, self.last_name, self.role)
 
-class Role(db.Model):
-    __tablename__  = 'roles'
-
-    id      = db.Column(db.Integer, primary_key=True)
-    name    = db.Column(db.Text)
-    rate    = db.Column(db.Integer, nullable=False)
-
-    users    = db.relationship("User", \
-        back_populates="role")
-
-    def __init__(self, _name, _rate):
-        self.name = _name
-        self.rate = _rate
-
-    def __repr__(self):
-        return "<Role(name='%s', rate='%s')>" \
-            % (self.name, self.rate)
-    
-    @staticmethod
-    def users_by_role(role_name):
-        return Role.query.filter_by(name=role_name).one().users
+    # @staticmethod
+    # def has_role(user, role_name):
+    #     if not user.is_authenticated:
+    #         return False
+    #     return user.role.rate >= Role.query.filter_by(name=role_name).one().rate
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'
@@ -93,17 +93,8 @@ class Hotel(db.Model):
     id              = db.Column(db.Integer, primary_key=True)
     name            = db.Column(db.Text)
     description     = db.Column(db.Text)
-
-    _starses = { 
-        '5': '*****',
-        '4': '****',
-        '3': '***',
-        '2': '**',
-        '1': '*',
-    }
-
     stars           = db.Column(db.Integer, \
-        CheckConstraint(Helper.sqlIN('stars', _starses.keys())))
+        CheckConstraint('stars in (%s)' % (', '.join(str(s.value) for s in HotelStars))))
 
     address         = db.relationship('Address', \
         back_populates='hotel', \
@@ -156,9 +147,9 @@ class Address(db.Model):
         self.number     = _number
         self.hotel      = _hotel
     
-    def _repr__(self):
-        return "<Address(country={}, city={}, post_code={}, street={}, number={})>" \
-            .format(self.country, self.city, self.post_code, self.street, self.number)
+    def __repr__(self):
+        return "<Address(country='%s', city='%s', post_code='%s', street='%s', number='%s')>" \
+            % (self.country, self.city, self.post_code, self.street, self.number)
 
 class Feedback(db.Model):
     __tablename__  = 'feedbacks'
@@ -191,17 +182,9 @@ class RoomCategory(db.Model):
     __tablename__  = 'room_categories'
 
     id          = db.Column(db.Integer, primary_key=True)
-
-    _types = {
-        'STANDARD': 1,
-        'LUX':      2,
-        'BUSINESS': 3,
-    }
-
-    type        = db.Column(db.Text, \
-        CheckConstraint(Helper.sqlIN('type', _types.keys())))
-
     price       = db.Column(db.Numeric)
+    type        = db.Column(db.Text, \
+        CheckConstraint("type in ('%s')" % ("', '".join([t.name for t in RoomType]))))
 
     hotel_id    = db.Column(db.Integer, \
         db.ForeignKey('hotels.id'))
@@ -273,10 +256,8 @@ class Reservation(db.Model):
     __tablename__  = 'reservations'
 
     id              = db.Column(db.Integer, primary_key=True)
-
-    status_id       = db.Column(db.Integer, db.ForeignKey('statuses.id'))
-    status          = db.relationship('Status', \
-        back_populates='reservations')
+    status          = db.Column(db.Text, \
+        CheckConstraint("status in ('%s')" % ("', '".join([s.name for s in ReservationStatus]))))
 
     rooms           = db.relationship('ReservationRoom', \
         back_populates='reservation')
@@ -304,24 +285,8 @@ class Reservation(db.Model):
         self.payment        = _payment
 
     def __repr__(self):
-        return "<Reservation(id='%s')>" \
-            % (self.id)
-
-class Status(db.Model):
-    __tablename__  = 'statuses'
-
-    id              = db.Column(db.Integer, primary_key=True)
-    name            = db.Column(db.Text)
-
-    reservations    = db.relationship("Reservation", \
-        back_populates="status")
-
-    def __init__(self, _name):
-        self.name = _name
-
-    def __repr__(self):
-        return "<Status(name='%s')>" \
-            % (self.name)
+        return "<Reservation(id='%s', status='%s')>" \
+            % (self.id, self.status)
 
 class Payment(db.Model):
     __tablename__  = 'payments'

@@ -14,4 +14,26 @@
     {{ wtf.quick_form(form) }}
 </div>
 
+<br> <hr> <br>
+
+<div>
+    <table>
+    <thead>
+        <th>
+            <td> </td>
+            <td> </td>
+        </th>
+    </thead>
+    <tbody>
+        {% for hotel in hotels %}
+            <tr>
+                <td> {{hotel.name}} </td>
+                <td> {{hotel.stars}} </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+
+
 {% endblock %}

@@ -1,8 +1,12 @@
 {% extends "bootstrap/base.html" %}
 {% from "bootstrap/utils.html" import flashed_messages %}
 
+{# {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+{% endblock %} #}
+
 {% block navbar %}
-<nav class="navbar navbar-top">
+<nav id="menu" class="navbar navbar-top">
     <ul class="nav navbar-nav">
         <li><a href="{{ url_for('index') }}"> Index </a></li>
 
@@ -18,20 +22,30 @@
                 <a class="dropdown-item" href="{{ url_for('hotels.list') }}"> List </a>
                 <!-- if admin -->
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{{ url_for('hotels.new') }}"> New Hotel </a>
+                <a class="dropdown-item" href="{{ url_for('hotels.update') }}"> New Hotel </a>
             </div>
         </li>
 
         {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('auth.login') }}"> Log In </a></li>
-        {% else %}
             <li><a href="{{ url_for('auth.logout') }}"> Log Out </a></li>
+        {% else %}
+            <li><a href="{{ url_for('auth.login') }}"> Log In </a></li>
         {% endif %}
     </ul>
 </nav>
 {% endblock %}
 
 {% block content %}
+<div id="block_content"> <!-- NEED TO super() in other templates -->
 {# Flash messages #}
-{{ flashed_messages() }}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+            <li> {{ message }} </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 {% endblock %}
+</div>

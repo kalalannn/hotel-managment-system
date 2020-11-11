@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% from "bootstrap/form.html" import render_form %}
 
 {% block title %} New Hotel {% endblock %}
 
@@ -7,11 +7,11 @@
 {{ super() }}
 
 <div class="page-header">
-    <h1> New Hotel... </h1>
+    <h3>New Hotel...</h3>
 </div>
 
 <div class="col-md-4">
-    {{ wtf.quick_form(form) }}
+    {{ render_form(form) }}
 </div>
 
 {% endblock %}

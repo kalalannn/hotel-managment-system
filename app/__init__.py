@@ -16,6 +16,8 @@ def create_app(config_name):
     bootstrap.init_app(app)
     login_manager.init_app(app)
 
+    app.add_template_global(models.UserRole, 'Role')
+
     @app.route('/')
     def index():
         return render_template('index.html')

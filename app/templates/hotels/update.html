@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% from "bootstrap/form.html" import render_form %}
 
-{% block title %} New Hotel {% endblock %}
+{% block title %} {{ op }} Hotel {% endblock %}
 
-{% block content %}
-{{ super() }}
+{% block inner_content %}
 
 <div class="page-header">
     <h3> {{ op }} Hotel </h3>
@@ -46,4 +45,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock inner_content %}

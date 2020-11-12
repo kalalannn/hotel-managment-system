@@ -2,8 +2,7 @@
 
 {% block title %}Auth home{% endblock %}
 
-{% block content %}
-{{ super() }}
+{% block inner_content %}
 <div class="page-header">
     <h3>Auth Home page!</h3>
     {% if current_user.is_authenticated %}
@@ -20,4 +19,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock content %}
+{% endblock inner_content %}

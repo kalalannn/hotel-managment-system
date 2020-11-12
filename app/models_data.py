@@ -1,6 +1,6 @@
 from app import db
 from datetime import datetime, timedelta, date
-from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, RoomCategory, UserRole
+from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, RoomCategory, UserRole, HotelStars
 
 def load_models_data():
     print ('Inserting data')
@@ -65,15 +65,15 @@ def load_models_data():
 
     hotel_0 = Hotel('Jizni Morava International',
         'Luxusni hotel v Brne pro podnikatele',
-        5, address_0, director_0)
+        HotelStars.FIVE.value, address_0, director_0)
 
     hotel_1 = Hotel('Praha President Hotel',
         'Nejlepsi hotel v Praze pro prezidenty',
-        4, address_1, director_1)
+        HotelStars.FOUR.value, address_1, director_1)
 
     hotel_2 = Hotel('Brno Grand Hotel',
         'Kolem hotelu je vzdycky hodne opilcu, bezdomovcu a vselijakych sebrancu',
-        3, address_2, director_2)
+        HotelStars.THREE.value, address_2, director_2)
 
     address_0.hotel_id = hotel_0.id
     address_1.hotel_id = hotel_1.id

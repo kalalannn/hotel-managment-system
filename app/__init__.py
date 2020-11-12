@@ -10,6 +10,7 @@ login_manager = LoginManager()
 def create_app(config_name):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_name)
+    app.add_template_global(models.UserRole, 'UserRole')
 
     db.init_app(app)
     bootstrap.init_app(app)
@@ -18,6 +19,10 @@ def create_app(config_name):
     @app.route('/')
     def index():
         return render_template('index.html')
+
+    @app.route('/forbidden')
+    def forbidden():
+        return render_template('forbidden.html'), 403
 
     @app.errorhandler(404)
     def not_found(error):
@@ -29,5 +34,6 @@ def create_app(config_name):
 
     from .hotels import hotels as hotels_blueprint
     app.register_blueprint(hotels_blueprint, url_prefix='/hotels')
+
 
     return app

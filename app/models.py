@@ -112,6 +112,7 @@ class Hotel(db.Model):
         back_populates="hotel")
 
     def __init__(self, _name, _description, _stars, _address, _owner):
+        super(Hotel, self).__init__()
         self.name           = _name
         self.description    = _description
         self.owner          = _owner
@@ -120,8 +121,9 @@ class Hotel(db.Model):
         self.owner          = _owner
 
     def __repr__(self):
-        return "<Hotel(name='%s', stars='%s')>" \
-            % (self.name, self.stars)
+        return "<Hotel(name={}, stars={}, description={})>".format(
+            self.name, self.stars, self.description
+        )
 
 class Address(db.Model):
     __tablename__  = 'addresses'
@@ -150,6 +152,9 @@ class Address(db.Model):
     def __repr__(self):
         return "<Address(country='%s', city='%s', post_code='%s', street='%s', number='%s')>" \
             % (self.country, self.city, self.post_code, self.street, self.number)
+
+    def text(self):
+        return '{} {}, {} {}, {}'.format(self.street, self.number, self.post_code, self.city, self.country)
 
 class Feedback(db.Model):
     __tablename__  = 'feedbacks'

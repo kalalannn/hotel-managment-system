@@ -2,12 +2,11 @@
 
 {% block title %}Auth home{% endblock %}
 
-{% block content %}
-{{ super() }}
+{% block inner_content %}
 <div class="page-header">
-    <h1>Auth Home page!</h1>
+    <h3>Auth Home page!</h3>
     {% if current_user.is_authenticated %}
-    <h3>Hello, {{ current_user.first_name }}!</h3>
+    <h4>Hello, {{ current_user.first_name }}!</h4>
     <div>
         <ul>
         <li>E-mail: {{ current_user.email }}</li>
@@ -20,4 +19,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{% endblock inner_content %}

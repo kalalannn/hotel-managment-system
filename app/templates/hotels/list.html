@@ -1,17 +1,38 @@
 {% extends "base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% from "bootstrap/form.html" import render_form %}
 
-{% block title %} Hotels List {% endblock %}
+{% block title %} Hotels {% endblock %}
 
-{% block content %}
-{{ super() }}
+{% block inner_content %}
 
 <div class="page-header">
-    <h1>Hotels list...</h1>
+    <h3>Hotels list...</h3>
 </div>
 
 <div class="col-md-4">
-    {{ wtf.quick_form(form) }}
+    {{ render_form(form) }}
 </div>
 
-{% endblock %}
+{# КАКОЙ НАХУЙ БР?? НОРМАЛЬНО ДЕЛАЙ #}
+<br> <hr> <br>
+
+<div>
+    <table>
+    <thead>
+        <th>
+            <td> </td>
+            <td> </td>
+        </th>
+    </thead>
+    <tbody>
+        {% for hotel in hotels %}
+            <tr>
+                <td> {{hotel.name}} </td>
+                <td> {{hotel.stars}} </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+
+{% endblock inner_content %}

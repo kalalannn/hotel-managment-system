@@ -1,23 +1,30 @@
 from flask import Flask, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 
 def create_app(config_name):
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_name)
+    app.add_template_global(models.UserRole, 'UserRole')
 
     db.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
 
+    app.add_template_global(models.UserRole, 'Role')
+
     @app.route('/')
     def index():
         return render_template('index.html')
+
+    @app.route('/forbidden')
+    def forbidden():
+        return render_template('forbidden.html'), 403
 
     @app.errorhandler(404)
     def not_found(error):

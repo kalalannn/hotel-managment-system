@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "bootstrap/form.html" import render_form %}
+
+{% block title %} {{ op }} Hotel {% endblock %}
+
+{% block inner_content %}
+
+<div class="page-header">
+    <h3> {{ op }} Hotel </h3>
+</div>
+
+<div class="col-md-4">
+    <style>
+    form textarea#description {
+        width: 400px;
+        height: 200px;
+        /* max-width: 100px; */
+    }
+    </style>
+
+    {% if current_user.role == UserRole.DIRECTOR.value %}
+        {{ hotel.name }} {{ '*' * hotel.stars }} <br>
+        Address: {{ hotel.address.text() }}      <br> <br>
+    {% endif %}
+
+    {{ render_form(form) }}
+    <!-- <form action="" method="POST">
+        {{ form.csrf_token }}
+        {% if 'name' in form %}
+            {{ form.name }} {{ form.stars }}
+            {{ form.owner }}
+            {{ form.address_country }}
+            {{ form.address_city }}
+            {{ form.address_post_code }}
+            {{ form.address_street }}
+            {{ form.address_number }}
+        {% else %}
+            {{ hotel.name }} {{ '*' * hotel.stars }}
+            Address: {{ hotel.address.text() }} <br>
+        {% endif %}
+            <br>
+        {{ form.description }} <br>
+        {{ form.submit }} <br>
+    </form> -->
+
+</div>
+
+{% endblock inner_content %}

@@ -4,9 +4,10 @@ from flask_login import current_user, login_user, logout_user, login_required
 from . import auth
 # Import needed forms and models
 from .forms import LoginForm, RegistrationForm, NewPasswordForm
-from ..models import User, Role
+from ..models import User, UserRole
 # Import database object
 from app import db
+from app.helpers import Helper
 
 # Set the route and accepted methods
 # Important! call it like url_for('auth.login')
@@ -33,13 +34,24 @@ def logout():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-    customer_role = Role.query.filter_by(name='customer').first()
+
+    # if User.role == UserRole.ADMIN.name:
+    #     choises = Helper.listObjToListOfTuples(Role.query.all(), '', 'name')
+    #     choises.insert(0, ('','')) # If you want to add an empty option
+    #     form.role.choices = choises
+    # else:
+    #     del form.role
+
+    # POST
     if form.validate_on_submit():
-        user = User(first_name=form.first_name.data,
-                    last_name=form.last_name.data,
-                    email=form.email.data,
-                    password=form.password.data,
-                    role=customer_role)
+        # role = Role.query.filter_by(name='CUSTOMER').one()
+        # if User.has_role(current_user, 'ADMIN'):
+        #     role = Role.query.filter_by(id=form.role.data).one()
+        user = User(form.first_name.data,
+                    form.last_name.data,
+                    form.email.data,
+                    form.password.data,
+                    UserRole.CUSTOMER.name)
         db.session.add(user)
         db.session.commit()
         flash('You can now log in.')

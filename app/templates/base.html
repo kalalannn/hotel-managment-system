@@ -7,6 +7,12 @@
 {% endblock %} #}
 {% block title %}Base{% endblock %}
 
+{% block scripts %}
+{{ super() }}
+{% block inner_scripts %}
+{% endblock inner_scripts %}
+{% endblock scripts %}
+
 {% block content %}
 {% include 'navbar.html' %}
 
@@ -17,9 +23,3 @@
 </div>
 
 {% endblock content %}
-
-{% block scripts %}
-{{ super() }}
-{% block inner_scripts %}
-{% endblock inner_scripts %}
-{% endblock scripts %}

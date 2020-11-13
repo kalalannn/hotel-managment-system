@@ -10,17 +10,7 @@ from app.helpers import Helper
 
 @hotels.route('/list/', methods=['GET', 'POST'])
 def list():
-    form = SearchForm()
-
-    # TODO delete!
-    # choises = Helper.dictToListOfTuples(Hotel._starses)
-    # choises.insert(0, ('',''))
-    # form.stars.choices = choises
-
-    # енамы збс
-    choices =[(s.value, '*' * s.value) for s in HotelStars]
-    choices.insert(0, ('',''))
-    form.stars.choices = choices
+    form = SearchForm(request.form)
 
     _hotels = None
     if request.method == 'GET':
@@ -33,7 +23,7 @@ def list():
             query = query.filter(Hotel.name.like("%{}%".format(form.name.data)))
 
         if form.stars.data:
-            query = query.filter(form.stars.data == Hotel.stars)
+            query = query.filter(Hotel.stars == form.stars.data.value)
 
         _hotels = query.all()
     # EMPTY FORM
@@ -46,7 +36,7 @@ def list():
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
 def update(hotel_id=None):
-    form = HotelForm(request.form, obj=None)
+    form = HotelForm(request.form)
     hotel = None
 
     if hotel_id:

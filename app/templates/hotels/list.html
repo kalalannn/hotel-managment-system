@@ -3,17 +3,64 @@
 
 {% block title %} Hotels {% endblock %}
 
+{% block inner_scripts %}
+<script>
+$(document).ready(function () {
+    var city = $('#city')
+    city.parent('div').hide()
+
+    var country = $('#country')
+    country[0].addEventListener('change', function() {
+        if (country.val() == '__None') {
+            city.parent('div').hide()
+        } else {
+            city.parent('div').show()
+        };
+    });
+});
+</script>
+{% endblock inner_scripts %}
+
 {% block inner_content %}
 
 <div class="page-header">
-    <h3>Hotels list...</h3>
+    <h3> Hotels </h3>
 </div>
+
+{% macro render_field(field) %}
+{% if field.type != 'CSRFTokenField' %}
+    <div class="input-group mb-3">
+        {% if field.type != 'SubmitField' %}
+            <div class="input-group-prepend">
+                {{ field.label(class_="input-group-text") }}
+            </div>
+        {% endif %}
+
+        {% if field.type == 'QuerySelectField' %}
+            {{ field(class_="custom-select")    | safe }}
+        {% elif field.type == 'SubmitField' %}
+            {{ field(class_="btn btn-primary")    | safe }}
+        {% else %}
+            {{ field(class_="form-control")     | safe }}
+        {% endif %}
+    </div>
+{% endif %}
+{% endmacro %}
 
 <div class="col-md-4">
-    {{ render_form(form) }}
+    {# { render_form(form) } #}
+    <div id="hotel_search_form">
+        <form method="post" action="">
+            {{ form.csrf_token }}
+
+            {% for field in form %}
+                {# <p> {{ field.type }} </p> #}
+                {{ render_field(field) }}
+            {% endfor %}
+        </form>
+    </div>
 </div>
 
-{# КАКОЙ НАХУЙ БР?? НОРМАЛЬНО ДЕЛАЙ #}
 <br> <hr> <br>
 
 <div>

@@ -6,6 +6,10 @@
     padding-right: 12rem !important;
 }
 
+h3 {
+  text-align: center !important;
+}
+
 /* nav#menu {
     margin: 20px, 20px, 20px, 20px;
     border: 2px solid black;

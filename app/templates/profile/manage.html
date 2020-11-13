@@ -3,6 +3,54 @@
 
 {% block title %}Auth home{% endblock %}
 
+{% block inner_scripts %}
+<script>
+    $(document).ready(function () {
+        // $('.edit-modal').click(function () {
+        $('#editUser').on('show.bs.modal', function (e) {
+            let $button = $(e.relatedTarget);
+            let url = $button.data('user-url');
+            console.log(url)
+            $.get(url, function (data) {
+                print_user(data);
+                // $('#editUser .modal-body').html(data.fff);
+                // $('#editUser').modal();
+                // $('#submit').click(function (event) {
+                //     event.preventDefault();
+                //     $.post(url, data = $('#ModalForm').serialize(), function (
+                //         data) {
+                //         if (data.status == 'ok') {
+                //             $('#Modal').modal('hide');
+                //             location.reload();
+                //         } else {
+                //             var obj = JSON.parse(data);
+                //             for (var key in obj) {
+                //                 if (obj.hasOwnProperty(key)) {
+                //                     var value = obj[key];
+                //                 }
+                //             }
+                //             $('.help-block').remove()
+                //             $('<p class="help-block">' + value + '</p>')
+                //                 .insertAfter('#' + key);
+                //             $('.form-group').addClass('has-error')
+                //         }
+                //     })
+                // });
+            })
+        });
+    });
+
+    function print_user(data) {
+        $('#editUser').data('user-id', data.id);
+
+        $('#first_name').val(data.first_name);
+        $('#last_name').val(data.last_name);
+        $('#email').val(data.email);
+        $('#role').val(data.role);
+    }
+</script>
+{% endblock inner_scripts %}
+
 {% block inner_content %}
 <div class="page-header">
     <h3>Management...</h3>
@@ -55,51 +103,3 @@
     </div>
 </div>
 {% endblock inner_content %}
-
-{% block inner_scripts %}
-<script>
-    $(document).ready(function () {
-        // $('.edit-modal').click(function () {
-        $('#editUser').on('show.bs.modal', function (e) {
-            let $button = $(e.relatedTarget);
-            let url = $button.data('user-url');
-            console.log(url)
-            $.get(url, function (data) {
-                print_user(data);
-                // $('#editUser .modal-body').html(data.fff);
-                // $('#editUser').modal();
-                // $('#submit').click(function (event) {
-                //     event.preventDefault();
-                //     $.post(url, data = $('#ModalForm').serialize(), function (
-                //         data) {
-                //         if (data.status == 'ok') {
-                //             $('#Modal').modal('hide');
-                //             location.reload();
-                //         } else {
-                //             var obj = JSON.parse(data);
-                //             for (var key in obj) {
-                //                 if (obj.hasOwnProperty(key)) {
-                //                     var value = obj[key];
-                //                 }
-                //             }
-                //             $('.help-block').remove()
-                //             $('<p class="help-block">' + value + '</p>')
-                //                 .insertAfter('#' + key);
-                //             $('.form-group').addClass('has-error')
-                //         }
-                //     })
-                // });
-            })
-        });
-    });
-
-    function print_user(data) {
-        $('#editUser').data('user-id', data.id);
-
-        $('#first_name').val(data.first_name);
-        $('#last_name').val(data.last_name);
-        $('#email').val(data.email);
-        $('#role').val(data.role);
-    }
-</script>
-{% endblock inner_scripts %}

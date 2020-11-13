@@ -4,12 +4,33 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
 from wtforms_components import read_only
 from wtforms.widgets import TextArea
-from ..models import User, UserRole, HotelStars, Address
+from ..models import User, UserRole, HotelStars, Address, RoomCategory
 
 class SearchForm(FlaskForm):
     name    = StringField('Name')
     stars   = SelectField('Stars')
     submit  = SubmitField('Search')
+
+class AddRoomForm(FlaskForm):
+    room_category = QuerySelectField('Category',      \
+        get_label = lambda t: "{}".format(t.type), \
+        validators=[Required()])
+
+    number_of_beds  = StringField('Number of beds')
+    numbers_from = StringField('Numbers from')
+    numbers_to = StringField('Numbers to')
+    addRoom         = SubmitField('Add Rooms')
+    
+    def __init__(self, *args, **kwargs):
+        super(AddRoomForm, self).__init__(*args, **kwargs)
+        self.obj = kwargs['obj']
+
+    def __repr__(self):
+        return 'room_category={}'.format(self.room_category)
+    
+    def add_room(self):
+        self.room_category.query_factory = lambda: RoomCategory.query.filter_by(hotel_id=self.obj.id)
+
 
 class HotelForm(FlaskForm):
     name       = StringField('Name',            \
@@ -33,6 +54,7 @@ class HotelForm(FlaskForm):
     description = StringField('Description',     \
         widget=TextArea(),
         validators=[Required()])
+    
 
     submit     = SubmitField('Save')
 

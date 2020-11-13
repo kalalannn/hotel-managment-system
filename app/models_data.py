@@ -79,11 +79,9 @@ def load_models_data():
     address_1.hotel_id = hotel_1.id
     address_2.hotel_id = hotel_2.id
 
-    status1 = Status('created')
-    status2 = Status('booked')
-    status3 = Status('canceled')
 
-    db.session.add_all([status1, status2, status3])
+
+    # db.session.add_all([status1, status2, status3])
     db.session.add_all([
         address_0, address_1, address_2,
         hotel_0, hotel_1, hotel_2
@@ -182,11 +180,11 @@ def load_models_data():
     ])
 
 
-    reservation1 = Reservation(status1, customer_0, receptionist_0, payment1)
-    reservation1_0 = Reservation(status3, customer_0, receptionist_0, payment1)
-    reservation1_1 = Reservation(status2, customer_0, receptionist_0, payment1)
-    reservation2 = Reservation(status2, customer_1, receptionist_1, payment2)
-    reservation3 = Reservation(status3, customer_2, receptionist_2, payment3)
+    # reservation1 = Reservation(status1, customer_0, receptionist_0, payment1)
+    # reservation1_0 = Reservation(status3, customer_0, receptionist_0, payment1)
+    # reservation1_1 = Reservation(status2, customer_0, receptionist_0, payment1)
+    # reservation2 = Reservation(status2, customer_1, receptionist_1, payment2)
+    # reservation3 = Reservation(status3, customer_2, receptionist_2, payment3)
 
     #res_room1 = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
     #res_room1_0 = ReservationRoom(datetime.today() + timedelta(days=1), datetime.today() + timedelta(days=6))
@@ -194,11 +192,11 @@ def load_models_data():
     #res_room2 = ReservationRoom(datetime.today() + timedelta(days=), datetime.today() + timedelta(days=6))
     #res_room3 = ReservationRoom(datetime.today() + timedelta(days=1), datetime.today() + timedelta(days=6))
 
-    db.session.add_all([
-        reservation1, reservation1_0, reservation1_1,
-        reservation2,
-        reservation3
-    ])
+ #   db.session.add_all([
+ #       reservation1, reservation1_0, reservation1_1,
+ #       reservation2,
+ #       reservation3
+ #   ])
 
     # reserv1 = Reservation(status1, user1, user3, payment1)
     # res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))

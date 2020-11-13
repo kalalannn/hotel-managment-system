@@ -9,7 +9,8 @@
     <h3> {{ op }} Hotel </h3>
 </div>
 
-<div class="col-md-4">
+<div class="row">
+<div class="col">
     <style>
     form textarea#description {
         width: 400px;
@@ -22,7 +23,6 @@
         {{ hotel.name }} {{ '*' * hotel.stars }} <br>
         Address: {{ hotel.address.text() }}      <br> <br>
     {% endif %}
-
     {{ render_form(form) }}
     <!-- <form action="" method="POST">
         {{ form.csrf_token }}
@@ -44,5 +44,10 @@
     </form> -->
 
 </div>
+<div class="col">
+    <h3>Add rooms</h3>
+    {{ render_form(add_room_form, form_type="horizontal") }}
+</div>
 
+</div>
 {% endblock inner_content %}

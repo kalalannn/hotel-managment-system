@@ -10,23 +10,6 @@
 {% block content %}
 {% include 'navbar.html' %}
 
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Reservations
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="{{ url_for('reservations.list') }}"> List </a>
-            </div>
-        </li>
-
-        {% if current_user.is_authenticated %}
-            <li><a href="{{ url_for('auth.login') }}"> Log In </a></li>
-        {% else %}
-            <li><a href="{{ url_for('auth.logout') }}"> Log Out </a></li>
-        {% endif %}
-    </ul>
-</nav>
-{% endblock %}
 <div class="px-12-left px-12-right">
 {{ render_messages() }}
 {% block inner_content %}

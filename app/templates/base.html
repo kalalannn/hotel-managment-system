@@ -17,3 +17,9 @@
 </div>
 
 {% endblock content %}
+
+{% block scripts %}
+{{ super() }}
+{% block inner_scripts %}
+{% endblock inner_scripts %}
+{% endblock scripts %}

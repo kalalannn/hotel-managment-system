@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}Auth home{% endblock %}
+
+{% block inner_content %}
+<div class="page-header">
+    <h3>Management...</h3>
+    {% if current_user.is_authenticated %}
+    <h4>Hello, {{ current_user.first_name }}!</h4>
+    <br>
+    <div>
+        <table class="table table-sm">
+            {% for role, items in users|groupby('role')|sort(reverse=True) %}
+            <tr>
+                {# <th rowspan="{{ items|length() }}">{{ UserRole(role).name|capitalize() }}</th> #}
+                <th>{{ UserRole(role).name|capitalize() }}</th>
+                <td></td>
+                <td></td>
+            </tr>
+            {% for user in items %}
+            <tr>
+                <td></td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#editUser"
+                        data-user-url="{{ url_for('profile.user_edit', id=user.id) }}">edit</button>
+                    <button type="button" class="btn btn-light" data-user-id="{{ user.id }}">delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="editUser" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit user info</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{ render_form(form) }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock inner_content %}
+
+{% block inner_scripts %}
+<script>
+    $(document).ready(function () {
+        // $('.edit-modal').click(function () {
+        $('#editUser').on('show.bs.modal', function (e) {
+            let $button = $(e.relatedTarget);
+            let url = $button.data('user-url');
+            console.log(url)
+            $.get(url, function (data) {
+                print_user(data);
+                // $('#editUser .modal-body').html(data.fff);
+                // $('#editUser').modal();
+                // $('#submit').click(function (event) {
+                //     event.preventDefault();
+                //     $.post(url, data = $('#ModalForm').serialize(), function (
+                //         data) {
+                //         if (data.status == 'ok') {
+                //             $('#Modal').modal('hide');
+                //             location.reload();
+                //         } else {
+                //             var obj = JSON.parse(data);
+                //             for (var key in obj) {
+                //                 if (obj.hasOwnProperty(key)) {
+                //                     var value = obj[key];
+                //                 }
+                //             }
+                //             $('.help-block').remove()
+                //             $('<p class="help-block">' + value + '</p>')
+                //                 .insertAfter('#' + key);
+                //             $('.form-group').addClass('has-error')
+                //         }
+                //     })
+                // });
+            })
+        });
+    });
+
+    function print_user(data) {
+        $('#editUser').data('user-id', data.id);
+
+        $('#first_name').val(data.first_name);
+        $('#last_name').val(data.last_name);
+        $('#email').val(data.email);
+        $('#role').val(data.role);
+    }
+</script>
+{% endblock inner_scripts %}

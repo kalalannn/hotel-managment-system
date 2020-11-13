@@ -25,6 +25,7 @@
 
     {% block scripts %}
     <!-- Optional JavaScript -->
+    <script type=text/javascript src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
     {{ bootstrap.load_js() }}
     {% endblock %}
 </body>

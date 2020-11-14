@@ -45,21 +45,24 @@ class User(UserMixin, db.Model):
     role            = db.Column(db.Integer, \
         CheckConstraint('role in (%s)' % (', '.join(str(r.value) for r in UserRole))))
 
-    own_hotels      = db.relationship('Hotel', \
-        back_populates='owner')
-
     recept_hotel_id  = db.Column(db.Integer, \
-        db.ForeignKey('hotel.id'))
+        db.ForeignKey('hotels.id'))
     recept_hotels   = db.relationship('Hotel', \
-        back_populates='receptionists')
+        foreign_keys = recept_hotel_id, \
+        back_populates = 'receptionists')
+
+    own_hotels       = db.relationship('Hotel', \
+        foreign_keys = 'Hotel.owner_id', \
+        back_populates = 'owner',
+        post_update = True)
 
     customer_reservations = db.relationship('Reservation', \
-        foreign_keys='Reservation.customer_id', \
-        back_populates='customer')
+        foreign_keys = 'Reservation.customer_id', \
+        back_populates = 'customer')
 
     receptionist_reservations = db.relationship('Reservation', \
-        foreign_keys='Reservation.receptionist_id', \
-        back_populates='receptionist')
+        foreign_keys = 'Reservation.receptionist_id', \
+        back_populates = 'receptionist')
 
     feedbacks       = db.relationship("Feedback", \
         back_populates="user")
@@ -106,12 +109,15 @@ class Hotel(db.Model):
         uselist=False)
 
     owner_id        = db.Column(db.Integer, \
-        db.ForeignKey('users.id'), nullable=False)
+        db.ForeignKey('users.id', name='fk_hotel_owner_id'))
     owner           = db.relationship("User", \
-        back_populates="own_hotels")
+        foreign_keys = owner_id, \
+        back_populates = "own_hotels", \
+        post_update = True)
 
     receptionists = db.relationship('User', \
-        back_populates='recept_hotels')
+        foreign_keys = 'User.recept_hotel_id', \
+        back_populates = 'recept_hotels')
 
     room_categories = db.relationship('RoomCategory', \
         back_populates='hotel')
@@ -251,12 +257,12 @@ class ReservationRoom(db.Model):
     room_id         = db.Column(db.Integer, \
         db.ForeignKey('rooms.id'))
     room            = db.relationship("Room", \
-        back_populates="reservations")
+        back_populates="reservations_rooms")
 
     reservation_id  = db.Column(db.Integer, \
         db.ForeignKey('reservations.id'))
     reservation     = db.relationship("Reservation", \
-        back_populates="reservation_ rooms")
+        back_populates="reservations_rooms")
 
 
     def __init__(self, _date_from, _date_to):
@@ -274,7 +280,7 @@ class Reservation(db.Model):
     status          = db.Column(db.Text, \
         CheckConstraint("status in ('%s')" % ("', '".join([s.name for s in ReservationStatus]))))
 
-    reservation_rooms           = db.relationship('ReservationRoom', \
+    reservations_rooms = db.relationship('ReservationRoom', \
         back_populates='reservation')
 
     payment_id      = db.Column(db.Integer, db.ForeignKey('payments.id'))

@@ -1,15 +1,29 @@
-.px-12-left {
-    padding-left: 12rem !important;
-}
-
-.px-12-right {
-    padding-right: 12rem !important;
-}
+/* @media all and (min-width: 960px) { and (max-width: 1024px) {
+    .container {
+    }
+} */
 
 h3 {
-  text-align: center !important;
+    text-align: center !important;
 }
 
+.input-group-prepend {
+    width: 30%;
+    min-width: 100px !important;
+}
+label.input-group-text {
+    width: 100%;
+    text-align: left;
+    min-width: 100px !important;
+    display: inline-block !important;
+}
+
+div[name=search_form] {
+    min-width: 260px;
+    padding: 10px;
+    border: 1px solid;
+    background-color: lemonchiffon;
+}
 /* nav#menu {
     margin: 20px, 20px, 20px, 20px;
     border: 2px solid black;

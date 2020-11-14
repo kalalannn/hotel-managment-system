@@ -13,34 +13,45 @@ from app import db
 @profile.route('/manage')
 def manage():
     users = User.query.order_by(User.role.desc()).all()
-    # for user in users:
-    #     print(user)
-    print(len(users))
-    # form = LoginForm()
-    # if form.validate_on_submit():
-    #     user = User.query.filter_by(email=form.email.data).first()
-    #     if user is not None and user.verify_password(form.password.data):
-    #         login_user(user, form.remember_me.data)
-    #         return redirect(request.args.get('next') or url_for('auth.home'))
-    #     flash('Invalid username or password.', 'error')
-    return render_template('profile/manage.html', users=users, form=UserForm(role=UserRole))
+    return render_template('profile/manage.html', users=users, form=UserForm())
 
 
-@profile.route('/user_edit/<id>', methods=['GET', 'POST'])
-def user_edit(id):
+@profile.route('/edit_user/<id>', methods=['GET', 'POST'])
+def edit_user(id):
     user = User.query.filter_by(id=id).one()
     form = UserForm()
+
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-    #     if user is not None and user.verify_password(form.password.data):
-    #         login_user(user, form.remember_me.data)
-    #         return redirect(request.args.get('next') or url_for('auth.home'))
-    #     flash('Invalid username or password.', 'error')
-    # return render_template('profile/manage.html', form=form)
-    # return render_template('profile/manage.html', jsonify({'f': form.first_name}))
-    # return jsonify({'fff': form.first_name, 'l': form.last_name})
+        found_user = User.query.filter_by(email=form.email.data).first()
+        if found_user != None and found_user.id != user.id:
+            return jsonify(status=500, message='User with this email already exists!')
+
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
+        user.email = form.email.data
+        user.role = form.role.data
+
+        db.session.add(user)
+        db.session.commit()
+        return jsonify(status=200, message='User successfully updated.')
+
     return jsonify({'id': user.id, 
                     'first_name': user.first_name, 
                     'last_name': user.last_name,
                     'email': user.email,
                     'role': user.role})
+
+@profile.route('/delete_user/<id>', methods=['GET'])
+def delete_user(id):
+    user = User.query.filter_by(id=id).one()
+
+    if (user.role == UserRole.ADMIN.value):
+        return jsonify(status=500, message='Cannot delete admin!')
+
+    if (user.id == current_user.id):
+        return jsonify(status=500, message='Cannot delete current user!')
+
+    # Hotel.query.filter_by(owner=user).all()
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify(status=200, message='User successfully deleted.')

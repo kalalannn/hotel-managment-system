@@ -11,12 +11,15 @@
     {% block styles %}
     <!-- Bootstrap CSS -->
     {{ bootstrap.load_css() }}
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/styles.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/toastr.min.css') }}">
     {% endblock %}
 
     {% block scripts %}
     <!-- Optional JavaScript -->
     <script type=text/javascript src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/global.js') }}"></script>
     {{ bootstrap.load_js() }}
     {% endblock %}
     

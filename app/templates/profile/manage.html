@@ -6,43 +6,64 @@
 {% block inner_scripts %}
 <script>
     $(document).ready(function () {
-        // $('.edit-modal').click(function () {
-        $('#editUser').on('show.bs.modal', function (e) {
+        // shows success message after page reload
+        if (sessionStorage.getItem('showmsg') === '1') {
+            Utils.showToast('success', sessionStorage.getItem('message'))
+            sessionStorage.removeItem('showmsg');
+            sessionStorage.removeItem('message');
+        }
+
+        $('#edit_user').on('show.bs.modal', function (e) {
             let $button = $(e.relatedTarget);
-            let url = $button.data('user-url');
-            console.log(url)
+            $('#edit_user').data('user-id', $button.data('user-id'));
+            $('#edit_user').data('user-url', $button.data('user-url'));
+            console.log($('#edit_user').data())
+
+            $.get($button.data('user-url'), function (data) {
+                fillUserForm(data);
+            })
+        });
+
+        $('.btn-save').on('click', function () {
+            let $modal = $(this).closest('.modal');
+
+            let url = $modal.data('user-url');
+            $.post(url, data = $('#edit_user form').serialize(), function (data) {
+                if (data.status == 200) {
+                    $modal.modal('hide');
+                    sessionStorage.setItem('showmsg', '1');
+                    sessionStorage.setItem('message', data.message);
+                    location.reload();
+                } else if (data.status == 500) {
+                    Utils.showToast('error', data.message);
+                }
+            });
+        });
+
+        $('#confirm').on('show.bs.modal', function (e) {
+            let $button = $(e.relatedTarget);
+            // $('#confirm').data('user-id', $button.data('user-id'));
+            $('#confirm').data('user-url', $button.data('user-url'));
+        });
+
+        $('.btn-delete').on('click', function () {
+            let $modal = $(this).closest('.modal');
+
+            let url = $modal.data('user-url');
             $.get(url, function (data) {
-                print_user(data);
-                // $('#editUser .modal-body').html(data.fff);
-                // $('#editUser').modal();
-                // $('#submit').click(function (event) {
-                //     event.preventDefault();
-                //     $.post(url, data = $('#ModalForm').serialize(), function (
-                //         data) {
-                //         if (data.status == 'ok') {
-                //             $('#Modal').modal('hide');
-                //             location.reload();
-                //         } else {
-                //             var obj = JSON.parse(data);
-                //             for (var key in obj) {
-                //                 if (obj.hasOwnProperty(key)) {
-                //                     var value = obj[key];
-                //                 }
-                //             }
-                //             $('.help-block').remove()
-                //             $('<p class="help-block">' + value + '</p>')
-                //                 .insertAfter('#' + key);
-                //             $('.form-group').addClass('has-error')
-                //         }
-                //     })
-                // });
+                if (data.status == 200) {
+                    $modal.modal('hide');
+                    sessionStorage.setItem('showmsg', '1');
+                    sessionStorage.setItem('message', data.message);
+                    location.reload();
+                } else if (data.status=500) {
+                    Utils.showToast('error', data.message)
+                }
             })
         });
     });
 
-    function print_user(data) {
-        $('#editUser').data('user-id', data.id);
-
+    function fillUserForm(data) {
         $('#first_name').val(data.first_name);
         $('#last_name').val(data.last_name);
         $('#email').val(data.email);
@@ -71,9 +92,10 @@
                 <td></td>
                 <td>{{ user.first_name }} {{ user.last_name }}</td>
                 <td>
-                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#editUser"
-                        data-user-url="{{ url_for('profile.user_edit', id=user.id) }}">edit</button>
-                    <button type="button" class="btn btn-light" data-user-id="{{ user.id }}">delete</button>
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#edit_user"
+                        data-user-url="{{ url_for('profile.edit_user', id=user.id) }}"> Edit </button>
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#confirm"
+                        data-user-url="{{ url_for('profile.delete_user', id=user.id) }}"> Delete </button>
                 </td>
             </tr>
             {% endfor %}
@@ -83,7 +105,7 @@
     {% endif %}
 </div>
 
-<div class="modal fade" id="editUser" role="dialog">
+<div class="modal fade" id="edit_user" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -97,7 +119,27 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-primary btn-save">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirm" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Sure you want to delete this user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-delete">Delete</button>
             </div>
         </div>
     </div>

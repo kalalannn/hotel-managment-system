@@ -36,7 +36,7 @@ def list():
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
 def update(hotel_id=None):
-    form = HotelForm(request.form)
+    form = HotelForm(request.form, obj=None)
     hotel = None
 
     if hotel_id:

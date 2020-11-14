@@ -11,11 +11,11 @@ from datetime import datetime, timedelta
 class SearchForm(FlaskForm):
     name    = StringField('Search')
 
-    stars   = QuerySelectField('Stars',         \
-        query_factory   = lambda : HotelStars,  \
-        get_pk          = lambda s: s.value,    \
-        get_label       = lambda s: '*' * s.value,    \
-        allow_blank     = True)
+    # stars   = QuerySelectField('Stars',         \
+    #     query_factory   = lambda : HotelStars,  \
+    #     get_pk          = lambda s: s.value,    \
+    #     get_label       = lambda s: '*' * s.value,    \
+    #     allow_blank     = True)
 
     country = QuerySelectField('Country',       \
         query_factory   = lambda: Address.query.distinct(Address.country).all(), \
@@ -29,13 +29,13 @@ class SearchForm(FlaskForm):
         get_label       = lambda a: "{} {}".format(a.post_code, a.city),        \
         allow_blank     = True)
 
-    date_from           = DateField('Date from', \
+    date_from           = DateField('From', \
         default = datetime.today)
-    date_to             = DateField('Date to',   \
+    date_to             = DateField('To',   \
         default = datetime.today() + timedelta(days=1))
 
-    people_count        = StringField('People count',   default=2)
-    rooms_count         = StringField('Rooms count',    default=1)
+    people_count        = StringField('Persons',   default=2)
+    rooms_count         = StringField('Rooms',    default=1)
 
     submit  = SubmitField('Search')
 

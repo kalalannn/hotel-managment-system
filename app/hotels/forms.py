@@ -44,11 +44,13 @@ class HotelForm(FlaskForm):
         validators=[Required()])
 
     stars      = QuerySelectField('Stars',      \
+        query_factory = lambda: HotelStars,     \
         get_pk      = lambda s: s.value,        \
         get_label   = lambda s: '*' * s.value,  \
         validators  = [Required()])
 
     owner      = QuerySelectField('Owner',      \
+        query_factory = lambda: User.query.filter_by(role=UserRole.DIRECTOR.value).all(), \
         get_label = lambda u: "{} {}".format(u.first_name, u.last_name), \
         validators=[Required()])
 
@@ -71,26 +73,22 @@ class HotelForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(HotelForm, self).__init__(*args, **kwargs)
-        self.obj = kwargs['obj']
+        if 'obj' in kwargs:
+            self.obj = kwargs['obj']
 
     def __repr__(self):
         return 'name={}, stars={}, desc={}'.format(self.name, self.stars, self.description)
 
     def admin(self):
-        self.stars.query_factory = lambda: HotelStars
-        self.stars.data = HotelStars(self.obj.stars)
-        self.owner.query_factory = lambda: User.query.filter_by(role=UserRole.DIRECTOR.value).all()
-        self.address_country.data = self.obj.address.country
-        self.address_post_code.data = self.obj.address.post_code
-        self.address_city.data = self.obj.address.city
-        self.address_street.data = self.obj.address.street
-        self.address_number.data = self.obj.address.number
+        if hasattr(self, 'obj'):
+            self.stars.data = HotelStars(self.obj.stars)
+            self.address_country.data = self.obj.address.country
+            self.address_post_code.data = self.obj.address.post_code
+            self.address_city.data = self.obj.address.city
+            self.address_street.data = self.obj.address.street
+            self.address_number.data = self.obj.address.number
 
-
-    # self.obj is Necessary to limit choises
     def director(self):
-        # self.stars.query_factory = lambda: [ HotelStars(self.obj.stars) ]
-        # self.owner.query_factory = lambda: [ self.obj.owner ]
         del self.name
         del self.stars
         del self.owner
@@ -99,6 +97,3 @@ class HotelForm(FlaskForm):
         del self.address_city     
         del self.address_street   
         del self.address_number   
-        # read_only(self.name)
-        # read_only(self.stars)
-        # read_only(self.owner)

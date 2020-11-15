@@ -8,7 +8,6 @@
 <div class="page-header">
     <h3> {{ op }} Hotel </h3>
 </div>
-
 <div class="row">
 <div class="col">
     <style>
@@ -23,6 +22,9 @@
         {{ hotel.name }} {{ '*' * hotel.stars }} <br>
         Address: {{ hotel.address.text() }}      <br> <br>
     {% endif %}
+</div>
+</div>
+<div class="row">
     {{ render_form(form) }}
     <!-- <form action="" method="POST">
         {{ form.csrf_token }}
@@ -43,11 +45,23 @@
         {{ form.submit }} <br>
     </form> -->
 
-</div>
-<div class="col">
-    <h3>Add rooms</h3>
-    {{ render_form(add_room_form, form_type="horizontal") }}
-</div>
 
+
+
+<br>
+
+<div class="col">
+
+    <form action="{{ url_for('rooms.new', hotel_id=hotel.id) }}" method="GET">
+        <button class="btn btn-primary" input type="submit">Add Room</button>
+    </form>
+    {# render_form(room_form, form_type="basic") #}
+<br>
+
+    {# render_form(category_form, form_type="basic") #}
+    <form action="{{ url_for('rooms.new_category', hotel_id=hotel.id) }}" method="GET">
+        <button class="btn btn-primary" input type="submit">Add Category</button>
+    </form>
+</div>
 </div>
 {% endblock inner_content %}

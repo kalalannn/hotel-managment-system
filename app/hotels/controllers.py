@@ -3,7 +3,8 @@ from flask import request, render_template, session, redirect, url_for, flash, j
 from flask_login import current_user, login_user, logout_user, login_required
 
 from . import hotels
-from .forms import SearchForm, HotelForm, RoomForm, CategoryForm
+from .forms import SearchForm, HotelForm
+from ..rooms.forms import RoomForm, RoomCategoryForm
 from ..models import Hotel, Address, User, HotelStars, UserRole, Room, RoomCategory
 from app import db
 from app.helpers import Helper
@@ -36,23 +37,23 @@ def list():
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
 def update(hotel_id=None):
-    room_form = RoomForm(request.form, obj=None)
+    #room_form = RoomForm(request.form, obj=None)
     hotel = None
 
     if hotel_id:
         op = 'Edit'
         hotel = Hotel.query.filter_by(id=hotel_id).one()
         form = HotelForm(request.form, obj=hotel)
-        room_form =  RoomForm(request.form, obj=hotel)
-        category_form = CategoryForm(request.form, obj=hotel)
+        #room_form =  RoomForm(request.form, obj=hotel)
+        #category_form = RoomCategoryForm(request.form, obj=hotel)
 
         if current_user.role == UserRole.ADMIN.value:
             form.admin()
         elif current_user.role == UserRole.DIRECTOR.value and current_user == hotel.owner:
             room_form =  RoomForm(request.form, obj=hotel)
             form.director()
-            room_form.add_room()
-            category_form.addCategory()
+            #room_form.add_room()
+            #category_form.addCategory()
         else:
             return redirect(url_for('forbidden'))
     elif current_user.role == UserRole.ADMIN.value:
@@ -61,17 +62,17 @@ def update(hotel_id=None):
     else:
         return redirect(url_for('forbidden'))
 
-    if room_form.validate_on_submit():
-        for i in range(int(room_form.numbers_from.data), int(room_form.numbers_to.data)+1):
-            room = Room(i, room_form.number_of_beds.data, room_form.room_category.data)
-            db.session.add(room)
-        db.session.commit()
+    #if room_form.validate_on_submit():
+    #    for i in range(int(room_form.numbers_from.data), int(room_form.numbers_to.data)+1):
+    #        room = Room(i, room_form.number_of_beds.data, room_form.room_category.data)
+    #        db.session.add(room)
+    #    db.session.commit()
 
-    elif category_form.validate_on_submit():
-        hotel = Hotel.query.filter_by(id=hotel_id).one()
-        category = RoomCategory(category_form.category.data.type, int(category_form.category_price.data), hotel)
-        db.session.add(category)
-        db.session.commit()
+    #elif category_form.validate_on_submit():
+    #    hotel = Hotel.query.filter_by(id=hotel_id).one()
+    #    category = RoomCategory(category_form.category.data.type, int(category_form.category_price.data), hotel)
+    #    db.session.add(category)
+    #    db.session.commit()
 
 
 
@@ -109,7 +110,9 @@ def update(hotel_id=None):
 
 
     rooms = Room.query.filter_by(room_category=room_form.room_category.data).all()
-    return render_template('hotels/update.html', form=form, rooms=rooms, hotel=hotel, op=op, room_form=room_form, category_form=category_form)
+    #return render_template('hotels/update.html', form=form, rooms=rooms, hotel=hotel, op=op, room_form=room_form, category_form=category_form)
+    
+    return render_template('hotels/update.html', form=form, rooms=rooms, hotel=hotel, op=op)
 
 # There must be hotel_id to SHOW!
 # @hotels.route('/show/', methods=['GET', 'POST'])

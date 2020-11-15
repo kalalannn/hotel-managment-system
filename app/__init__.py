@@ -37,6 +37,9 @@ def create_app(config_name):
     from .hotels import hotels as hotels_blueprint
     app.register_blueprint(hotels_blueprint, url_prefix='/hotels')
 
+    from .rooms import rooms as rooms_blueprint
+    app.register_blueprint(rooms_blueprint, url_prefix='/rooms')
+
     from .profile import profile as profile_blueprint
     app.register_blueprint(profile_blueprint, url_prefix='/profile')
 

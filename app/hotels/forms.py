@@ -4,13 +4,7 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
 from wtforms_components import read_only
 from wtforms.widgets import TextArea
-<<<<<<< HEAD
 from ..models import User, UserRole, HotelStars, Address, RoomCategory
-=======
-from wtforms.fields.html5 import DateField
-from ..models import User, UserRole, HotelStars, Address
-from datetime import datetime, timedelta
->>>>>>> main
 
 class SearchForm(FlaskForm):
     name    = StringField('Search')
@@ -41,28 +35,9 @@ class SearchForm(FlaskForm):
     people_count        = StringField('Persons',   default=2)
     rooms_count         = StringField('Rooms',    default=1)
 
+    name    = StringField('Name')
+    stars   = SelectField('Stars')
     submit  = SubmitField('Search')
-
-class AddRoomForm(FlaskForm):
-    room_category = QuerySelectField('Category',      \
-        get_label = lambda t: "{}".format(t.type), \
-        validators=[Required()])
-
-    number_of_beds  = StringField('Number of beds')
-    numbers_from = StringField('Numbers from')
-    numbers_to = StringField('Numbers to')
-    addRoom         = SubmitField('Add Rooms')
-    
-    def __init__(self, *args, **kwargs):
-        super(AddRoomForm, self).__init__(*args, **kwargs)
-        self.obj = kwargs['obj']
-
-    def __repr__(self):
-        return 'room_category={}'.format(self.room_category)
-    
-    def add_room(self):
-        self.room_category.query_factory = lambda: RoomCategory.query.filter_by(hotel_id=self.obj.id)
-
 
 class HotelForm(FlaskForm):
     name       = StringField('Name',            \
@@ -77,24 +52,16 @@ class HotelForm(FlaskForm):
         get_label = lambda u: "{} {}".format(u.first_name, u.last_name), \
         validators=[Required()])
 
-    address_country    = StringField('Country',     \
-        validators=[Required()])
-<<<<<<< HEAD
-    
-=======
-    address_post_code  = StringField('Post code',   \
-        validators=[Required()])
-    address_city       = StringField('City',        \
-        validators=[Required()])
-    address_street     = StringField('Street',      \
-        validators=[Required()])
-    address_number     = StringField('Number',      \
-        validators=[Required()])
+    address_country    = StringField('Country',    validators=[Required()])
+    address_post_code  = StringField('Post code',  validators=[Required()])
+    address_city       = StringField('City',       validators=[Required()])
+    address_street     = StringField('Street',     validators=[Required()])
+    address_number     = StringField('Number',     validators=[Required()])
 
-    description = StringField('Description',        \
-        widget      = TextArea(),                   \
-        validators  = [Required()])
->>>>>>> main
+    description = StringField('Description',     \
+        widget=TextArea(),
+        validators=[Required()])
+    
 
     submit     = SubmitField('Save')
 

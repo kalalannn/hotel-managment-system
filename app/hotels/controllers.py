@@ -22,8 +22,8 @@ def list():
         if form.name.data is not None:
             query = query.filter(Hotel.name.like("%{}%".format(form.name.data)))
 
-        if form.stars.data:
-            query = query.filter(Hotel.stars == form.stars.data.value)
+        # if form.stars.data:
+        #     query = query.filter(Hotel.stars == form.stars.data.value)
 
         _hotels = query.all()
     # EMPTY FORM

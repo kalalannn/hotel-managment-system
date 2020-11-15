@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 
-{# Этот файл не трогать! #}
 <head>
     {% block head %}
     <!-- Required meta tags -->
@@ -28,6 +27,31 @@
 </head>
 
 <body>
+    {% macro render_field(field) %}
+        {% if field.type != 'CSRFTokenField' %}
+            {% if field.type == 'SubmitField' %}
+                <div class="input-group">
+            {% else %}
+                {# mb-2: margin-bottom: .5rem; #}
+                <div class="input-group mb-2">
+            {% endif %}
+                {% if field.type != 'SubmitField' %}
+                    <div class="input-group-prepend">
+                        {{ field.label(class_="input-group-text") }}
+                    </div>
+                {% endif %}
+
+                {% if field.type == 'QuerySelectField' %}
+                    {{ field(class_="custom-select")    | safe }}
+                {% elif field.type == 'SubmitField' %}
+                    {{ field(class_="btn btn-primary")    | safe }}
+                {% else %}
+                    {{ field(class_="form-control")     | safe }}
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endmacro %}
+
     <!-- Your page content -->
     {% block content %}{% endblock %}
 </body>

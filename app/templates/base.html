@@ -1,11 +1,7 @@
 {% extends "bootstrap_base.html" %}
 {% from 'bootstrap/utils.html' import render_messages %}
 
-
-{# {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-{% endblock %} #}
-{% block title %}Base{% endblock %}
+{% block title %} Base {% endblock %}
 
 {% block scripts %}
 {{ super() }}
@@ -14,9 +10,9 @@
 {% endblock scripts %}
 
 {% block content %}
-{% include 'navbar.html' %}
 
-<div class="px-12-left px-12-right">
+<div class="container">
+{% include 'navbar.html' %}
 {{ render_messages() }}
 {% block inner_content %}
 {% endblock inner_content %}

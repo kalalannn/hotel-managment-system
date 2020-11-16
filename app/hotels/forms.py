@@ -50,11 +50,13 @@ class HotelForm(FlaskForm):
         validators=[Required()])
 
     stars      = QuerySelectField('Stars',      \
+        query_factory = lambda: HotelStars,     \
         get_pk      = lambda s: s.value,        \
         get_label   = lambda s: '*' * s.value,  \
         validators  = [Required()])
 
     owner      = QuerySelectField('Owner',      \
+        query_factory = lambda: User.query.filter_by(role=UserRole.DIRECTOR.value).all(), \
         get_label = lambda u: "{} {}".format(u.first_name, u.last_name), \
         validators=[Required()])
 
@@ -90,11 +92,7 @@ class HotelForm(FlaskForm):
             self.address_street.data = self.obj.address.street
             self.address_number.data = self.obj.address.number
 
-
-    # self.obj is Necessary to limit choises
     def director(self):
-        # self.stars.query_factory = lambda: [ HotelStars(self.obj.stars) ]
-        # self.owner.query_factory = lambda: [ self.obj.owner ]
         del self.name
         del self.stars
         del self.owner

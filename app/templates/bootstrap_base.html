@@ -35,7 +35,8 @@
                 {# mb-2: margin-bottom: .5rem; #}
                 <div class="input-group mb-2">
             {% endif %}
-                {% if field.type != 'SubmitField' %}
+                {% if field.type == 'SubmitField' %}
+                {% else %}
                     <div class="input-group-prepend">
                         {{ field.label(class_="input-group-text") }}
                     </div>

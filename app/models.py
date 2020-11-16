@@ -42,6 +42,7 @@ class User(UserMixin, db.Model):
     last_name       = db.Column(db.Text)
     email           = db.Column(db.Text)
     password_hash   = db.Column(db.Text)
+    is_active       = db.Column(db.Boolean)
     role            = db.Column(db.Integer, \
         CheckConstraint('role in (%s)' % (', '.join(str(r.value) for r in UserRole))))
 
@@ -78,12 +79,13 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __init__(self, _first_name, _last_name, _email, _password, _role):
+    def __init__(self, _first_name, _last_name, _email, _password, _role, _is_active=True):
         self.first_name     = _first_name
         self.last_name      = _last_name
         self.email          = _email
         self.password_hash  = generate_password_hash(_password)
         self.role           = _role
+        self.is_active      = _is_active
 
     def __repr__(self):
         return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (

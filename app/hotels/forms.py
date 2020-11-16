@@ -1,10 +1,16 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField
+from wtforms import StringField, SelectField, SubmitField, DateField, IntegerField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
 from wtforms_components import read_only
 from wtforms.widgets import TextArea
-from ..models import User, UserRole, HotelStars, Address, RoomCategory
+from wtforms.fields.html5 import DateField
+
+from datetime import datetime, timedelta
+
+from ..models import User, UserRole, HotelStars, Address
+from ..models import RoomCategory, RoomType
+
 
 class SearchForm(FlaskForm):
     name    = StringField('Search')
@@ -67,20 +73,22 @@ class HotelForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(HotelForm, self).__init__(*args, **kwargs)
-        self.obj = kwargs['obj']
+        if 'obj' in kwargs:
+            self.obj = kwargs['obj']
 
     def __repr__(self):
         return 'name={}, stars={}, desc={}'.format(self.name, self.stars, self.description)
 
     def admin(self):
         self.stars.query_factory = lambda: HotelStars
-        self.stars.data = HotelStars(self.obj.stars)
         self.owner.query_factory = lambda: User.query.filter_by(role=UserRole.DIRECTOR.value).all()
-        self.address_country.data = self.obj.address.country
-        self.address_post_code.data = self.obj.address.post_code
-        self.address_city.data = self.obj.address.city
-        self.address_street.data = self.obj.address.street
-        self.address_number.data = self.obj.address.number
+        if hasattr(self, 'obj'):
+            self.stars.data = HotelStars(self.obj.stars)
+            self.address_country.data = self.obj.address.country
+            self.address_post_code.data = self.obj.address.post_code
+            self.address_city.data = self.obj.address.city
+            self.address_street.data = self.obj.address.street
+            self.address_number.data = self.obj.address.number
 
 
     # self.obj is Necessary to limit choises
@@ -98,3 +106,36 @@ class HotelForm(FlaskForm):
         # read_only(self.name)
         # read_only(self.stars)
         # read_only(self.owner)
+
+class RoomCategoryForm(FlaskForm):
+    price = IntegerField('Price CZK')
+
+    type = QuerySelectField('Type',      \
+        query_factory   = lambda: RoomType, \
+        get_pk          = lambda t: t.value, \
+        get_label       = lambda t: RoomType(t.value).name, \
+        validators=[Required()])
+
+    submit        = SubmitField('Add Category')
+
+class RoomForm(FlaskForm):
+    room_category = QuerySelectField('Category',      \
+        get_pk          = lambda c: c.id,   \
+        get_label       = lambda c: c.type, \
+        validators = [Required()])
+
+    beds            = IntegerField('Beds')
+
+    numbers_from    = IntegerField(u'\u2116 From')
+    numbers_to      = IntegerField(u'\u2116 To')
+
+    submit         = SubmitField('Add Rooms')
+    
+    def __init__(self, *args, **kwargs):
+        super(RoomForm, self).__init__(*args, **kwargs)
+        if 'hotel_id' in kwargs:
+            self.room_category.query_factory = \
+                lambda: RoomCategory.query.filter_by(hotel_id=kwargs['hotel_id']).distinct("type")
+
+
+

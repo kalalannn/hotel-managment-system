@@ -244,8 +244,10 @@ class Room(db.Model):
         self.room_category  = _room_category
 
     def __repr__(self):
-        return "<Room(id='%s', nubmer='%s', beds='%s')>" \
-            % (self.id, self.number, self.beds)
+        return "<Room(id={}, number={}, beds={}, room_category={}, price={})>".format(
+            self.id, self.number, self.beds, \
+            self.room_category.type, self.room_category.price
+            )
 
 class ReservationRoom(db.Model):
     __tablename__  = 'reservations_rooms'

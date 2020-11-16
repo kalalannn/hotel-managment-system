@@ -1,15 +1,6 @@
 {% extends "base.html" %}
 {% from "bootstrap/form.html" import render_form %}
 
-{% block title %} {{ op }} Hotel {% endblock %}
-
-{% block inner_content %}
-
-<div class="page-header">
-    <h3> {{ op }} Hotel </h3>
-</div>
-<div class="row">
-<div class="col">
     <style>
     form textarea#description {
         width: 400px;
@@ -18,50 +9,57 @@
     }
     </style>
 
-    {% if current_user.role == UserRole.DIRECTOR.value %}
-        {{ hotel.name }} {{ '*' * hotel.stars }} <br>
-        Address: {{ hotel.address.text() }}      <br> <br>
+{% block title %} {{ op }} Hotel {% endblock %}
+
+{% block inner_content %}
+
+{# <div class="page-header">
+</div>
+#}
+<div class="row">
+    <div class="col">
+        <h3> {{ op }} Hotel </h3>
+        {% if current_user.role == UserRole.DIRECTOR.value %}
+            {{ hotel.name }} {{ '*' * hotel.stars }} <br>
+            Address: {{ hotel.address.text() }}      <br> <br>
+        {% endif %}
+        <form method="POST" action="">
+            {{ form.csrf_token }}
+            {% for field in form %}
+                {{ render_field(field) }}
+            {% endfor %}
+        </form>
+    </div>
+
+    {% if hotel is defined %}
+        <div class="col">
+            <h3> Rooms Categories </h3>
+            <form method="POST" action="../{{ hotel.id }}/room_categories/new">
+                {{ category_form.csrf_token }}
+                {% for field in category_form %}
+                    {{ render_field(field) }}
+                {% endfor %}
+            </form>
+
+            <h3> Rooms </h3>
+            <form method="POST" action="../{{ hotel.id }}/room_categories/rooms/new">
+                {{ room_form.csrf_token }}
+                {% for field in room_form %}
+                    {{ render_field(field) }}
+                {% endfor %}
+            </form>
+
+            {% for room_category in hotel.room_categories %}
+                <p> {{ room_category.type }} {{ room_category.price }} </p>
+
+                {% for room in room_category.rooms %}
+                    <p> Number: {{ room.number }}, Beds: {{ room.beds }}  </p>
+                {% endfor %}
+            {% endfor %}
+
+        </div>
+    </div>
     {% endif %}
 </div>
-</div>
-<div class="row">
-    {{ render_form(form) }}
-    <!-- <form action="" method="POST">
-        {{ form.csrf_token }}
-        {% if 'name' in form %}
-            {{ form.name }} {{ form.stars }}
-            {{ form.owner }}
-            {{ form.address_country }}
-            {{ form.address_city }}
-            {{ form.address_post_code }}
-            {{ form.address_street }}
-            {{ form.address_number }}
-        {% else %}
-            {{ hotel.name }} {{ '*' * hotel.stars }}
-            Address: {{ hotel.address.text() }} <br>
-        {% endif %}
-            <br>
-        {{ form.description }} <br>
-        {{ form.submit }} <br>
-    </form> -->
 
-
-
-
-<br>
-
-<div class="col">
-
-    <form action="{{ url_for('rooms.new', hotel_id=hotel.id) }}" method="GET">
-        <button class="btn btn-primary" input type="submit">Add Room</button>
-    </form>
-    {# render_form(room_form, form_type="basic") #}
-<br>
-
-    {# render_form(category_form, form_type="basic") #}
-    <form action="{{ url_for('rooms.new_category', hotel_id=hotel.id) }}" method="GET">
-        <button class="btn btn-primary" input type="submit">Add Category</button>
-    </form>
-</div>
-</div>
 {% endblock inner_content %}

@@ -4,6 +4,7 @@
 {% block title %}Auth home{% endblock %}
 
 {% block inner_scripts %}
+
 <script>
     $(document).ready(function () {
         // shows success message after page reload
@@ -13,28 +14,34 @@
             sessionStorage.removeItem('message');
         }
 
-        $('#edit_user').on('show.bs.modal', function (e) {
+        $('#user_dialog').on('show.bs.modal', function (e) {
+            let $modal = $(this);
             let $button = $(e.relatedTarget);
-            $('#edit_user').data('user-id', $button.data('user-id'));
-            $('#edit_user').data('user-url', $button.data('user-url'));
-            console.log($('#edit_user').data())
+            $modal.data('user-url', $button.data('user-url'));
+            $modal.data('action', $button.data('action'));
 
-            $.get($button.data('user-url'), function (data) {
-                fillUserForm(data);
-            })
+            if ($modal.data('action') === 'add') {
+                $modal.find('.modal-title').text('Add new user');
+                $modal.find('form')[0].reset();
+            } else if ($modal.data('action') === 'edit') {
+                $modal.find('.modal-title').text('Edit user info');
+                $.get($button.data('user-url'), function (data) {
+                    fillUserForm($modal.find('form'), data);
+                });
+            }
         });
 
         $('.btn-save').on('click', function () {
             let $modal = $(this).closest('.modal');
-
             let url = $modal.data('user-url');
-            $.post(url, data = $('#edit_user form').serialize(), function (data) {
-                if (data.status == 200) {
+
+            $.post(url, data = $modal.find('form').serialize(), function (data) {
+                if (data.status === 200) {
                     $modal.modal('hide');
                     sessionStorage.setItem('showmsg', '1');
                     sessionStorage.setItem('message', data.message);
                     location.reload();
-                } else if (data.status == 500) {
+                } else {
                     Utils.showToast('error', data.message);
                 }
             });
@@ -42,7 +49,6 @@
 
         $('#confirm').on('show.bs.modal', function (e) {
             let $button = $(e.relatedTarget);
-            // $('#confirm').data('user-id', $button.data('user-id'));
             $('#confirm').data('user-url', $button.data('user-url'));
         });
 
@@ -56,33 +62,48 @@
                     sessionStorage.setItem('showmsg', '1');
                     sessionStorage.setItem('message', data.message);
                     location.reload();
-                } else if (data.status=500) {
+                } else if (data.status == 500) {
                     Utils.showToast('error', data.message)
                 }
             })
         });
     });
 
-    function fillUserForm(data) {
-        $('#first_name').val(data.first_name);
-        $('#last_name').val(data.last_name);
-        $('#email').val(data.email);
-        $('#role').val(data.role);
+    function fillUserForm(form, data) {
+        form.find('#first_name').val(data.first_name);
+        form.find('#last_name').val(data.last_name);
+        form.find('#email').val(data.email);
+        form.find('#role').val(data.role);
     }
 </script>
 {% endblock inner_scripts %}
 
 {% block inner_content %}
+
 <div class="page-header">
     <h3>Management...</h3>
     {% if current_user.is_authenticated %}
     <h4>Hello, {{ current_user.first_name }}!</h4>
     <br>
-    <div>
+    <div name="search_form" class="d-inline-block mr-5 align-top">
+        <form action="{{ url_for('profile.manage') }}" method="POST">
+        {% for field in user_search_form %}
+        {# <p> {{ field.type }} </p> #}
+        {{ render_field(field) }}
+        {% endfor %}
+        <button type="submit" class="btn btn-info btn-lg float-right">
+            Search
+        </button>
+        </form>
+    </div>
+    <div class="d-inline-block col-7">
+        <button id="add_user" class="btn btn-info btn-lg mb-3 float-right" data-toggle="modal"
+            data-target="#user_dialog" data-user-url="{{ url_for('profile.add_user') }}" data-action="add">
+            Add user
+        </button>
         <table class="table table-sm">
             {% for role, items in users|groupby('role')|sort(reverse=True) %}
             <tr>
-                {# <th rowspan="{{ items|length() }}">{{ UserRole(role).name|capitalize() }}</th> #}
                 <th>{{ UserRole(role).name|capitalize() }}</th>
                 <td></td>
                 <td></td>
@@ -92,10 +113,13 @@
                 <td></td>
                 <td>{{ user.first_name }} {{ user.last_name }}</td>
                 <td>
-                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#edit_user"
-                        data-user-url="{{ url_for('profile.edit_user', id=user.id) }}"> Edit </button>
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#user_dialog"
+                        data-user-url="{{ url_for('profile.edit_user', id=user.id) }}" data-action="edit"> Edit
+                    </button>
+                    {% if current_user.role == UserRole.ADMIN.value and user.role != UserRole.ADMIN.value %}
                     <button type="button" class="btn btn-light" data-toggle="modal" data-target="#confirm"
                         data-user-url="{{ url_for('profile.delete_user', id=user.id) }}"> Delete </button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -105,17 +129,17 @@
     {% endif %}
 </div>
 
-<div class="modal fade" id="edit_user" role="dialog">
+<div class="modal fade" id="user_dialog" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit user info</h5>
+                <h5 class="modal-title">Title</h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                {{ render_form(form) }}
+                {{ render_form(user_form) }}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

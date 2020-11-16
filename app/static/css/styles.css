@@ -21,8 +21,9 @@ label.input-group-text {
 div[name=search_form] {
     min-width: 260px;
     padding: 10px;
-    border: 1px solid;
-    background-color: lemonchiffon;
+    /* border: 1px solid; */
+    border-radius: 10px;
+    background-color: #ebf4f4;
 }
 /* nav#menu {
     margin: 20px, 20px, 20px, 20px;

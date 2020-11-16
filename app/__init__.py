@@ -16,7 +16,7 @@ def create_app(config_name):
     bootstrap.init_app(app)
     login_manager.init_app(app)
 
-    app.add_template_global(models.UserRole, 'Role')
+    app.add_template_global(models.RoomType, 'RoomType')
 
     @app.route('/')
     def index():
@@ -25,6 +25,10 @@ def create_app(config_name):
     @app.route('/forbidden')
     def forbidden():
         return render_template('forbidden.html'), 403
+
+    @app.route('/error')
+    def error():
+        return render_template('error.html')
 
     @app.errorhandler(404)
     def not_found(error):
@@ -39,6 +43,5 @@ def create_app(config_name):
 
     from .profile import profile as profile_blueprint
     app.register_blueprint(profile_blueprint, url_prefix='/profile')
-
 
     return app

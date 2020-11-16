@@ -42,19 +42,28 @@ class User(UserMixin, db.Model):
     last_name       = db.Column(db.Text)
     email           = db.Column(db.Text)
     password_hash   = db.Column(db.Text)
+    is_active       = db.Column(db.Boolean)
     role            = db.Column(db.Integer, \
         CheckConstraint('role in (%s)' % (', '.join(str(r.value) for r in UserRole))))
 
-    hotels          = db.relationship('Hotel', \
-        back_populates='owner')
+    recept_hotel_id  = db.Column(db.Integer, \
+        db.ForeignKey('hotels.id'))
+    recept_hotels   = db.relationship('Hotel', \
+        foreign_keys = recept_hotel_id, \
+        back_populates = 'receptionists')
 
-    reservs_cust    = db.relationship('Reservation', \
-        foreign_keys='Reservation.customer_id', \
-        back_populates='customer')
+    own_hotels       = db.relationship('Hotel', \
+        foreign_keys = 'Hotel.owner_id', \
+        back_populates = 'owner',
+        post_update = True)
 
-    reservs_recept  = db.relationship('Reservation', \
-        foreign_keys='Reservation.receptionist_id', \
-        back_populates='receptionist')
+    customer_reservations = db.relationship('Reservation', \
+        foreign_keys = 'Reservation.customer_id', \
+        back_populates = 'customer')
+
+    receptionist_reservations = db.relationship('Reservation', \
+        foreign_keys = 'Reservation.receptionist_id', \
+        back_populates = 'receptionist')
 
     feedbacks       = db.relationship("Feedback", \
         back_populates="user")
@@ -70,12 +79,13 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __init__(self, _first_name, _last_name, _email, _password, _role):
+    def __init__(self, _first_name, _last_name, _email, _password, _role, _is_active=True):
         self.first_name     = _first_name
         self.last_name      = _last_name
         self.email          = _email
         self.password_hash  = generate_password_hash(_password)
         self.role           = _role
+        self.is_active      = _is_active
 
     def __repr__(self):
         return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (
@@ -101,9 +111,15 @@ class Hotel(db.Model):
         uselist=False)
 
     owner_id        = db.Column(db.Integer, \
-        db.ForeignKey('users.id'), nullable=False)
+        db.ForeignKey('users.id', name='fk_hotel_owner_id'))
     owner           = db.relationship("User", \
-        back_populates="hotels")
+        foreign_keys = owner_id, \
+        back_populates = "own_hotels", \
+        post_update = True)
+
+    receptionists = db.relationship('User', \
+        foreign_keys = 'User.recept_hotel_id', \
+        back_populates = 'recept_hotels')
 
     room_categories = db.relationship('RoomCategory', \
         back_populates='hotel')
@@ -161,7 +177,8 @@ class Feedback(db.Model):
 
     id          = db.Column(db.Integer, primary_key=True)
     text        = db.Column(db.Text)
-    rating      = db.Column(db.Integer)
+    stars       = db.Column(db.Integer, \
+        CheckConstraint('stars in (%s)' % (', '.join(str(s.value) for s in HotelStars))))
 
     user_id     = db.Column(db.Integer, \
         db.ForeignKey('users.id'), nullable=False)
@@ -173,9 +190,9 @@ class Feedback(db.Model):
     hotel       = db.relationship("Hotel", \
         back_populates="feedbacks")
 
-    def __init__(self, _text, _rating, _user, _hotel):
+    def __init__(self, _text, _stars, _user, _hotel):
         self.text   = _text
-        self.rating = _rating
+        self.stars  = _stars
         self.user   = _user
         self.hotel  = _hotel
 
@@ -220,7 +237,7 @@ class Room(db.Model):
     room_category   = db.relationship('RoomCategory', \
         back_populates='rooms')
 
-    reservations    = db.relationship('ReservationRoom', \
+    reservations_rooms    = db.relationship('ReservationRoom', \
         back_populates='room')
 
     def __init__(self, _number, _beds, _room_category):
@@ -229,8 +246,10 @@ class Room(db.Model):
         self.room_category  = _room_category
 
     def __repr__(self):
-        return "<Room(id='%s', nubmer='%s', beds='%s')>" \
-            % (self.id, self.number, self.beds)
+        return "<Room(id={}, number={}, beds={}, room_category={}, price={})>".format(
+            self.id, self.number, self.beds, \
+            self.room_category.type, self.room_category.price
+            )
 
 class ReservationRoom(db.Model):
     __tablename__  = 'reservations_rooms'
@@ -239,15 +258,16 @@ class ReservationRoom(db.Model):
     date_from       = db.Column(db.Date)
     date_to         = db.Column(db.Date)
 
-    reservation_id  = db.Column(db.Integer, \
-        db.ForeignKey('reservations.id'))
-    reservation     = db.relationship("Reservation", \
-        back_populates="rooms")
-
     room_id         = db.Column(db.Integer, \
         db.ForeignKey('rooms.id'))
     room            = db.relationship("Room", \
-        back_populates="reservations")
+        back_populates="reservations_rooms")
+
+    reservation_id  = db.Column(db.Integer, \
+        db.ForeignKey('reservations.id'))
+    reservation     = db.relationship("Reservation", \
+        back_populates="reservations_rooms")
+
 
     def __init__(self, _date_from, _date_to):
         self.date_from  = _date_from
@@ -264,7 +284,7 @@ class Reservation(db.Model):
     status          = db.Column(db.Text, \
         CheckConstraint("status in ('%s')" % ("', '".join([s.name for s in ReservationStatus]))))
 
-    rooms           = db.relationship('ReservationRoom', \
+    reservations_rooms = db.relationship('ReservationRoom', \
         back_populates='reservation')
 
     payment_id      = db.Column(db.Integer, db.ForeignKey('payments.id'))
@@ -275,12 +295,12 @@ class Reservation(db.Model):
     customer_id     = db.Column(db.Integer, db.ForeignKey('users.id'))
     customer        = db.relationship('User', \
         foreign_keys = customer_id, \
-        back_populates = 'reservs_cust')
+        back_populates = 'customer_reservations')
 
     receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     receptionist    = db.relationship('User', \
         foreign_keys = receptionist_id, \
-        back_populates = 'reservs_recept')
+        back_populates = 'receptionist_reservations')
 
 
     def __init__(self, _status, _customer, _receptionist, _payment):

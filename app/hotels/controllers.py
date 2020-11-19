@@ -147,11 +147,11 @@ def new_room_category (hotel_id):
     else:
         return redirect (url_for('error', error="Wrong data."))
 
-
 # There must be hotel_id to SHOW!
-# @hotels.route('/show/', methods=['GET', 'POST'])
-# def show():
-#     return render_template('hotels/show.html')
+@hotels.route('/show/<int:hotel_id>', methods=['GET', 'POST'])
+def show(hotel_id):
+    hotel = Hotel.query.filter_by(id=hotel_id).one()
+    return render_template('hotels/show.html', hotel=hotel)
 
 # # There also
 # @hotels.route('/edit/', methods=['GET', 'POST'])

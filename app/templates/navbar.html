@@ -50,7 +50,7 @@
                     <div class="dropdown-menu dropdown-menu-right">
                         <a href="#" class="dropdown-item">Info</a>
                         <a href="#" class="dropdown-item">Reservations</a>
-                        {% if current_user.role >= Role.DIRECTOR.value %}
+                        {% if current_user.role >= UserRole.DIRECTOR.value %}
                         <a href="#" class="dropdown-item">Hotels</a>
                         <a href="{{ url_for('profile.manage') }}" class="dropdown-item">Manage...</a>
                         {% endif %}

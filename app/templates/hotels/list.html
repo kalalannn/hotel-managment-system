@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "bootstrap/form.html" import render_form %}
 
 {% block title %} Hotels {% endblock %}
 
@@ -35,7 +34,7 @@ input#submit {
 
 
 <!-- id="hotel_search_form"  -->
-<div class="row">
+<div class="row align-items-start">
     <div name="search_form" class="col col-md-2">
         <form method="post" action="">
             {{ form.csrf_token }}
@@ -45,27 +44,38 @@ input#submit {
             {% endfor %}
         </form>
     </div>
-    <div class="col-md-auto">
-        <table>
-        <thead>
-            <th>
-                <td> </td>
-                <td> </td>
-            </th>
-        </thead>
-        <tbody>
-            {% for hotel in hotels %}
-                <tr>
-                    <td> {{hotel.name}} </td>
-                    <td> {{hotel.stars}} </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-        </table>
+    <div class="col" style="margin-left: 5px">
+        {% for hotel in hotels %}
+        <div class="row" style="margin-bottom: 5px;">
+            <div class="col-md-4 text-center" >
+                <img src="{{ url_for('static', filename='img/hotel_image.png') }}">
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <a href="{{ url_for('hotels.show', hotel_id=hotel.id) }}" > <b> {{ hotel.name }} {{ '*' * hotel.stars }} </b> </a>
+                </div>
+
+                <div class="row">
+                    {{ hotel.address.post_code }} {{ hotel.address.city }}, {{ hotel.address.country }}
+                </div>
+
+                <div class="row"> &nbsp; </div>
+
+                {% for room_category in hotel.room_categories %}
+                <div class="row">
+                    {{ room_category.type }} - {{ room_category.price }}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 text-center">
+                <button type="button" class="btn btn-primary"
+                    onclick="location.href=`{{ url_for('hotels.show', hotel_id=hotel.id) }}`">
+                    Show hotel
+                </button>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
-
 <br> <hr> <br>
-
-
 {% endblock inner_content %}

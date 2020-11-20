@@ -81,3 +81,6 @@ class ReservationForm(FlaskForm):
 
     def unauthorised(self):
         self.category.query_factory = lambda: RoomCategory.query.filter_by(hotel_id=self.obj.id)
+    
+class ChangeDate(FlaskForm):
+    change_dates = SubmitField('Change Date')

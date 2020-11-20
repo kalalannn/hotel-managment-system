@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% from "bootstrap/form.html" import render_form %}
+
+{% block title %} Hotels {% endblock %}
+
+{% block inner_scripts %}
+<script>
+$(document).ready(function () {
+    var beds_1 = $('#beds_1')
+    var beds_2 = $('#beds_2')
+    var beds_3 = $('#beds_3')
+
+    var date_from = $('#date_from')
+    var date_to = $('#date_to')
+
+    date_from.parent('div').hide()
+    date_to.parent('div').hide()
+
+    beds_1.parent('div').hide()
+    beds_2.parent('div').hide()
+    beds_3.parent('div').hide()
+
+    var category = $('#category')
+    var change_dates = $('#change_dates')
+
+    if ($('#category option:selected').text() == 'STANDARD'){
+        beds_1.parent('div').show()}
+        else {
+            beds_1.parent('div').hide()
+        }
+        if ($('#category option:selected').text() == 'LUX'){
+        beds_2.parent('div').show()}
+        else {
+            beds_2.parent('div').hide()
+        }
+        if ($('#category option:selected').text() == 'BUSINESS'){
+        beds_3.parent('div').show()}
+        else {
+            beds_3.parent('div').hide()
+        }
+
+    category[0].addEventListener('change', function() {
+    if ($('#category option:selected').text() == 'STANDARD'){
+        beds_1.parent('div').show()}
+        else {
+            beds_1.parent('div').hide()
+        }
+        if ($('#category option:selected').text() == 'LUX'){
+        beds_2.parent('div').show()}
+        else {
+            beds_2.parent('div').hide()
+        }
+        if ($('#category option:selected').text() == 'BUSINESS'){
+        beds_3.parent('div').show()}
+        else {
+            beds_3.parent('div').hide()
+        }
+    });
+    $('#change_dates').click(function () {
+        date_from.parent('div').show()
+        date_to.parent('div').show()
+        change_dates.hide()
+    });
+    
+});
+</script>
+{% endblock inner_scripts %}
+
+{% block inner_content %}
+<div class="row">
+    <div class="col-md-6">
+    <h1>{{hotel.name}} {{hotel.stars}}</h1>
+    <p style="font-size: 30px;">Description<p>
+    {{ hotel.description }}
+</div>
+</div>
+<div class="row">
+<div class="col-md-6" style="text-align: left;">
+
+<form method="POST">
+    {{ form.csrf_token }}
+    
+    {% for field in form if field != form.first_name and field != form.last_name %} 
+    {{ render_field(field) }}
+    {% endfor %}
+
+    {% if current_user.role == UserRole.ANON.value %}
+        {{ render_field(form.first_name) }}
+        {{ render_field(form.last_name) }}
+    {% endif %}
+</form>
+</div>
+<div class="col">
+<button id="change_dates" class="btn btn-primary btn-delete", type="button">Change dates</button>
+</div>
+
+
+</div>
+{% endblock inner_content %}

@@ -5,9 +5,11 @@
 {% block inner_scripts %}
 <script>
 $(document).ready(function () {
+// REMOVE {{{
     var beds_1 = $('#beds_1')
     var beds_2 = $('#beds_2')
     var beds_3 = $('#beds_3')
+// }}}
 
     var date_from = $('#date_from')
     var date_to = $('#date_to')
@@ -15,46 +17,51 @@ $(document).ready(function () {
     date_from.parent('div').hide()
     date_to.parent('div').hide()
 
+// REMOVE {{{
     beds_1.parent('div').hide()
     beds_2.parent('div').hide()
     beds_3.parent('div').hide()
+// }}}
 
     var category = $('#category')
     var change_dates = $('#change_dates')
 
-    if ($('#category option:selected').text() == 'STANDARD'){
-        beds_1.parent('div').show()}
-        else {
-            beds_1.parent('div').hide()
-        }
-        if ($('#category option:selected').text() == 'LUX'){
-        beds_2.parent('div').show()}
-        else {
-            beds_2.parent('div').hide()
-        }
-        if ($('#category option:selected').text() == 'BUSINESS'){
-        beds_3.parent('div').show()}
-        else {
-            beds_3.parent('div').hide()
-        }
+// REMOVE {{{
+    if ($('#category option:selected').text() == 'STANDARD') {
+        beds_1.parent('div').show()
+    } else {
+        beds_1.parent('div').hide()
+    }
+    if ($('#category option:selected').text() == 'LUX') {
+        beds_2.parent('div').show()
+    } else {
+        beds_2.parent('div').hide()
+    }
+    if ($('#category option:selected').text() == 'BUSINESS') {
+        beds_3.parent('div').show()
+    } else {
+        beds_3.parent('div').hide()
+    }
 
     category[0].addEventListener('change', function() {
-    if ($('#category option:selected').text() == 'STANDARD'){
-        beds_1.parent('div').show()}
-        else {
+        if ($('#category option:selected').text() == 'STANDARD') {
+            beds_1.parent('div').show()
+        } else {
             beds_1.parent('div').hide()
         }
-        if ($('#category option:selected').text() == 'LUX'){
-        beds_2.parent('div').show()}
-        else {
+        if ($('#category option:selected').text() == 'LUX') {
+            beds_2.parent('div').show()
+        } else {
             beds_2.parent('div').hide()
         }
-        if ($('#category option:selected').text() == 'BUSINESS'){
-        beds_3.parent('div').show()}
-        else {
+        if ($('#category option:selected').text() == 'BUSINESS') {
+            beds_3.parent('div').show()
+        } else {
             beds_3.parent('div').hide()
         }
     });
+    // }}}
+    // Daty vsegda pokazyvat !!! koroche JS REMOVE
     $( "#form1" ).submit(function (event) {
         date_from.parent('div').show()
         date_to.parent('div').show()
@@ -67,10 +74,6 @@ $(document).ready(function () {
 {% endblock inner_scripts %}
 
 {% block inner_content %}
-<div class="page-header">
-    <h3> {{ hotel.name }} </h3>
-</div>
-
 <div class="row">
     <div class="col-md-6">
     <h1>{{hotel.name}} {{hotel.stars}}</h1>
@@ -95,6 +98,7 @@ $(document).ready(function () {
 </form>
 </div>
 <div class="col">
+{# kousky forem REMOVE chceme 1 FORMU #}
 <form id="form1">
     {{ form1.csrf_token }}
     {{ render_field(form1.change_dates) }}

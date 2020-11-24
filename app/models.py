@@ -25,14 +25,15 @@ class HotelStars(Enum):
     FIVE = 5
 
 class RoomType(Enum):
-    STANDARD = 1
-    LUX = 2
-    BUSINESS = 3
+    LUX = 1
+    BUSINESS = 2
+    STANDARD = 3
 
 class ReservationStatus(Enum):
-    CREATED = 1
-    BOOKED = 2
-    CANCELED = 3
+    NEW = 1
+    CONFIRMED = 2
+    CHECKED_IN = 3
+    CHECKED_OUT = 4
 
 class User(UserMixin, db.Model):
     __tablename__  = 'users'
@@ -205,8 +206,8 @@ class RoomCategory(db.Model):
 
     id          = db.Column(db.Integer, primary_key=True)
     price       = db.Column(db.Numeric)
-    type        = db.Column(db.Text, \
-        CheckConstraint("type in ('%s')" % ("', '".join([t.name for t in RoomType]))))
+    type        = db.Column(db.Integer, \
+        CheckConstraint("type in (%s)" % (", ".join([str(t.value) for t in RoomType]))))
 
     hotel_id    = db.Column(db.Integer, \
         db.ForeignKey('hotels.id'))
@@ -248,7 +249,7 @@ class Room(db.Model):
     def __repr__(self):
         return "<Room(id={}, number={}, beds={}, room_category={}, price={})>".format(
             self.id, self.number, self.beds, \
-            self.room_category.type, self.room_category.price
+            RoomType(self.room_category.type).name, self.room_category.price
             )
 
 class ReservationRoom(db.Model):
@@ -281,8 +282,8 @@ class Reservation(db.Model):
     __tablename__  = 'reservations'
 
     id              = db.Column(db.Integer, primary_key=True)
-    status          = db.Column(db.Text, \
-        CheckConstraint("status in ('%s')" % ("', '".join([s.name for s in ReservationStatus]))))
+    status          = db.Column(db.Integer, \
+        CheckConstraint("status in (%s)" % (", ".join([str(s.value) for s in ReservationStatus]))))
 
     reservations_rooms = db.relationship('ReservationRoom', \
         back_populates='reservation')

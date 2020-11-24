@@ -1,5 +1,5 @@
-from flask import request, render_template, session, redirect, url_for, flash, jsonify
-from flask_login import current_user, login_user, logout_user, login_required
+from flask import request, render_template, session, redirect, url_for, jsonify
+from flask_login import current_user
 import jsonpickle
 
 from . import profile
@@ -63,7 +63,6 @@ def add_user():
                         _role=UserRole(int(form.data['role'])).value,
                         # only developers know password :D
                         _password='testpassword')
-            print(user.role)
             db.session.add(user)
             db.session.commit()
             return jsonify(status=200, message='User successfully created.')

@@ -16,10 +16,12 @@
 
     {% block scripts %}
     <!-- Optional JavaScript -->
-    <script type=text/javascript src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/global.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/daypilot-all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/global.js') }}"></script>
     {{ bootstrap.load_js() }}
+    {{ datepicker.loader(theme="base") }}
     {% endblock %}
     
     <title>{% block title %}{% endblock %}</title>

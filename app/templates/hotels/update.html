@@ -50,7 +50,7 @@
             </form>
 
             {% for room_category in hotel.room_categories %}
-                <p> {{ room_category.type }} {{ room_category.price }} </p>
+                <p> {{ RoomType(room_category.type).name }} {{ room_category.price }} </p>
 
                 {% for room in room_category.rooms %}
                     <p> Number: {{ room.number }}, Beds: {{ room.beds }}  </p>

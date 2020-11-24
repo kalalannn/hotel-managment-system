@@ -1,6 +1,7 @@
 from app import db
 from datetime import datetime, timedelta, date
-from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, RoomCategory, UserRole, HotelStars
+from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, \
+    RoomCategory, UserRole, HotelStars, ReservationStatus, RoomType
 
 def load_models_data():
     print ('Inserting data')
@@ -96,14 +97,14 @@ def load_models_data():
     # ROOMS_CATEORIES
     # def __init__(self, _type, _price, _hotel):
 
-    room_cat_0_0 = RoomCategory('LUX',      2500, hotel_0)
-    room_cat_0_1 = RoomCategory('STANDARD', 2000, hotel_0)
+    room_cat_0_0 = RoomCategory(RoomType.LUX.value,      2500, hotel_0)
+    room_cat_0_1 = RoomCategory(RoomType.STANDARD.value, 2000, hotel_0)
 
-    room_cat_1_0 = RoomCategory('LUX',      2000, hotel_1)
-    room_cat_1_1 = RoomCategory('STANDARD', 1500, hotel_1)
+    room_cat_1_0 = RoomCategory(RoomType.LUX.value,      2000, hotel_1)
+    room_cat_1_1 = RoomCategory(RoomType.STANDARD.value, 1500, hotel_1)
 
-    room_cat_2_0 = RoomCategory('LUX',      1500, hotel_2)
-    room_cat_2_1 = RoomCategory('STANDARD', 1200, hotel_2)
+    room_cat_2_0 = RoomCategory(RoomType.LUX.value,      1500, hotel_2)
+    room_cat_2_1 = RoomCategory(RoomType.STANDARD.value, 1200, hotel_2)
 
     db.session.add_all([
         room_cat_0_0, room_cat_0_1,
@@ -114,44 +115,44 @@ def load_models_data():
     # ROOMS
     # def __init__(self, _number, _beds, _room_category):
 
-    DVA_LUZKA = 2
-    TRI_LUZKA = 3
+    TWO_BEDS = 2
+    THREE_BEDS = 3
 
     # 4 LUXY
-    room_0_0_0 = Room(DVA_LUZKA, 1, room_cat_0_0)
-    room_0_0_1 = Room(DVA_LUZKA, 2, room_cat_0_0)
-    room_0_0_2 = Room(TRI_LUZKA, 3, room_cat_0_0)
-    room_0_0_3 = Room(TRI_LUZKA, 4, room_cat_0_0)
+    room_0_0_0 = Room(TWO_BEDS, 1, room_cat_0_0)
+    room_0_0_1 = Room(TWO_BEDS, 2, room_cat_0_0)
+    room_0_0_2 = Room(THREE_BEDS, 3, room_cat_0_0)
+    room_0_0_3 = Room(THREE_BEDS, 4, room_cat_0_0)
 
     # 4 STANDARDY
-    room_0_1_0 = Room(DVA_LUZKA, 5, room_cat_0_1)
-    room_0_1_1 = Room(DVA_LUZKA, 6, room_cat_0_1)
-    room_0_1_2 = Room(TRI_LUZKA, 7, room_cat_0_1)
-    room_0_1_3 = Room(TRI_LUZKA, 8, room_cat_0_1)
+    room_0_1_0 = Room(TWO_BEDS, 5, room_cat_0_1)
+    room_0_1_1 = Room(TWO_BEDS, 6, room_cat_0_1)
+    room_0_1_2 = Room(THREE_BEDS, 7, room_cat_0_1)
+    room_0_1_3 = Room(THREE_BEDS, 8, room_cat_0_1)
 
     # 3 LUXY
-    room_1_0_0 = Room(DVA_LUZKA, 1, room_cat_1_0)
-    room_1_0_1 = Room(DVA_LUZKA, 2, room_cat_1_0)
-    room_1_0_2 = Room(TRI_LUZKA, 3, room_cat_1_0)
+    room_1_0_0 = Room(TWO_BEDS, 1, room_cat_1_0)
+    room_1_0_1 = Room(TWO_BEDS, 2, room_cat_1_0)
+    room_1_0_2 = Room(THREE_BEDS, 3, room_cat_1_0)
 
     # 3 STANDARDY
-    room_1_1_0 = Room(TRI_LUZKA, 4, room_cat_1_1)
-    room_1_1_1 = Room(DVA_LUZKA, 5, room_cat_1_1)
-    room_1_1_2 = Room(DVA_LUZKA, 6, room_cat_1_1)
+    room_1_1_0 = Room(THREE_BEDS, 4, room_cat_1_1)
+    room_1_1_1 = Room(TWO_BEDS, 5, room_cat_1_1)
+    room_1_1_2 = Room(TWO_BEDS, 6, room_cat_1_1)
 
     # 5 LUXU
-    room_2_0_0 = Room(DVA_LUZKA, 1, room_cat_2_0)
-    room_2_0_1 = Room(DVA_LUZKA, 2, room_cat_2_0)
-    room_2_0_2 = Room(TRI_LUZKA, 3, room_cat_2_0)
-    room_2_0_2 = Room(TRI_LUZKA, 4, room_cat_2_0)
-    room_2_0_2 = Room(TRI_LUZKA, 5, room_cat_2_0)
+    room_2_0_0 = Room(TWO_BEDS, 1, room_cat_2_0)
+    room_2_0_1 = Room(TWO_BEDS, 2, room_cat_2_0)
+    room_2_0_2 = Room(THREE_BEDS, 3, room_cat_2_0)
+    room_2_0_2 = Room(THREE_BEDS, 4, room_cat_2_0)
+    room_2_0_2 = Room(THREE_BEDS, 5, room_cat_2_0)
 
     # 5 STANDARDU
-    room_2_1_0 = Room(TRI_LUZKA, 6, room_cat_2_1)
-    room_2_1_1 = Room(DVA_LUZKA, 7, room_cat_2_1)
-    room_2_1_2 = Room(DVA_LUZKA, 8, room_cat_2_1)
-    room_2_1_2 = Room(DVA_LUZKA, 9, room_cat_2_1)
-    room_2_1_2 = Room(DVA_LUZKA, 10,room_cat_2_1)
+    room_2_1_0 = Room(THREE_BEDS, 6, room_cat_2_1)
+    room_2_1_1 = Room(TWO_BEDS, 7, room_cat_2_1)
+    room_2_1_2 = Room(TWO_BEDS, 8, room_cat_2_1)
+    room_2_1_2 = Room(TWO_BEDS, 9, room_cat_2_1)
+    room_2_1_2 = Room(TWO_BEDS, 10,room_cat_2_1)
 
     # EQUIPMENT
     # def __init__(self, _type, _name):
@@ -179,51 +180,70 @@ def load_models_data():
         room_2_1_0, room_2_1_1, room_2_1_2, room_2_1_2, room_2_1_2,
     ])
 
+#####
+    # сам юзер делают резервацу
+    # - юзер устанавливает даты
+    # - ты выдаешь свободные комнаты на эти даты (отсортированные по категориям, с кол-вом комнат)
+    # - юзер выбирает комнату(ы) и жмет бронировать
+    #     if not authenticated:
+    #         anon = User(first_name, last_name, email, None, UserRole.ANON.value)
 
-    # reservation1 = Reservation(status1, customer_0, receptionist_0, payment1)
-    # reservation1_0 = Reservation(status3, customer_0, receptionist_0, payment1)
-    # reservation1_1 = Reservation(status2, customer_0, receptionist_0, payment1)
-    # reservation2 = Reservation(status2, customer_1, receptionist_1, payment2)
-    # reservation3 = Reservation(status3, customer_2, receptionist_2, payment3)
+    #     payment = Payment() # full = for each room (room_category.price * days)
+    #                             # block = 0.5 full
+    #                             # is_payed, is_blocked = False, False
+    #     reservation = Reservation(customer or anon, payment)
+    #     status = History(reservation, ReservationStatus, date_change=today, receptionist=None)
 
-    #res_room1 = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
-    #res_room1_0 = ReservationRoom(datetime.today() + timedelta(days=1), datetime.today() + timedelta(days=6))
-    #res_room1_1 = ReservationRoom(datetime.today() + timedelta(days=2), datetime.today() + timedelta(days=7))
-    #res_room2 = ReservationRoom(datetime.today() + timedelta(days=), datetime.today() + timedelta(days=6))
-    #res_room3 = ReservationRoom(datetime.today() + timedelta(days=1), datetime.today() + timedelta(days=6))
+    #     for room in rooms:
+    #         reservation_room = ReservationRoom(from, to)
+    #         reservation_room.room = room
+    #         reservation.reservations_rooms.append(reservation_room)
 
- #   db.session.add_all([
- #       reservation1, reservation1_0, reservation1_1,
- #       reservation2,
- #       reservation3
- #   ])
+    # Hotel.room_categories.rooms
+    # rooms = filter(lambda r: is_free(r, date_from, date_to), rooms)
+    # rooms.sort()
+#####
 
-    # reserv1 = Reservation(status1, user1, user3, payment1)
-    # res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
-    # res_room.room = room2
-    # reserv1.rooms.append(res_room)
-    # res_room = ReservationRoom(datetime.today() + timedelta(days=7), datetime.today() + timedelta(days=18))
-    # res_room.room = room3
-    # reserv1.rooms.append(res_room)
-    # db.session.add(reserv1)
+    reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_0, payment1)
+    reserv2 = Reservation(ReservationStatus.CONFIRMED.value, customer_1, receptionist_0, payment1)
+    reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment1)
+    reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, receptionist_1, payment2)
+    reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, receptionist_3, payment3)
 
-    # reserv2 = Reservation(status2, user1, user2, payment1)
-    # res_room = ReservationRoom(datetime.today() + timedelta(days=10), datetime.today() + timedelta(days=22))
-    # res_room.room = room3
-    # reserv2.rooms.append(res_room)
+    res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
+    res_room.room = room_2_0_1
+    reserv1.reservations_rooms.append(res_room)
 
-    # db.session.add(reserv2)
+    res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
+    res_room.room = room_1_0_2
+    reserv1.reservations_rooms.append(res_room)
 
-    # reserv3 = Reservation(status3, user3, user3, payment3)
-    # res_room = ReservationRoom(datetime.today() + timedelta(days=1), datetime.today() + timedelta(days=2))
-    # res_room.room = room1
-    # reserv3.rooms.append(res_room)
+    res_room = ReservationRoom(datetime.today() - timedelta(days=7), datetime.today() - timedelta(days=1))
+    res_room.room = room_1_0_2
+    reserv2.reservations_rooms.append(res_room)
 
-    # res_room = ReservationRoom(datetime.today() + timedelta(days=2), datetime.today() + timedelta(days=3))
-    # res_room.room = room2
-    # reserv3.rooms.append(res_room)
+    res_room = ReservationRoom(datetime.today() + timedelta(days=2), datetime.today() + timedelta(days=5))
+    res_room.room = room_1_0_0
+    reserv3.reservations_rooms.append(res_room)
 
-    # db.session.add(reserv3)
+    res_room = ReservationRoom(datetime.today() - timedelta(days=10), datetime.today() - timedelta(days=5))
+    res_room.room = room_2_0_1
+    reserv4.reservations_rooms.append(res_room)
+    res_room = ReservationRoom(datetime.today() + timedelta(days=1), datetime.today() + timedelta(days=7))
+    res_room.room = room_2_0_2
+    reserv4.reservations_rooms.append(res_room)
+
+    res_room = ReservationRoom(datetime.today() - timedelta(days=15), datetime.today() - timedelta(days=9))
+    res_room.room = room_0_0_2
+    reserv5.reservations_rooms.append(res_room)
+
+    db.session.add_all([
+        reserv1,
+        reserv2,
+        reserv3,
+        reserv4,
+        reserv5
+    ])
 
     print('Data inserted. Commit.')
     db.session.commit()

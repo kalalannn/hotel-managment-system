@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}Auth home{% endblock %}
+
+{% block inner_scripts %}
+
+{{ datepicker.picker(id="#date_from", dateFormat="dd-mm-yy") }}
+{{ datepicker.picker(id="#date_to", dateFormat="dd-mm-yy") }}
+
+<style type="text/css">
+    .ui-autocomplete {
+        z-index: 5000;
+    }
+
+    .status_free.scheduler_default_rowheadercol2 {
+        background: #fff;
+        border-left: 5px solid #1a9d13;
+    }
+
+    .status_busy.scheduler_default_rowheadercol2 {
+        background: #fff;
+        border-left: 5px solid #ea3624;
+    }
+
+    .paid-text {
+        color: #1a9d13;
+        font-size: 9pt;
+    }
+
+    .unpaid-text {
+        color: #ea3624;
+        font-size: 9pt;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var board = new DayPilot.Scheduler("dashboard");
+
+        board.startDate = DayPilot.Date.today().firstDayOfMonth();
+        board.days = DayPilot.Date.today().daysInMonth();
+        board.scale = 'Day';
+        board.timeHeaders = [
+            { groupBy: "Month", format: "MMMM yyyy" },
+            { groupBy: "Day", format: "d" }
+        ];
+        board.rowHeaderColumns = [
+            { title: "Room", display: "name" },
+            { title: "Capacity", display: "capacity" },
+            { title: "Status", display: "status" }
+        ];
+        board.eventMoveHandling = "Disabled";
+        board.init();
+
+        board.onBeforeRowHeaderRender = function (args) {
+            if (args.row.level === 0) return;
+
+            let beds = function (count) { return count + " bed" + (count > 1 ? "s" : ""); };
+            args.row.columns[1].html = beds(args.row.data.capacity);
+
+            switch (args.row.data.status) {
+                case "Free": args.row.cssClass = "status_free"; break;
+                case "Busy": args.row.cssClass = "status_busy"; break;
+            }
+        };
+
+        board.onBeforeCellRender = function (args) {
+            if (args.cell.start <= DayPilot.Date.today() && DayPilot.Date.today() < args.cell.end) {
+                args.cell.backColor = "#d3f7ed";
+            }
+        };
+
+        board.onBeforeEventRender = function (args) {
+            switch (args.data.status) {
+                case "NEW":
+                    args.data.barColor = '#e69138'; // orange
+                    args.data.toolTip = 'New';
+                    break;
+                case "CONFIRMED":
+                    args.data.barColor = "#1a9d13"; // green
+                    args.data.toolTip = "Confirmed";
+                    break;
+                case "CHECKED_IN":
+                    args.data.barColor = "#1691f4";  // blue
+                    args.data.toolTip = "Checked in";
+                    break;
+                case "CHECKED_OUT":
+                    args.data.barColor = "gray";
+                    args.data.toolTip = "Checked out";
+                    break;
+                default:
+                    args.data.toolTip = "Unexpected state";
+                    break;
+            }
+
+            args.data.html = DayPilot.Util.escapeHtml(args.data.text);
+            args.data.html = "<div>" + args.data.html + "<br/><span style='color:gray'>" + args.data.toolTip + "</span></div>";
+
+            let html;
+            if (args.data.isPaid) {
+                html = "<div class='paid-text'>Paid</div>";
+            } else {
+                html = "<div class='unpaid-text'>Unpaid</div>";
+            }
+            args.data.areas = [
+                { bottom: 10, right: 4, html: html, v: "Visible" },
+            ];
+        };
+
+        board.onTimeRangeSelected = function (args) {
+            $form = $('#reservationDialog').find('form');
+
+            $.ajax({
+                url: '{{ url_for("dashboard.autocomplete") }}'
+            }).done(function (data) {
+                $form.find('#email').autocomplete({
+                    source: function (request, response) {
+                        var results = $.ui.autocomplete.filter(data.json_list, request.term);
+
+                        response(results.slice(0, 10));
+                    },
+                    minLength: 2
+                });
+            });
+            $form.find('#date_from').datepicker("setDate", new Date(args.start));
+            $form.find('#date_to').datepicker("setDate", new Date(args.end));
+
+
+            $('#reservationDialog').modal('show');
+
+            // DayPilot.Modal.form(form, data).then(function (modal) {
+            //     board.clearSelection();
+            //     if (modal.canceled) {
+            //         return;
+            //     }
+            //     let formdata = modal.result;
+            //     DayPilot.Http.ajax({
+            //         url: "{{ url_for('dashboard.create_reservation') }}",
+            //         data: formdata,
+            //         success: function (xhr) {
+            //             console.log(xhr)
+            //             // e.id = ajax.data.id;
+            //             // e.paid = ajax.data.paid;
+            //             // e.status = ajax.data.status;
+            //             // dp.events.add(e);
+            //         }
+            //     });
+            // });
+        };
+
+        board.onEventClick = function (args) {
+            console.log('click!')
+        };
+
+        loadRooms();
+        loadReservations();
+
+        function loadRooms() {
+            DayPilot.Http.ajax({
+                url: "{{ url_for('dashboard.load_rooms') }}",
+                data: {
+                    capacity: $('#capacityFilter').val(),
+                    type: $('#typeFilter').val()
+                },
+                success: function (xhr) {
+                    if (xhr.data.status === 500) {
+                        $('#errorMessage').html(xhr.data.message)
+                    } else {
+                        board.treeEnabled = true;
+                        board.resources = xhr.data;
+                        board.update();
+                        $('.content').prop('hidden', false);
+                    }
+                }
+            })
+        }
+
+        function loadReservations() {
+            let start = board.visibleStart();
+            let end = board.visibleEnd();
+            DayPilot.Http.ajax({
+                url: "{{ url_for('dashboard.load_reservations') }}",
+                data: {
+                    start: start.toString(),
+                    end: end.toString()
+                },
+                success: function (xhr) {
+                    board.events.list = xhr.data;
+                    board.update();
+                }
+            });
+        }
+
+        $('#capacityFilter, #typeFilter').on('change', function () {
+            loadRooms();
+        });
+    });
+</script>
+{% endblock inner_scripts %}
+
+{% block inner_content %}
+<div class="mb-5">
+    <h3>Auth Home page!</h3>
+
+    {% if current_user.is_authenticated %}
+    <h5 id="errorMessage"></h5>
+
+    <div class="content" hidden>
+        <div class="form-group">
+            <div class="form-row">
+                <label for="capacityFilter" class="form-control-sm">Capacity:</label>
+                <select id="capacityFilter" class="form-control-sm col-sm-1">
+                    <option value="0" default></option>
+                    <option value="1">1 bed</option>
+                    <option value="2">2 beds</option>
+                    <option value="3">3 beds</option>
+                    <option value="4">4+ beds</option>
+                </select>
+                <label for="typeFilter" class="form-control-sm">Type:</label>
+                <select id="typeFilter" class="form-control-sm col-sm-1">
+                    <option value="0" default></option>
+                    <option value="1">lux</option>
+                    <option value="2">business</option>
+                    <option value="3">standard</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="dashboard"></div>
+    </div>
+
+    {% include 'dashboard/modals.html' %}
+    {% endif %}
+</div>
+{% endblock inner_content %}

@@ -5,9 +5,6 @@
 
 {% block inner_scripts %}
 
-{{ datepicker.picker(id="#date_from", dateFormat="dd-mm-yy") }}
-{{ datepicker.picker(id="#date_to", dateFormat="dd-mm-yy") }}
-
 <style type="text/css">
     .ui-autocomplete {
         z-index: 5000;
@@ -108,7 +105,7 @@
             ];
         };
 
-        board.onTimeRangeSelected = function (args) {
+        board.onTimeRangeSelected = function (timeRange) {
             $form = $('#reservationDialog').find('form');
 
             $.ajax({
@@ -123,9 +120,13 @@
                     minLength: 2
                 });
             });
-            $form.find('#date_from').datepicker("setDate", new Date(args.start));
-            $form.find('#date_to').datepicker("setDate", new Date(args.end));
 
+
+            $('#date_from').val(timeRange.start.value.split('T')[0].split('-').reverse().join('.'))
+                .prop('disabled', 'true');
+
+            $('#date_to').val(timeRange.end.value.split('T')[0].split('-').reverse().join('.'))
+                .prop('disabled', 'true');
 
             $('#reservationDialog').modal('show');
 

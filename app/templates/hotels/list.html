@@ -63,7 +63,7 @@ input#submit {
 
                 {% for room_category in hotel.room_categories %}
                 <div class="row">
-                    {{ room_category.type }} - {{ room_category.price }}
+                    {{ RoomType(room_category.type).name }} - {{ room_category.price }}
                 </div>
                 {% endfor %}
             </div>

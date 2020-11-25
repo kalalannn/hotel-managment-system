@@ -66,10 +66,12 @@ def load_rooms():
 
 @dashboard.route('/load_reservations', methods=['GET', 'POST'])
 def load_reservations():
-    month_start = datetime.fromisoformat(json.loads(request.data)['start'])
-    month_end = datetime.fromisoformat(json.loads(request.data)['end'])
+    # We need only data ! NOT time
+    # With tim it is harder, so neser se se tim :)
+    date_from = date(year=2020,month=11,day=1)
+    date_to = date(year=2020,month=11,day=30)
 
-    res_rooms = ReservationRoom.query.filter(ReservationRoom.date_from >= month_start, ReservationRoom.date_to < month_end).all()
+    res_rooms = ReservationRoom.query.filter(ReservationRoom.date_from >= date_from, ReservationRoom.date_to < date_to).all()
 
     json_result = []
     for res_room in res_rooms:
@@ -89,8 +91,9 @@ def load_reservations():
 
 @dashboard.route('/create_reservation', methods=['GET', 'POST'])
 def create_reservation():
-    start_date = datetime.fromisoformat(json.loads(request.data)['start'])
-    end_date = datetime.fromisoformat(json.loads(request.data)['end'])
+    # We need only data ! NOT time ALSO
+    date_from = date(year=2020,month=11,day=1)
+    date_to = date(year=2020,month=11,day=30)
     room_id = int(json.loads(request.data)['room'])
     first_name = json.loads(request.data)['first_name']
     last_name = json.loads(request.data)['last_name']

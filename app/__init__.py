@@ -2,12 +2,12 @@ from flask import Flask, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user
-from flask_datepicker import datepicker
+# from flask_datepicker import datepicker
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
-dp = datepicker()
+# dp = datepicker()
 
 def create_app(config_name):
     app = Flask(__name__, static_url_path='/static')
@@ -17,7 +17,7 @@ def create_app(config_name):
     db.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
-    dp.init_app(app)
+    # dp.init_app(app)
 
     app.add_template_global(models.RoomType, 'RoomType')
 

@@ -14,9 +14,9 @@ from app.helpers import Helper
 def list():
     form = SearchForm(request.form)
 
-    _hotels = None
+    hotels = None
     if request.method == 'GET':
-        _hotels = Hotel.query.order_by(Hotel.stars).limit(10).all()
+        hotels = Hotel.query.order_by(Hotel.stars).limit(10).all()
     # POST
     elif form.validate_on_submit():
         query = Hotel.query
@@ -27,12 +27,12 @@ def list():
         # if form.stars.data:
         #     query = query.filter(Hotel.stars == form.stars.data.value)
 
-        _hotels = query.all()
+        hotels = query.all()
     # EMPTY FORM
     else:
-        _hotels = Hotel.query.limit(10).all()
+        hotels = Hotel.query.order_by(Hotel.stars).limit(10).all()
 
-    return render_template('hotels/list.html', form=form, hotels=_hotels)
+    return render_template('hotels/list.html', form=form, hotels=hotels)
 
 @login_required
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin

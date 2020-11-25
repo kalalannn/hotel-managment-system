@@ -13,6 +13,8 @@ class ReservationForm(FlaskForm):
         get_label = lambda t: "{}".format(t.type), \
         validators=[Required()])
 
+
+    # RM {{
     beds_1 = QuerySelectField('Beds',      \
         get_pk          = lambda t: t.beds, \
         get_label = lambda t: "{}".format(t.beds))
@@ -25,16 +27,10 @@ class ReservationForm(FlaskForm):
         get_pk          = lambda t: t.id, \
         get_label       = lambda t: "{}".format(t.beds))
 
-    #date_from           = DateField('From', \
-    #    default = datetime.today)
-    #date_to             = DateField('To',   \
-    #    default = datetime.today)
-
+    # }}
     date_from   = StringField('Date From')
     date_to     = StringField('Date To')
     
-    first_name  = StringField('Frirst Name', validators=[Required()])
-    last_name   = StringField('Last Name',   validators=[Required()])
     email       = StringField('E-mail',      validators=[Required()])
 
     reserve     = SubmitField('Reserve')
@@ -44,15 +40,14 @@ class ReservationForm(FlaskForm):
         if 'obj' in kwargs:
             self.obj = kwargs['obj']
         if 'date_from' in kwargs:
-            #df = datetime.strptime(kwargs['date_from'], '%d/%m/%y')
-            #self.date_from = df
-            self.date_from = kwargs['date_from']
+            self.df = kwargs['date_from']
         if 'date_to' in kwargs:
-            self.date_to = kwargs['date_to']
+            self.dt = kwargs['date_to']
         if 'user' in kwargs:
             self.usr = kwargs['user']
 
-    def authorised(self):
+        # HOTEL != RESERVATION => obj != hotel, hotel=kwargs['hotel']
+        # REMOVE NAH
         self.category.query_factory = lambda: RoomCategory.query.filter_by(hotel_id=self.obj.id)
         q = RoomCategory.query.filter_by(hotel_id=self.obj.id, type='STANDARD').first()
         if q is not None:
@@ -74,13 +69,11 @@ class ReservationForm(FlaskForm):
                 lambda: Room.query.filter_by(room_category_id = RoomCategory.query.filter_by(hotel_id=self.obj.id, type='BUSINESS').one().id)
         else:
             del self.beds_3
-         
-        self.first_name.data=self.usr.first_name
-        self.last_name.data=self.usr.last_name
+
+        #  }} REMOVE
+
+    def authorised(self):
         self.email.data = self.usr.email
 
     def unauthorised(self):
         self.category.query_factory = lambda: RoomCategory.query.filter_by(hotel_id=self.obj.id)
-    
-class ChangeDate(FlaskForm):
-    change_dates = SubmitField('Change Date')

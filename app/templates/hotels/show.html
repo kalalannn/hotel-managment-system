@@ -10,11 +10,6 @@ $(document).ready(function () {
     var beds_2 = $('#beds_2')
     var beds_3 = $('#beds_3')
 
-    var date_from = $('#date_from')
-    var date_to = $('#date_to')
-
-    date_from.parent('div').hide()
-    date_to.parent('div').hide()
 
     beds_1.parent('div').hide()
     beds_2.parent('div').hide()
@@ -56,12 +51,7 @@ $(document).ready(function () {
             beds_3.parent('div').hide()
         }
     });
-    $( "#form1" ).submit(function (event) {
-        date_from.parent('div').show()
-        date_to.parent('div').show()
-        change_dates.hide()
-        event.preventDefault();
-    });
+    
     
 });
 </script>
@@ -81,7 +71,7 @@ $(document).ready(function () {
 <form method="POST">
     {{ form.csrf_token }}
     
-    {% for field in form if field != form.first_name and field != form.last_name %} 
+    {% for field in form if field %} 
     {{ render_field(field) }}
     {% endfor %}
 
@@ -92,13 +82,11 @@ $(document).ready(function () {
 </form>
 </div>
 <div class="col">
-<form id="form1">
-    {{ form1.csrf_token }}
-    {{ render_field(form1.change_dates) }}
-<!--<button id="change_dates" class="btn btn-primary btn-delete", type="submit">Change dates</button>-->
-</form>
+    {% if (current_user == hotel.owner and current_user.role == UserRole.DIRECTOR.value) or current_user.role == UserRole.ADMIN.value %}
+    <form action="{{url_for('hotels.update', hotel_id=hotel.id)}}">
+        <input type="submit" class="btn btn-primary" value="Edit Hotel" />
+    </form>
+    {% endif %}
 </div>
-
-
 </div>
 {% endblock inner_content %}

@@ -5,7 +5,7 @@ import datetime
 from . import hotels
 from .forms import SearchForm, HotelForm
 from .forms import RoomForm, RoomCategoryForm
-from ..reservations.forms import ReservationForm, ChangeDate
+from ..reservations.forms import ReservationForm
 from ..models import Hotel, Address, User, HotelStars, UserRole, Reservation, Payment, ReservationRoom
 from ..models import Room, RoomCategory, RoomType
 from app import db
@@ -34,8 +34,8 @@ def list():
         _hotels = Hotel.query.limit(10).all()
 
     resp = make_response(render_template('hotels/list.html', form=form, hotels=_hotels), )
-    resp.set_cookie('date_from', '2/2/20')
-    resp.set_cookie('date_to', '3/3/20')
+    resp.set_cookie('date_from', '2020-02-02')
+    resp.set_cookie('date_to', '2020-03-03')
     return resp
     #return render_template('hotels/list.html', form=form, hotels=_hotels)
 
@@ -158,18 +158,18 @@ def show(hotel_id):
     hotel = Hotel.query.filter_by(id=hotel_id).one()
     date_from = request.cookies.get('date_from')
     date_to = request.cookies.get('date_to')
-    form1 = ChangeDate()
-    if form1.validate_on_submit():
-        form = ReservationForm(request.form, obj=hotel, user=current_user)
-    else:
+    if current_user.is_authenticated:
         form = ReservationForm(request.form, obj=hotel, date_from=date_from, date_to=date_to, user=current_user)
-    form.authorised()
+        form.authorised()
+    else:
+        form = ReservationForm(request.form, obj=hotel, date_from=date_from, date_to=date_to)
+        form.unauthorised()
     if form.validate_on_submit():
         room_category = RoomCategory.query.filter_by(hotel_id=hotel.id, type=form.category.data.type).one()
         amount = room_category.price
         payment = Payment(amount//2, amount, 0.1,False, False)
-        df= datetime.datetime.strptime(str(form.date_from.data), '%Y-%m-%d').strftime('%Y-%m-%d')
-        dt= datetime.datetime.strptime(str(form.date_to.data), "%Y-%m-%d").strftime('%Y-%m-%d')
+        df= datetime.datetime.strptime(str(form.date_from.data), '%Y-%m-%d')
+        dt= datetime.datetime.strptime(str(form.date_to.data), "%Y-%m-%d")
         reservation_room = ReservationRoom(df, dt)
         reservation = Reservation('CREATED', current_user, current_user, payment)
         db.session.add(reservation)
@@ -183,13 +183,12 @@ def show(hotel_id):
         else:
             b = form.beds_3.data
             beds = int(b.beds)
-        print(room_category.id, beds)
         room = Room.query.filter_by(room_category_id=room_category.id, beds=beds).one()
         reservation_room.room_id = room.id
         reservation_room.reservation_id = reservation.id
         db.session.add(reservation_room)
         db.session.commit()
-    return render_template('hotels/show.html', hotel=hotel, form=form, form1=form1)
+    return render_template('hotels/show.html', hotel=hotel, form=form)
 
 # # There also
 # @hotels.route('/edit/', methods=['GET', 'POST'])

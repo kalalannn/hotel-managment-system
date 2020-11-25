@@ -4,7 +4,6 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
 from wtforms_components import read_only
 from wtforms.widgets import TextArea
-from wtforms.fields.html5 import DateField
 
 from datetime import datetime, timedelta
 

@@ -10,8 +10,9 @@
     {% block styles %}
     <!-- Bootstrap CSS -->
     {{ bootstrap.load_css() }}
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/styles.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/toastr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/toastr.min.css') }}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     {% endblock %}
 
     {% block scripts %}
@@ -21,8 +22,8 @@
     <script src="{{ url_for('static', filename='js/daypilot-all.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/global.js') }}"></script>
     {{ bootstrap.load_js() }}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     {% endblock %}
-    
     <title>{% block title %}{% endblock %}</title>
     {% endblock %}
 </head>

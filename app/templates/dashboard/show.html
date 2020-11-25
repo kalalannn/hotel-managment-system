@@ -121,12 +121,10 @@
                 });
             });
 
-
-            $('#date_from').val(timeRange.start.value.split('T')[0].split('-').reverse().join('.'))
-                .prop('disabled', 'true');
-
-            $('#date_to').val(timeRange.end.value.split('T')[0].split('-').reverse().join('.'))
-                .prop('disabled', 'true');
+            $form.find("#date_from").datepicker({ dateFormat: "dd-mm-yy" });
+            $form.find("#date_to").datepicker({ dateFormat: "dd-mm-yy" });
+            $form.find('#date_from').datepicker("setDate", new Date(args.start));
+            $form.find('#date_to').datepicker("setDate", new Date(args.end));
 
             $('#reservationDialog').modal('show');
 

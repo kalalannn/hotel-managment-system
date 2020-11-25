@@ -16,6 +16,9 @@ $(document).ready(function () {
             city.parent('div').show()
         };
     });
+
+    $("#date_from").datepicker({ dateFormat: "dd-mm-yy" })
+        .datepicker("setDate", '03-04-2018');
 });
 </script>
 {% endblock inner_scripts %}

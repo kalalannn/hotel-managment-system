@@ -3,10 +3,12 @@ from flask_login import current_user
 from datetime import datetime, date
 import uuid
 
+import jsonpickle
+
 from . import dashboard
 # Import needed forms and models
 from .forms import UserForm
-from ..models import UserRole, Hotel, Room, RoomCategory, ReservationRoom, ReservationStatus, RoomType
+from ..models import User, UserRole, Hotel, Room, RoomCategory, ReservationRoom, ReservationStatus, RoomType
 # Import database object
 from app import db
 
@@ -17,12 +19,22 @@ def show():
     return render_template('dashboard/show.html', form=form)
 
 
-LIST=["abc","abcd","abcde","abcdef","abcdef","abcdef","abcdef","abcdef","abcdef","abcdef","abcde","abcde","abcde","abcde"]
+@dashboard.route('/email_autocomplete', methods=['GET'])
+def email_autocomplete():
+    users = User.query.all()
+    emails = list(map(lambda u: u.email, users))
 
-@dashboard.route('/autocomplete',methods=['GET'])
-def autocomplete():
-    search = request.args.get('term')
-    return jsonify(json_list=LIST) 
+    return jsonify(json_emails=emails)
+
+
+@dashboard.route('/find_user', methods=['GET'])
+def find_user():
+    email = request.args.get('email')
+    user = User.query.filter_by(email=email).first()
+
+    return jsonify(
+        {'first_name': user.first_name,
+        'last_name': user.last_name})
 
 
 @dashboard.route('/load_rooms', methods=['GET', 'POST'])
@@ -66,12 +78,10 @@ def load_rooms():
 
 @dashboard.route('/load_reservations', methods=['GET', 'POST'])
 def load_reservations():
-    # We need only data ! NOT time
-    # With tim it is harder, so neser se se tim :)
-    date_from = date(year=2020,month=11,day=1)
-    date_to = date(year=2020,month=11,day=30)
-
-    res_rooms = ReservationRoom.query.filter(ReservationRoom.date_from >= date_from, ReservationRoom.date_to < date_to).all()
+    # month_start = datetime.fromisoformat(json.loads(request.data)['start'])
+    # month_end = datetime.fromisoformat(json.loads(request.data)['end'])
+    # res_rooms = ReservationRoom.query.filter(ReservationRoom.date_from >= month_start, ReservationRoom.date_to < month_end).all()
+    res_rooms = ReservationRoom.query.all()
 
     json_result = []
     for res_room in res_rooms:
@@ -91,18 +101,18 @@ def load_reservations():
 
 @dashboard.route('/create_reservation', methods=['GET', 'POST'])
 def create_reservation():
-    # We need only data ! NOT time ALSO
-    date_from = date(year=2020,month=11,day=1)
-    date_to = date(year=2020,month=11,day=30)
-    room_id = int(json.loads(request.data)['room'])
-    first_name = json.loads(request.data)['first_name']
-    last_name = json.loads(request.data)['last_name']
+    data = json.loads(request.data)
 
-    # print(start_date)
-    # print(end_date)
-    # print(room_id)
-    # print(first_name)
-    # print(last_name)
+    first_name = data['first_name']
+    last_name = data['last_name']
+    email = data['email']
+    date_from = datetime.strptime(data['date_from'], '%d-%m-%Y')
+    date_to = datetime.strptime(data['date_from'], '%d-%m-%Y')
+    print(first_name)
+    print(last_name)
+    print(email)
+    print(date_from)
+    print(date_to)
 
     return jsonify({'t':'ttt'})
 

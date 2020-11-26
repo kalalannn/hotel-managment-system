@@ -6,14 +6,10 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 
 # Define the database we are working with
-DATABASE_USER = 'postgres'
-DATABASE_PASSWORD = 'postgres'
-DATABASE_PATH = 'localhost:5432/mydb'
+DATABASE_USER = 'zaczeshwpfbuxb'
+DATABASE_PASSWORD = '55fe00bdf6948369b6e9c6171bfb7fac645ac7565fb7189cff441066a08c8963'
 
-SQLALCHEMY_DATABASE_URI = 'postgresql://' + \
-    DATABASE_USER + ':' + \
-    DATABASE_PASSWORD + '@' + \
-    DATABASE_PATH
+SQLALCHEMY_DATABASE_URI = 'postgres://zaczeshwpfbuxb:55fe00bdf6948369b6e9c6171bfb7fac645ac7565fb7189cff441066a08c8963@ec2-54-247-85-251.eu-west-1.compute.amazonaws.com:5432/d524f86431l6o8'
 
 DATABASE_CONNECT_OPTIONS = {}
 

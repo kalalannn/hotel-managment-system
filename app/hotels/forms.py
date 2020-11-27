@@ -38,10 +38,8 @@ class SearchForm(FlaskForm):
         default = datetime.today() + timedelta(days=1))
 
     people_count        = StringField('Persons',   default=2)
-    rooms_count         = StringField('Rooms',    default=1)
+    # rooms_count         = StringField('Rooms',    default=1)
 
-    name    = StringField('Name')
-    stars   = SelectField('Stars')
     submit  = SubmitField('Search')
 
 class HotelForm(FlaskForm):
@@ -105,20 +103,23 @@ class HotelForm(FlaskForm):
         # read_only(self.owner)
 
 class RoomCategoryForm(FlaskForm):
-    price = IntegerField('Price CZK')
-
     type = QuerySelectField('Type',      \
         query_factory   = lambda: RoomType, \
         get_pk          = lambda t: t.value, \
         get_label       = lambda t: RoomType(t.value).name, \
         validators=[Required()])
 
-    submit        = SubmitField('Add Category')
+    price = IntegerField('Price CZK')
+    description = StringField('Description',     \
+        widget=TextArea(),
+        validators=[Required()])
+
+    submit        = SubmitField('Save')
 
 class RoomForm(FlaskForm):
     room_category = QuerySelectField('Category',      \
-        get_pk          = lambda c: c.id,   \
-        get_label       = lambda c: c.type, \
+        get_pk          = lambda c: c.type,   \
+        get_label       = lambda c: "{} ({},- CZK)".format(RoomType(c.type).name, c.price), \
         validators = [Required()])
 
     beds            = IntegerField('Beds')

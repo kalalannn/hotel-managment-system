@@ -1,0 +1,27 @@
+<style>
+.img-selected {
+    width: 245px;
+    height: 245px;
+    margin-right: 10px;
+}
+.img-option {
+    width: 75px; /* * 3 = 225px */
+    height: 75px;
+}
+</style>
+<div class="row no-gutters">
+    <div>
+        <img class="img-selected" src="{{ url_for('static', filename='img/hotel_image.png') }}">
+    </div>
+
+    <div>
+    {% for i in range(0,3) %}
+        <div>
+        {% for y in range(0,2) %}
+                <img class="img-option" src="{{ url_for('static', filename='img/hotel_image.png') }}"
+                    style="{% if i==1 %} margin-top: 10px; margin-bottom: 10px; {% endif %} {% if y==0 %} margin-right: 8px; {% endif %}" >
+        {% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+</div>

@@ -1,24 +1,36 @@
 {% extends "base.html" %}
-{% from "bootstrap/form.html" import render_form %}
 
-    <style>
-    form textarea#description {
-        width: 400px;
-        height: 200px;
-        /* max-width: 100px; */
-    }
-    </style>
+<style>
+form textarea#description {
+    width: 400px;
+    height: 200px;
+    /* max-width: 100px; */
+}
+</style>
 
 {% block title %} {{ op }} Hotel {% endblock %}
 
 {% block inner_content %}
 
-{# <div class="page-header">
-</div>
-#}
-<div class="row">
-    <div class="col">
-        <h3> {{ op }} Hotel </h3>
+<h4 class="p-3">
+    {{ op }} Hotel 
+    {% if op == 'New' %}
+    {% elif op == 'Edit' %}
+        (<a href="{{ url_for('hotels.show', hotel_id=hotel.id) }}"> Show </a>)
+    {% elif op == 'Show' %}
+        (<a href="{{ url_for('hotels.update', hotel_id=hotel.id) }}"> Edit </a>)
+    {% endif %}
+</h4>
+
+<div class="row no-gutters">
+    {% if op == 'Edit' or op == 'Show' %}
+    <div class="col col-md-auto p-3">
+        {% include "images.html" %}
+    </div>
+    {% endif %}
+
+    {% if op == 'New' or op == 'Edit' %}
+    <div class="col p-3">
         {% if current_user.role == UserRole.DIRECTOR.value %}
             {{ hotel.name }} {{ '*' * hotel.stars }} <br>
             Address: {{ hotel.address.text() }}      <br> <br>
@@ -30,36 +42,122 @@
             {% endfor %}
         </form>
     </div>
-
-    {% if hotel is defined %}
-        <div class="col">
-            <h3> Rooms Categories </h3>
-            <form method="POST" action="../{{ hotel.id }}/room_categories/new">
-                {{ category_form.csrf_token }}
-                {% for field in category_form %}
-                    {{ render_field(field) }}
-                {% endfor %}
-            </form>
-
-            <h3> Rooms </h3>
-            <form method="POST" action="../{{ hotel.id }}/room_categories/rooms/new">
-                {{ room_form.csrf_token }}
-                {% for field in room_form %}
-                    {{ render_field(field) }}
-                {% endfor %}
-            </form>
-
-            {% for room_category in hotel.room_categories %}
-                <p> {{ RoomType(room_category.type).name }} {{ room_category.price }} </p>
-
-                {% for room in room_category.rooms %}
-                    <p> Number: {{ room.number }}, Beds: {{ room.beds }}  </p>
-                {% endfor %}
-            {% endfor %}
-
-        </div>
+    {% elif op == 'Show' %}
+    <div class="col p-3">
+        <h4> <b> {{ hotel.name }} </b> {{ '*' * hotel.stars }} </h4>
+        <p> Address: {{ hotel.address.text() }} </p>
+        <p> {{ hotel.description }} </p>
     </div>
     {% endif %}
 </div>
 
+{% if hotel is defined and op == 'Edit' %}
+<br> <br>
+<style>
+.table-align-valign-center > tbody > tr > td,
+.table-align-valign-center > thead > tr > th {
+    vertical-align: middle;
+}
+.table-align-valign-center > tbody > tr > td:not(:first-child),
+.table-align-valign-center > thead > tr > th:not(:first-child) {
+    text-align: center;
+}
+</style>
+<h3 class="p-3"> Rooms (<a href=""> New </a>) and Categories (<a href=""> New </a>) </h3>
+<div class="row p-3">
+    <div class="col">
+        <table class="table table-striped table-align-valign-center">
+            <thead class="thead-dark">
+                <tr>
+                {% for field in category_form %}
+                    {% if field.type != 'CSRFTokenField' and field.type != 'SubmitField' %}
+                        <th> {{ field.label }} </th>
+                    {% endif %}
+                {% endfor %}
+                    <th> Action </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for room_category in hotel.room_categories %}
+                <tr>
+                    <td><b> {{ RoomType(room_category.type).name }}  </b></td>
+                    <td><b> {{ "{},-".format(room_category.price) }} </b></td>
+                    <td> {{ room_category.description }} </td>
+                    <td> <button class="btn btn-primary" onClick="$('#modalRoomCategory').modal('show'); return false;">
+                        Update {#{ room_category.id }#}
+                        </button>
+                    </td>
+                </tr>
+
+                    {% for room in room_category.rooms %}
+                    <tr>
+                        <td> &nbsp; </td>
+                        <td> Room #{{ room.number }} </td>
+                        <td> {{ room.beds }} Beds  </td>
+                        <td> <button class="btn btn-primary" onClick="$('#modalRoom').modal('show'); return false;">
+                            Update {#{ room.id }#} 
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                {% endfor %}
+            </tbody>
+            </table>
+    </div>
+
+    <div class="modal fade" id="modalRoomCategory" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> RoomCategory </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="../{{ hotel.id }}/room_categories/new">
+                    {{ category_form.csrf_token }}
+                    {% for field in category_form %}
+                        {{ render_field(field) }}
+                    {% endfor %}
+                    </form>
+                </div>
+                <!-- <div class="modal-footer"> -->
+                    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                    <!-- <button type="button" class="btn btn-primary btn-save">Save</button> -->
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalRoom" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> Room </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="../{{ hotel.id }}/room_categories/rooms/new">
+                        {{ room_form.csrf_token }}
+                        {% for field in room_form %}
+                            {{ render_field(field) }}
+                        {% endfor %}
+                    </form>
+                </div>
+                <!-- <div class="modal-footer"> -->
+                    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                    <!-- <button type="button" class="btn btn-primary btn-save">Save</button> -->
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<br><br>
 {% endblock inner_content %}

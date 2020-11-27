@@ -39,11 +39,9 @@ def list():
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
 def update(hotel_id=None):
     if hotel_id:
-        op      = 'Edit'
         hotel   = Hotel.query.filter_by(id=hotel_id).one()
         form    = HotelForm(request.form, obj=hotel)
     else:
-        op      = 'New'
         hotel   = None
         form    = HotelForm(request.form)
 
@@ -94,10 +92,10 @@ def update(hotel_id=None):
         # rooms           = hotel.room_categories.rooms
         # room_categories = hotel.room_categories
         return render_template('hotels/update.html', \
-            op=op, form=form, hotel=hotel, room_form=room_form, category_form=category_form)
+            op='Edit', form=form, hotel=hotel, room_form=room_form, category_form=category_form)
     else:
         return render_template('hotels/update.html', \
-            op=op, form=form)
+            op='New', form=form)
 
 @login_required
 @hotels.route('/<int:hotel_id>/room_categories/rooms/new', methods=['POST'])
@@ -140,18 +138,18 @@ def new_room_category (hotel_id):
     form = RoomCategoryForm(request.form, hotel_id=hotel_id)
     if form.validate_on_submit():
         category = RoomCategory(RoomType(form.type.data).name, \
-            int(form.price.data), hotel)
+            int(form.price.data), hotel, form.description.data)
         db.session.add(category)
         db.session.commit()
         return redirect(url_for('hotels.update', hotel_id=hotel_id))
     else:
         return redirect (url_for('error', error="Wrong data."))
 
-# There must be hotel_id to SHOW!
-@hotels.route('/show/<int:hotel_id>', methods=['GET', 'POST'])
+@hotels.route('/show/<int:hotel_id>', methods=['GET'])
 def show(hotel_id):
     hotel = Hotel.query.filter_by(id=hotel_id).one()
-    return render_template('hotels/show.html', hotel=hotel)
+    return render_template('hotels/update.html',
+        op='Show', hotel=hotel)
 
 # # There also
 # @hotels.route('/edit/', methods=['GET', 'POST'])

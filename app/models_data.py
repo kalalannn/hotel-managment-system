@@ -59,7 +59,8 @@ def load_models_data():
 
     address_0 = Address('Czech Republic', 'Brno', '602 00', 'Masarykova', '21')
     address_1 = Address('Czech Republic', 'Praha-Vinohrady', '120 00', 'Korunni', '691')
-    address_2 = Address('Czech Republic', 'Brno', '602 00', 'Benesova', '605')
+    address_2 = Address('Česká republika', 'Brno', '602 00', 'Benesova', '605')
+    address_3 = Address('Česká republika', 'Praha 6', '165 00', 'Sídlištní', '1/1167')
 
     # HOTELS
     # def __init__(self, _name, _description, _stars, _address, _owner):
@@ -76,40 +77,63 @@ def load_models_data():
         'Kolem hotelu je vzdycky hodne opilcu, bezdomovcu a vselijakych sebrancu',
         HotelStars.THREE.value, address_2, director_2)
 
+    hotel_3 = Hotel('Prague Hotel Carl Inn Free Parking',
+        "Prague Hotel Carl Inn Free Parking se nachází vedle autobusové zastávky "+
+        "Kamýcká v klidné rezidenční čtvrti v Praze 6. "+
+        "Nabízí restauraci, bar a bezplatné Wi-Fi připojení. "+
+        "Každý pokoj má posezení, kabelovou TV, trezor, lednici a "+
+        "vlastní koupelnu se sprchou a toaletními potřebami zdarma. "+
+        "Vybrané pokoje mají balkon. "+
+        " Prague Hotel Carl Inn Free Parking disponuje nepřetržitě otevřenou recepcí, "+
+        "zahradou a terasou. Mezi poskytované služby patří prodej vstupenek, "+
+        "turistické informace a bezplatná úschova zavazadel. "+
+        "Na místě je neplacené parkoviště. Za příplatek mohou hosté využívat bazén, "+
+        "tenisové kurty a fitness centrum, to vše vzdálené jen 50 metrů od hotelu. "+
+        "Hotel se nachází 6 km od Pražského hradu a 7 km od letiště Václava Havla Praha. "+
+        "Na požádání a za příplatek lze zajistit kyvadlovou dopravu.",
+        HotelStars.FOUR.value, address_3, director_0)
+
+
     address_0.hotel_id = hotel_0.id
     address_1.hotel_id = hotel_1.id
     address_2.hotel_id = hotel_2.id
-
-
+    address_3.hotel_id = hotel_3.id
 
     # db.session.add_all([status1, status2, status3])
     db.session.add_all([
-        address_0, address_1, address_2,
-        hotel_0, hotel_1, hotel_2
+        address_0, address_1, address_2, address_3,
+        hotel_0, hotel_1, hotel_2, hotel_3
     ])
-
-    payment1 = Payment(21.44, 30.5, 4.08)
-    payment2 = Payment(5.4, 10.5, 1.22)
-    payment3 = Payment(18.8, 19.3, 1.08)
-
-    db.session.add_all([payment1, payment2, payment3])
 
     # ROOMS_CATEORIES
     # def __init__(self, _type, _price, _hotel):
 
-    room_cat_0_0 = RoomCategory(RoomType.LUX.value,      2500, hotel_0)
-    room_cat_0_1 = RoomCategory(RoomType.STANDARD.value, 2000, hotel_0)
+    room_cat_0_0 = RoomCategory(RoomType.LUX.value,      2500, hotel_0,
+        "Luxusni pokoj")
+    room_cat_0_1 = RoomCategory(RoomType.STANDARD.value, 2000, hotel_0,
+        "Standardni pokoj na miru")
 
-    room_cat_1_0 = RoomCategory(RoomType.LUX.value,      2000, hotel_1)
-    room_cat_1_1 = RoomCategory(RoomType.STANDARD.value, 1500, hotel_1)
+    room_cat_1_0 = RoomCategory(RoomType.LUX.value,      2000, hotel_1,
+        "Luxusni pokoj Prestiz++")
+    room_cat_1_1 = RoomCategory(RoomType.STANDARD.value, 1500, hotel_1,
+        "Pokud nejste prezident -> tak standard")
 
-    room_cat_2_0 = RoomCategory(RoomType.LUX.value,      1500, hotel_2)
-    room_cat_2_1 = RoomCategory(RoomType.STANDARD.value, 1200, hotel_2)
+    room_cat_2_0 = RoomCategory(RoomType.LUX.value,      1500, hotel_2,
+        "Dokonaly lux s holky vevnitr")
+    room_cat_2_1 = RoomCategory(RoomType.STANDARD.value, 1200, hotel_2,
+        "Vyhodny standard")
+
+    room_cat_3_0 = RoomCategory(RoomType.STANDARD.value, 2000, hotel_3,
+        "Prazsky standard za Prazskou cenu")
+    room_cat_3_1 = RoomCategory(RoomType.BUSINESS.value, 2500, hotel_3,
+        "Urcen pro podnikave lidi")
+
 
     db.session.add_all([
         room_cat_0_0, room_cat_0_1,
         room_cat_1_0, room_cat_1_1,
         room_cat_2_0, room_cat_2_1,
+        room_cat_3_0, room_cat_3_1,
     ])
 
     # ROOMS
@@ -117,42 +141,55 @@ def load_models_data():
 
     TWO_BEDS = 2
     THREE_BEDS = 3
+    FOUR_BEDS = 4
 
     # 4 LUXY
-    room_0_0_0 = Room(TWO_BEDS, 1, room_cat_0_0)
-    room_0_0_1 = Room(TWO_BEDS, 2, room_cat_0_0)
-    room_0_0_2 = Room(THREE_BEDS, 3, room_cat_0_0)
-    room_0_0_3 = Room(THREE_BEDS, 4, room_cat_0_0)
+    room_0_0_0 = Room(1, TWO_BEDS, room_cat_0_0)
+    room_0_0_1 = Room(2, TWO_BEDS, room_cat_0_0)
+    room_0_0_2 = Room(3, THREE_BEDS, room_cat_0_0)
+    room_0_0_3 = Room(4, THREE_BEDS, room_cat_0_0)
 
     # 4 STANDARDY
-    room_0_1_0 = Room(TWO_BEDS, 5, room_cat_0_1)
-    room_0_1_1 = Room(TWO_BEDS, 6, room_cat_0_1)
-    room_0_1_2 = Room(THREE_BEDS, 7, room_cat_0_1)
-    room_0_1_3 = Room(THREE_BEDS, 8, room_cat_0_1)
+    room_0_1_0 = Room(5, TWO_BEDS, room_cat_0_1)
+    room_0_1_1 = Room(6, TWO_BEDS, room_cat_0_1)
+    room_0_1_2 = Room(7, THREE_BEDS, room_cat_0_1)
+    room_0_1_3 = Room(8, THREE_BEDS, room_cat_0_1)
 
     # 3 LUXY
-    room_1_0_0 = Room(TWO_BEDS, 1, room_cat_1_0)
-    room_1_0_1 = Room(TWO_BEDS, 2, room_cat_1_0)
-    room_1_0_2 = Room(THREE_BEDS, 3, room_cat_1_0)
+    room_1_0_0 = Room(1, TWO_BEDS, room_cat_1_0)
+    room_1_0_1 = Room(2, TWO_BEDS, room_cat_1_0)
+    room_1_0_2 = Room(3, THREE_BEDS, room_cat_1_0)
 
     # 3 STANDARDY
-    room_1_1_0 = Room(THREE_BEDS, 4, room_cat_1_1)
-    room_1_1_1 = Room(TWO_BEDS, 5, room_cat_1_1)
-    room_1_1_2 = Room(TWO_BEDS, 6, room_cat_1_1)
+    room_1_1_0 = Room(4, THREE_BEDS, room_cat_1_1)
+    room_1_1_1 = Room(5, TWO_BEDS, room_cat_1_1)
+    room_1_1_2 = Room(6, TWO_BEDS, room_cat_1_1)
 
     # 5 LUXU
-    room_2_0_0 = Room(TWO_BEDS, 1, room_cat_2_0)
-    room_2_0_1 = Room(TWO_BEDS, 2, room_cat_2_0)
-    room_2_0_2 = Room(THREE_BEDS, 3, room_cat_2_0)
-    room_2_0_2 = Room(THREE_BEDS, 4, room_cat_2_0)
-    room_2_0_2 = Room(THREE_BEDS, 5, room_cat_2_0)
+    room_2_0_0 = Room(1, TWO_BEDS, room_cat_2_0)
+    room_2_0_1 = Room(2, TWO_BEDS, room_cat_2_0)
+    room_2_0_2 = Room(3, THREE_BEDS, room_cat_2_0)
+    room_2_0_2 = Room(4, THREE_BEDS, room_cat_2_0)
+    room_2_0_2 = Room(5, THREE_BEDS, room_cat_2_0)
 
     # 5 STANDARDU
-    room_2_1_0 = Room(THREE_BEDS, 6, room_cat_2_1)
-    room_2_1_1 = Room(TWO_BEDS, 7, room_cat_2_1)
-    room_2_1_2 = Room(TWO_BEDS, 8, room_cat_2_1)
-    room_2_1_2 = Room(TWO_BEDS, 9, room_cat_2_1)
-    room_2_1_2 = Room(TWO_BEDS, 10,room_cat_2_1)
+    room_2_1_0 = Room(6, THREE_BEDS, room_cat_2_1)
+    room_2_1_1 = Room(7, TWO_BEDS, room_cat_2_1)
+    room_2_1_2 = Room(8, TWO_BEDS, room_cat_2_1)
+    room_2_1_2 = Room(9, TWO_BEDS, room_cat_2_1)
+    room_2_1_2 = Room(10, TWO_BEDS, room_cat_2_1)
+
+    # 4 STANDARDY
+    room_3_0_0 = Room(1, TWO_BEDS,      room_cat_3_0)
+    room_3_0_1 = Room(2, THREE_BEDS,    room_cat_3_0)
+    room_3_0_2 = Room(3, THREE_BEDS,    room_cat_3_0)
+    room_3_0_3 = Room(4, FOUR_BEDS,     room_cat_3_0)
+
+    # 3 BUISSNESY
+    room_3_1_0 = Room(5, TWO_BEDS,    room_cat_3_1)
+    room_3_1_1 = Room(6, TWO_BEDS,    room_cat_3_1)
+    room_3_1_2 = Room(7, THREE_BEDS,  room_cat_3_1)
+
 
     # EQUIPMENT
     # def __init__(self, _type, _name):
@@ -178,6 +215,7 @@ def load_models_data():
         room_1_1_0, room_1_1_1, room_1_1_2,
         room_2_0_0, room_2_0_1, room_2_0_2, room_2_0_2, room_2_0_2,
         room_2_1_0, room_2_1_1, room_2_1_2, room_2_1_2, room_2_1_2,
+        room_3_0_0, room_3_0_1, room_3_0_2, room_3_0_3, room_3_1_0, room_3_1_1, room_3_1_2,
     ])
 
 #####
@@ -203,6 +241,12 @@ def load_models_data():
     # rooms = filter(lambda r: is_free(r, date_from, date_to), rooms)
     # rooms.sort()
 #####
+
+    payment1 = Payment(21.44, 30.5, 4.08)
+    payment2 = Payment(5.4, 10.5, 1.22)
+    payment3 = Payment(18.8, 19.3, 1.08)
+
+    db.session.add_all([payment1, payment2, payment3])
 
     reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_0, payment1)
     reserv2 = Reservation(ReservationStatus.CONFIRMED.value, customer_1, receptionist_0, payment1)

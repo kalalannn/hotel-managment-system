@@ -208,6 +208,7 @@ class RoomCategory(db.Model):
     price       = db.Column(db.Numeric)
     type        = db.Column(db.Integer, \
         CheckConstraint("type in (%s)" % (", ".join([str(t.value) for t in RoomType]))))
+    description = db.Column(db.Text)
 
     hotel_id    = db.Column(db.Integer, \
         db.ForeignKey('hotels.id'))
@@ -217,10 +218,11 @@ class RoomCategory(db.Model):
     rooms       = db.relationship('Room', \
         back_populates='room_category')
 
-    def __init__(self, _type, _price, _hotel):
+    def __init__(self, _type, _price, _hotel, _description):
         self.type  = _type
         self.price = _price
         self.hotel = _hotel
+        self.description = _description
 
     def __repr__(self):
         return "<RoomCategory(type='%s', price='%s')>" \

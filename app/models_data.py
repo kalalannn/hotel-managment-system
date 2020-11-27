@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta
 from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, \
     RoomCategory, UserRole, HotelStars, ReservationStatus, RoomType
 
@@ -253,6 +254,8 @@ def load_models_data():
     reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment1)
     reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, receptionist_1, payment2)
     reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, receptionist_3, payment3)
+    reserv6 = Reservation(ReservationStatus.CONFIRMED.value, customer_3, receptionist_1, payment3)
+    reserv7 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment2)
 
     res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
     res_room.room = room_2_0_1
@@ -280,6 +283,14 @@ def load_models_data():
     res_room = ReservationRoom(datetime.today() - timedelta(days=15), datetime.today() - timedelta(days=9))
     res_room.room = room_0_0_2
     reserv5.reservations_rooms.append(res_room)
+
+    res_room = ReservationRoom(datetime.today() - relativedelta(months=1, days=13), datetime.today() - relativedelta(months=1, days=9))
+    res_room.room = room_0_1_1
+    reserv6.reservations_rooms.append(res_room)
+
+    res_room = ReservationRoom(datetime.today() + relativedelta(days=10), datetime.today() + relativedelta(days=13))
+    res_room.room = room_1_0_2
+    reserv7.reservations_rooms.append(res_room)
 
     db.session.add_all([
         reserv1,

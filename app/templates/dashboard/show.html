@@ -10,18 +10,23 @@
         z-index: 5000;
     }
 
-    .status_free.scheduler_default_rowheadercol2 {
+    .status_free.scheduler_default_rowheadercol1 {
         background: #fff;
         border-left: 5px solid #1a9d13;
     }
 
-    .status_busy.scheduler_default_rowheadercol2 {
+    .status_busy.scheduler_default_rowheadercol1 {
         background: #fff;
         border-left: 5px solid #ea3624;
     }
 
     .paid-text {
         color: #1a9d13;
+        font-size: 9pt;
+    }
+
+    .blocked-text {
+        color: #5d86ec;
         font-size: 9pt;
     }
 
@@ -49,17 +54,22 @@
         ];
         board.rowHeaderColumns = [
             { title: "Room", display: "name" },
-            { title: "Capacity", display: "capacity" },
             { title: "Status", display: "status" }
         ];
         board.eventMoveHandling = "Disabled";
+        board.allowEventOverlap = false;
+        board.timeRangeRightClickHandling = "Disabled";
         board.init();
+
+        board.onGridMouseDown = function (args) {
+            var button = DayPilot.Util.mouseButton(args.originalEvent);
+            if (button.right) {
+                args.action = "None";
+            }
+        };
 
         board.onBeforeRowHeaderRender = function (args) {
             if (args.row.level === 0) return;
-
-            let beds = function (count) { return count + " bed" + (count > 1 ? "s" : ""); };
-            args.row.columns[1].html = beds(args.row.data.capacity);
 
             switch (args.row.data.status) {
                 case "Free": args.row.cssClass = "status_free"; break;
@@ -83,12 +93,8 @@
                     args.data.barColor = '#e69138'; // orange
                     args.data.toolTip = 'New';
                     break;
-                case "CONFIRMED":
-                    args.data.barColor = "#1a9d13"; // green
-                    args.data.toolTip = "Confirmed";
-                    break;
                 case "CHECKED_IN":
-                    args.data.barColor = "#1691f4";  // blue
+                    args.data.barColor = "#1a9d13";  // green
                     args.data.toolTip = "Checked in";
                     break;
                 case "CHECKED_OUT":
@@ -104,13 +110,15 @@
             args.data.html = "<div>" + args.data.html + "<br/><span style='color:gray'>" + args.data.toolTip + "</span></div>";
 
             let html;
-            if (args.data.isPaid) {
+            if (args.data.payment == 'paid') {
                 html = "<div class='paid-text'>Paid</div>";
+            } else if (args.data.payment == 'blocked') {
+                html = "<div class='blocked-text'>Blocked</div>";
             } else {
                 html = "<div class='unpaid-text'>Unpaid</div>";
             }
             args.data.areas = [
-                { bottom: 10, right: 4, html: html, v: "Visible" },
+                { bottom: 10, right: 5, html: html, v: "Visible" },
             ];
         };
 
@@ -134,14 +142,192 @@
                 });
             });
 
-            let date_from = args.start;
-            let date_to = args.end;
+            $('#create_date_from').datepicker("setDate", args.start);
+            $('#create_date_to').datepicker("setDate", args.end);
 
-            $('#date_from, #date_to').datepicker({
+            console.log(args)
+            $('#reservationDialog').modal('show')
+                .data('data-room-id', args.resource)
+                .find('.modal-title').text('Reserve room #' + args.resource);
+        };
+
+        board.contextMenu = new DayPilot.Menu({
+            items: [
+                {
+                    text: "Edit", onClick: function (args) {
+                        let title = 'Edit reservation for room #' + args.source.data.room_number
+
+                        $modal = $('#editDialog');
+                        $modal.find('form')[0].reset();
+                        $modal.modal('show')
+                            .data('reserv-room-id', args.source.data.id)
+                            .find('.modal-title').text(title);
+
+                        setEditDilogData(args.source.data);
+                    }
+                },
+                {
+                    text: "Delete", onClick: function (args) {
+                        $('#confirm').modal('show').data('reserv-room-id', args.source.data.id);
+                    }
+                },
+                { text: "-" },
+                { text: "Details", onClick: function (args) { console.log('select') } },
+            ]
+        });
+
+
+        loadRooms();
+        loadReservations();
+        setDatepickers();
+
+        $('#capacityFilter, #typeFilter').on('change', function () {
+            loadRooms();
+        });
+
+        $('#reservationDialog').on('hide.bs.modal', function () {
+            board.clearSelection();
+        });
+
+        $('#editDialog .btn-save').on('click', function () {
+            $modal = $(this).closest('.modal');
+
+            $.ajax({
+                url: "{{ url_for('dashboard.edit_reservation') }}",
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    reserv_room_id: $modal.data('reserv-room-id'),
+                    status: $('#status').val(),
+                    payment: $('#payment').val(),
+                    date_from: $('#edit_date_from').val(),
+                    date_to: $('#edit_date_to').val()
+                }),
+                success: function (data) {
+                    $modal.modal('hide');
+                    loadRooms();
+                    loadReservations();
+                    board.update();
+                    Utils.showToast('success', data.message)
+                },
+                error: function () {
+                    Utils.showToast('error', 'Some error occured. Try to reload the page')
+                }
+            });
+        });
+
+        $('#confirm .btn-delete').on('click', function () {
+            $modal = $(this).closest('.modal');
+
+            $.ajax({
+                url: "{{ url_for('dashboard.delete_reservation') }}",
+                data: { reserv_room_id: $modal.data('reserv-room-id') },
+                success: function (data) {
+                    $modal.modal('hide');
+                    loadRooms();
+                    loadReservations();
+                    board.update();
+                    Utils.showToast('success', data.message)
+                },
+                error: function () {
+                    Utils.showToast('error', 'Some error occured. Try to reload the page')
+                }
+            });
+        });
+
+        $('#reservationDialog .btn-save').on('click', function () {
+            let $modal = $(this).closest('.modal');
+            let $form = $modal.find('form');
+            $form.validate({
+                errorClass: "unpaid-text",
+            });
+
+            if ($form.valid()) {
+                $.ajax({
+                    url: "{{ url_for('dashboard.get_user') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        email: $('#email').val(),
+                        first_name: $('#first_name').val(),
+                        last_name: $('#last_name').val(),
+                    }),
+                    success: function (data) {
+                        $.ajax({
+                            url: "{{ url_for('dashboard.create_reservation') }}",
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                customer_id: data.user_id,
+                                reservations_rooms: [{
+                                    room_id: $modal.data('data-room-id'),
+                                    date_from: $('#create_date_from').val(),
+                                    date_to: $('#create_date_to').val()
+                                }]
+                            }),
+                            success: function (data) {
+                                $modal.modal('hide');
+                                loadReservations();
+                                loadRooms();
+                                board.update();
+                                Utils.showToast('success', data.message)
+                            },
+                            error: function () {
+                                Utils.showToast('error', 'Some error occurred. Try to reload the page')
+                            }
+                        });
+                    },
+                    error: function () {
+                        Utils.showToast('error', 'Some error occurred. Try to reload the page')
+                    }
+                });
+            }
+        });
+
+        $('#email').on('input', function () {
+            $('#first_name').prop('disabled', false);
+            $('#last_name').prop('disabled', false);
+        });
+
+
+        $('#prevMonth').on('click', function () {
+            board.startDate = board.startDate.addMonths(-1);
+            board.days = board.startDate.daysInMonth();
+            loadRooms();
+            loadReservations();
+            board.update();
+            return false;
+        });
+
+        $('#nextMonth').on('click', function () {
+            board.startDate = board.startDate.addMonths(1);
+            board.days = board.startDate.daysInMonth();
+            loadRooms();
+            loadReservations();
+            board.update();
+            return false;
+        });
+
+
+        function setEditDilogData(data) {
+            let status = data.status.toLowerCase() == 'new' 
+                ? 1 : (data.status.toLowerCase() == 'checked_in' ? 3 : 4);
+            $('#status').val(status);
+
+            let payment = data.payment == 'unpaid'
+                ? 0 : (data.payment == 'blocked' ? 1 : 2)
+            $('#payment').val(payment);
+
+            $('#edit_date_from').datepicker("setDate", new Date(data.start));
+            $('#edit_date_to').datepicker("setDate", new Date(data.end));
+        }
+
+        function setDatepickers() {
+            $('#create_date_from, #create_date_to').datepicker({
                 dateFormat: "dd-mm-yy",
                 beforeShowDay: function (date) {
-                    let from = $('#date_from').datepicker('getDate');
-                    let to = $('#date_to').datepicker('getDate');
+                    let from = $('#create_date_from').datepicker('getDate');
+                    let to = $('#create_date_to').datepicker('getDate');
                     if (date >= from && date <= to) {
                         return [true, 'date-bg', ''];
                     }
@@ -149,76 +335,64 @@
                 }
             });
 
-            $('#date_from').datepicker("setDate", date_from)
+            $('#create_date_from')
                 .datepicker('option', 'onSelect', function () {
-                    let from = $('#date_from').datepicker('getDate');
-                    let to = $('#date_to').datepicker('getDate');
+                    let from = $('#create_date_from').datepicker('getDate');
+                    let to = $('#create_date_to').datepicker('getDate');
                     if (from >= to) {
                         from.setDate(from.getDate() + 1);
-                        $('#date_to').datepicker("setDate", from);
+                        $('#create_date_to').datepicker("setDate", from);
                     }
                 });
-            $('#date_to').datepicker("setDate", date_to)
+            $('#create_date_to')
                 .datepicker('option', 'onSelect', function () {
-                    let from = $('#date_from').datepicker('getDate');
-                    let to = $('#date_to').datepicker('getDate');
+                    let from = $('#create_date_from').datepicker('getDate');
+                    let to = $('#create_date_to').datepicker('getDate');
                     if (to <= from) {
                         to.setDate(to.getDate() - 1);
-                        $('#date_from').datepicker("setDate", to);
+                        $('#create_date_from').datepicker("setDate", to);
                     }
                 });
 
-            $('#reservationDialog').find('.modal-title').text('Reserve room #' + args.resource);
-            $('#reservationDialog').modal('show');
-        };
-
-        board.onEventClick = function (args) {
-            console.log('click!')
-        };
-
-        loadRooms();
-        loadReservations();
-
-        $('#capacityFilter, #typeFilter').on('change', function () {
-            loadRooms();
-        });
-
-        $('#reservationDialog .btn-save').on('click', function () {
-            let $form = $(this).closest('.modal').find('form');
-            $form.validate({
-                errorClass: "unpaid-text",
+            $('#edit_date_from, #edit_date_to').datepicker({
+                dateFormat: "dd-mm-yy",
+                beforeShowDay: function (date) {
+                    let from = $('#edit_date_from').datepicker('getDate');
+                    let to = $('#edit_date_to').datepicker('getDate');
+                    if (date >= from && date <= to) {
+                        return [true, 'date-bg', ''];
+                    }
+                    return [true, '', ''];
+                }
             });
 
-            if ($form.valid()) {
-                DayPilot.Http.ajax({
-                    url: "{{ url_for('dashboard.create_reservation') }}",
-                    data: {
-                        first_name: $('#first_name').val(),
-                        last_name: $('#last_name').val(),
-                        email: $('#email').val(),
-                        date_from: $('#date_from').val(),
-                        date_to: $('#date_to').val(),
-                    },
-                    success: function (xhr) {
-                        console.log(xhr)
+            $('#edit_date_from')
+                .datepicker('option', 'onSelect', function () {
+                    let from = $('#edit_date_from').datepicker('getDate');
+                    let to = $('#edit_date_to').datepicker('getDate');
+                    if (from >= to) {
+                        from.setDate(from.getDate() + 1);
+                        $('#edit_date_to').datepicker("setDate", from);
                     }
                 });
-            } else {
-                console.log('lol')
-            }
-        });
-
-        $('#reservationDialog').on('hide.bs.modal', function () {
-            board.clearSelection();
-        });
+            $('#edit_date_to')
+                .datepicker('option', 'onSelect', function () {
+                    let from = $('#edit_date_from').datepicker('getDate');
+                    let to = $('#edit_date_to').datepicker('getDate');
+                    if (to <= from) {
+                        to.setDate(to.getDate() - 1);
+                        $('#edit_date_from').datepicker("setDate", to);
+                    }
+                });
+        }
 
         function loadUserByEmail(email) {
             $.ajax({
                 url: '{{ url_for("dashboard.find_user") }}',
                 data: { email: email },
                 success: function (data) {
-                    $('#first_name').val(data.first_name)
-                    $('#last_name').val(data.last_name)
+                    $('#first_name').val(data.first_name).prop('disabled', true)
+                    $('#last_name').val(data.last_name).prop('disabled', true)
                 },
                 error: function () {
                     Utils.showToast('error', 'Some problem occurred. Try to reload the page')
@@ -261,23 +435,6 @@
                 }
             });
         }
-
-        $('#prevMonth').on('click', function () {
-            board.startDate = board.startDate.addMonths(-1);
-            board.days = board.startDate.daysInMonth();
-            board.update();
-            loadRooms();
-            loadReservations();
-            return false;
-        });
-        $('#nextMonth').on('click', function () {
-            board.startDate = board.startDate.addMonths(1);
-            board.days = board.startDate.daysInMonth();
-            board.update();
-            loadRooms();
-            loadReservations();
-            return false;
-        });
     });
 
 </script>

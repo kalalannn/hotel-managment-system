@@ -28,27 +28,27 @@ def load_models_data():
     # def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date):
 
     # 1 ADMIN, 3 DIRECTORS; 4 RECEPTIONISTS, 8 CUSTOMERS
-    admin_0 = User('Admin', 'Admin 0', 'admin@gmail.com', 'a0qwerty', UserRole.ADMIN.value)
+    admin_0 = User('Admin', 'Admin 0', 'admin@gmail.com', UserRole.ADMIN.value, 'a0qwerty')
 
     # ПОМЕНЯЛ ПАРОЛИ ЧТОБ БЫЛО УДОБНО ВВОДИТЬ. НИКАКИХ НИЖНИХ ДЕФИСОВ
-    director_0 = User('Ivan', 'Director 0', 'director0@gmail.com', 'd0qwerty', UserRole.DIRECTOR.value)
-    director_1 = User('Ivan', 'Director 1', 'director1@gmail.com', 'd1qwerty', UserRole.DIRECTOR.value)
-    director_2 = User('Ivan', 'Director 2', 'director2@gmail.com', 'd2qwerty', UserRole.DIRECTOR.value)
+    director_0 = User('Ivan', 'Director 0', 'director0@gmail.com', UserRole.DIRECTOR.value, 'd0qwerty')
+    director_1 = User('Ivan', 'Director 1', 'director1@gmail.com', UserRole.DIRECTOR.value, 'd1qwerty')
+    director_2 = User('Ivan', 'Director 2', 'director2@gmail.com', UserRole.DIRECTOR.value, 'd2qwerty')
 
-    receptionist_0 = User('Oleg', 'Receptionist 0', 'receptionist0@gmail.com', 'r0qwerty', UserRole.RECEPTIONIST.value)
-    receptionist_1 = User('Oleg', 'Receptionist 1', 'receptionist1@gmail.com', 'r1qwerty', UserRole.RECEPTIONIST.value)
-    receptionist_2 = User('Oleg', 'Receptionist 2', 'receptionist2@gmail.com', 'r2qwerty', UserRole.RECEPTIONIST.value)
-    receptionist_3 = User('Oleg', 'Receptionist 3', 'receptionist3@gmail.com', 'r3qwerty', UserRole.RECEPTIONIST.value)
+    receptionist_0 = User('Oleg', 'Receptionist 0', 'receptionist0@gmail.com', UserRole.RECEPTIONIST.value, 'r0qwerty')
+    receptionist_1 = User('Oleg', 'Receptionist 1', 'receptionist1@gmail.com', UserRole.RECEPTIONIST.value, 'r1qwerty')
+    receptionist_2 = User('Oleg', 'Receptionist 2', 'receptionist2@gmail.com', UserRole.RECEPTIONIST.value, 'r2qwerty')
+    receptionist_3 = User('Oleg', 'Receptionist 3', 'receptionist3@gmail.com', UserRole.RECEPTIONIST.value, 'r3qwerty')
 
-    customer_0 = User('Vasia', 'Customer 0', 'customer0@gmail.com', 'c0qwerty', UserRole.CUSTOMER.value)
-    customer_1 = User('Vasia', 'Customer 1', 'customer1@gmail.com', 'c1qwerty', UserRole.CUSTOMER.value)
-    customer_2 = User('Vasia', 'Customer 2', 'customer2@gmail.com', 'c2qwerty', UserRole.CUSTOMER.value)
-    customer_3 = User('Vasia', 'Customer 3', 'customer3@gmail.com', 'c3qwerty', UserRole.CUSTOMER.value)
+    customer_0 = User('Vasia', 'Customer 0', 'customer0@gmail.com', UserRole.CUSTOMER.value, 'c0qwerty')
+    customer_1 = User('Vasia', 'Customer 1', 'customer1@gmail.com', UserRole.CUSTOMER.value, 'c1qwerty')
+    customer_2 = User('Vasia', 'Customer 2', 'customer2@gmail.com', UserRole.CUSTOMER.value, 'c2qwerty')
+    customer_3 = User('Vasia', 'Customer 3', 'customer3@gmail.com', UserRole.CUSTOMER.value, 'c3qwerty')
 
-    customer_4 = User('Vasia', 'Customer 4', 'customer4@gmail.com', 'c4qwerty', UserRole.CUSTOMER.value)
-    customer_5 = User('Vasia', 'Customer 5', 'customer5@gmail.com', 'c5qwerty', UserRole.CUSTOMER.value)
-    customer_6 = User('Vasia', 'Customer 6', 'customer6@gmail.com', 'c6qwerty', UserRole.CUSTOMER.value)
-    customer_7 = User('Vasia', 'Customer 7', 'customer7@gmail.com', 'c7qwerty', UserRole.CUSTOMER.value)
+    customer_4 = User('Vasia', 'Customer 4', 'customer4@gmail.com', UserRole.CUSTOMER.value, 'c4qwerty')
+    customer_5 = User('Vasia', 'Customer 5', 'customer5@gmail.com', UserRole.CUSTOMER.value, 'c5qwerty')
+    customer_6 = User('Vasia', 'Customer 6', 'customer6@gmail.com', UserRole.CUSTOMER.value, 'c6qwerty')
+    customer_7 = User('Vasia', 'Customer 7', 'customer7@gmail.com', UserRole.CUSTOMER.value, 'c7qwerty')
 
     db.session.add_all([
         admin_0,
@@ -229,7 +229,7 @@ def load_models_data():
 
     #     payment = Payment() # full = for each room (room_category.price * days)
     #                             # block = 0.5 full
-    #                             # is_payed, is_blocked = False, False
+    #                             # is_paid, is_blocked = False, False
     #     reservation = Reservation(customer or anon, payment)
     #     status = History(reservation, ReservationStatus, date_change=today, receptionist=None)
 
@@ -249,13 +249,13 @@ def load_models_data():
 
     db.session.add_all([payment1, payment2, payment3])
 
-    reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_0, payment1)
-    reserv2 = Reservation(ReservationStatus.CONFIRMED.value, customer_1, receptionist_0, payment1)
-    reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment1)
-    reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, receptionist_1, payment2)
-    reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, receptionist_3, payment3)
-    reserv6 = Reservation(ReservationStatus.CONFIRMED.value, customer_3, receptionist_1, payment3)
-    reserv7 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment2)
+    reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, payment1)
+    reserv2 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, payment1)
+    reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, payment1)
+    reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, payment2)
+    reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, payment3)
+    reserv6 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_3, payment3)
+    reserv7 = Reservation(ReservationStatus.NEW.value, customer_0, payment2)
 
     res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
     res_room.room = room_2_0_1

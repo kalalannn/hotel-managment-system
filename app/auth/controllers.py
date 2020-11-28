@@ -34,24 +34,17 @@ def logout():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-
-    # if User.role == UserRole.ADMIN.name:
-    #     choises = Helper.listObjToListOfTuples(Role.query.all(), '', 'name')
-    #     choises.insert(0, ('','')) # If you want to add an empty option
-    #     form.role.choices = choises
-    # else:
-    #     del form.role
-
     # POST
     if form.validate_on_submit():
         # role = Role.query.filter_by(name='CUSTOMER').one()
         # if User.has_role(current_user, 'ADMIN'):
         #     role = Role.query.filter_by(id=form.role.data).one()
-        user = User(form.first_name.data,
-                    form.last_name.data,
-                    form.email.data,
-                    form.password.data,
-                    UserRole.CUSTOMER.name)
+        user = User(
+            _first_name=form.first_name.data,
+            _last_name=form.last_name.data,
+            _email=form.email.data,
+            _role=UserRole.CUSTOMER.value,
+            _password=form.password.data)
         db.session.add(user)
         db.session.commit()
         flash('You can now log in.')

@@ -11,13 +11,13 @@ login_manager = LoginManager()
 def create_app(config_name):
     app = Flask(__name__, static_url_path='/static')
     app.config.from_object(config_name)
+
     app.add_template_global(models.UserRole, 'UserRole')
+    app.add_template_global(models.RoomType, 'RoomType')
 
     db.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
-
-    app.add_template_global(models.RoomType, 'RoomType')
 
     @app.route('/favicon.ico')
     def favicon():

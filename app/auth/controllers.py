@@ -11,9 +11,9 @@ from app.helpers import Helper
 
 # Set the route and accepted methods
 # Important! call it like url_for('auth.login')
-@auth.route('/login/', methods=['GET', 'POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    form = LoginForm(request.form)
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
@@ -33,29 +33,36 @@ def logout():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
+    form = RegistrationForm(request.form)
 
-    # if User.role == UserRole.ADMIN.name:
-    #     choises = Helper.listObjToListOfTuples(Role.query.all(), '', 'name')
-    #     choises.insert(0, ('','')) # If you want to add an empty option
-    #     form.role.choices = choises
-    # else:
-    #     del form.role
+    if current_user.is_authenticated and current_user.role == UserRole.ADMIN.value:
+        form.admin()
+    elif current_user.is_authenticated and current_user.role == UserRole.DIRECTOR.value:
+        form.director()
+    else:
+        form.others()
 
     # POST
     if form.validate_on_submit():
-        # role = Role.query.filter_by(name='CUSTOMER').one()
-        # if User.has_role(current_user, 'ADMIN'):
-        #     role = Role.query.filter_by(id=form.role.data).one()
+        if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value:
+            role = form.role.data
+        else:
+            role = UserRole.CUSTOMER.value
+
         user = User(form.first_name.data,
                     form.last_name.data,
                     form.email.data,
                     form.password.data,
-                    UserRole.CUSTOMER.name)
+                    role)
         db.session.add(user)
         db.session.commit()
-        flash('You can now log in.')
-        return redirect(url_for('auth.login'))
+        if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value:
+            flash('User {} was created'.format(user.email))
+            return redirect (url_for('profile.manage'))
+        else:
+            flash('You can now log in.')
+            return redirect(url_for('auth.login'))
+
     return render_template('auth/register.html', form=form)
 
 

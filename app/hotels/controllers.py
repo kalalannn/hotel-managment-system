@@ -10,28 +10,27 @@ from ..models import Room, RoomCategory, RoomType
 from app import db
 from app.helpers import Helper
 
-@hotels.route('/list/', methods=['GET', 'POST'])
-def list():
+@hotels.route('/list', methods=['GET', 'POST'])
+@hotels.route('/list/<int:owner_id>', methods=['GET', 'POST'])
+def list(owner_id=None):
     form = SearchForm(request.form)
 
-    hotels = None
-    if request.method == 'GET':
-        hotels = Hotel.query.order_by(Hotel.stars).limit(10).all()
+    query = Hotel.query
+    if owner_id:
+        query = query.filter(Hotel.owner_id == owner_id)
+
     # POST
-    elif form.validate_on_submit():
-        query = Hotel.query
+    if form.validate_on_submit():
 
         if form.name.data is not None:
             query = query.filter(Hotel.name.like("%{}%".format(form.name.data)))
 
         # if form.stars.data:
         #     query = query.filter(Hotel.stars == form.stars.data.value)
-
-        hotels = query.all()
-    # EMPTY FORM
     else:
-        hotels = Hotel.query.order_by(Hotel.stars).limit(10).all()
-
+        query = query.order_by(Hotel.stars).limit(10)
+    
+    hotels = query.all()
     return render_template('hotels/list.html', form=form, hotels=hotels)
 
 @login_required

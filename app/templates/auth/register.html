@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% from "bootstrap/form.html" import render_form %}
 
 {% block title %}Registration{% endblock %}
 
-{% block content %}
-{{ super() }}
-<div class="page-header">
-    <h3>Registration...</h3>
+{% block inner_content %}
+<h2 class="p-3"> Register </h2>
+<div class="col col-md-6 p-3">
+    <form method="post">
+        {{ form.csrf_token }}
+        {% for field in form %}
+            {{ render_field(field) }}
+        {% endfor %}
+    </form>
 </div>
-<div class="col-md-4">
-    {{ render_form(form) }}
-</div>
-{% endblock %}
+{% endblock inner_content %}

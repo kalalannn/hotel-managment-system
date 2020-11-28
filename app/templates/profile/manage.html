@@ -78,53 +78,46 @@
 {% endblock inner_scripts %}
 
 {% block inner_content %}
-<div class="page-header">
-    <h3>Management...</h3>
-    {% if current_user.is_authenticated %}
-    <h4>Hello, {{ current_user.first_name }}!</h4>
-    <br>
-    <div name="search_form" class="d-inline-block mr-5 align-top">
-        <form action="{{ url_for('profile.manage') }}" method="POST">
-        {% for field in user_search_form %}
-        {# <p> {{ field.type }} </p> #}
+<h2 class="p-3"> Users Management
+    (<a href="{{ url_for('auth.register') }}"> New </a>)
+</h2>
+<div name="search_form" class="d-inline-block mr-5 align-top">
+    <form method="POST">
+    {{ user_search_form.csrf_token }}
+    {% for field in user_search_form %}
         {{ render_field(field) }}
+    {% endfor %}
+    </form>
+</div>
+<div class="d-inline-block col-7">
+    <!-- <button id="add_user" class="btn btn-primary float-right" data-toggle="modal" style="margin-bottom: 5px; margin-right: 5px;"
+        data-target="#user_dialog" data-user-url="{{ url_for('profile.add_user') }}" data-action="add">
+        Add user
+    </button> -->
+    <table class="table table-sm">
+        {% for role, items in users|groupby('role')|sort(reverse=True) %}
+        <tr>
+            <th>{{ UserRole(role).name|capitalize() }}</th>
+            <td></td>
+            <td></td>
+        </tr>
+        {% for user in items %}
+        <tr>
+            <td></td>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+            <td>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#user_dialog"
+                    data-user-url="{{ url_for('profile.edit_user', id=user.id) }}" data-action="edit"> Edit
+                </button>
+                {% if current_user.role == UserRole.ADMIN.value and user.role != UserRole.ADMIN.value %}
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#confirm"
+                    data-user-url="{{ url_for('profile.delete_user', id=user.id) }}"> Delete </button>
+                {% endif %}
+            </td>
+        </tr>
         {% endfor %}
-        <button type="submit" class="btn btn-info btn-lg float-right">
-            Search
-        </button>
-        </form>
-    </div>
-    <div class="d-inline-block col-7">
-        <button id="add_user" class="btn btn-info btn-lg mb-3 float-right" data-toggle="modal"
-            data-target="#user_dialog" data-user-url="{{ url_for('profile.add_user') }}" data-action="add">
-            Add user
-        </button>
-        <table class="table table-sm">
-            {% for role, items in users|groupby('role')|sort(reverse=True) %}
-            <tr>
-                <th>{{ UserRole(role).name|capitalize() }}</th>
-                <td></td>
-                <td></td>
-            </tr>
-            {% for user in items %}
-            <tr>
-                <td></td>
-                <td>{{ user.first_name }} {{ user.last_name }}</td>
-                <td>
-                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#user_dialog"
-                        data-user-url="{{ url_for('profile.edit_user', id=user.id) }}" data-action="edit"> Edit
-                    </button>
-                    {% if current_user.role == UserRole.ADMIN.value and user.role != UserRole.ADMIN.value %}
-                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#confirm"
-                        data-user-url="{{ url_for('profile.delete_user', id=user.id) }}"> Delete </button>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-        </table>
-    </div>
-    {% endif %}
+        {% endfor %}
+    </table>
 </div>
 
 <div class="modal fade" id="user_dialog" role="dialog">

@@ -1,17 +1,18 @@
 {% extends "base.html" %}
-{% from "bootstrap/form.html" import render_form %}
 
 {% block title %}Login{% endblock %}
 
 {% block inner_content %}
-<div class="page-header">
-    <h3>Login page...</h3>
-</div>
-<div class="col-md-4">
-    {{ render_form(form) }}
-    New user?
-    <a href="{{ url_for('auth.register') }}">
-        Click here to register
-    </a>
+<h2 class='p-3'>Log In</h2>
+<div class="col col-md-6 p-3">
+    <form method="post">
+        {{ form.csrf_token }}
+        {% for field in form %}
+            {{ render_field(field) }}
+        {% endfor %}
+    </form>
+    <p class="p-3">
+        New user? <a href="{{ url_for('auth.register') }}"> Click here to register </a>
+    </p>
 </div>
 {% endblock inner_content %}

@@ -33,12 +33,16 @@
     {% macro render_field(field) %}
         {% if field.type != 'CSRFTokenField' %}
             {% if field.type == 'SubmitField' %}
-                <div class="input-group">
+                <div class="input-group-btn">
+            {% elif field.type == 'BooleanField' %}
+                <div class="form-check" style="margin-left: 5px; margin-bottom: 5px">
             {% else %}
                 {# mb-2: margin-bottom: .5rem; #}
                 <div class="input-group mb-2">
             {% endif %}
                 {% if field.type == 'SubmitField' %}
+                {% elif field.type == 'BooleanField' %}
+                    {{ field(class_="form-check-input")    | safe }}
                 {% else %}
                     <div class="input-group-prepend">
                         {{ field.label(class_="input-group-text") }}
@@ -48,7 +52,9 @@
                 {% if field.type == 'QuerySelectField' %}
                     {{ field(class_="custom-select")    | safe }}
                 {% elif field.type == 'SubmitField' %}
-                    {{ field(class_="btn btn-primary")    | safe }}
+                    {{ field(class_="btn btn-primary float-right")    | safe }}
+                {% elif field.type == 'BooleanField' %}
+                    {{ field.label(class_="form-check-label") }}
                 {% else %}
                     {{ field(class_="form-control")     | safe }}
                 {% endif %}

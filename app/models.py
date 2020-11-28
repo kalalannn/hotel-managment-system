@@ -2,9 +2,10 @@ from app import db
 from sqlalchemy import CheckConstraint, column
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from app.helpers import Helper
 from . import login_manager
 from enum import Enum
+import string
+import random
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -31,7 +32,7 @@ class RoomType(Enum):
 
 class ReservationStatus(Enum):
     NEW = 1
-    CONFIRMED = 2
+    CANCELED = 2
     CHECKED_IN = 3
     CHECKED_OUT = 4
 
@@ -59,15 +60,18 @@ class User(UserMixin, db.Model):
         post_update = True)
 
     customer_reservations = db.relationship('Reservation', \
-        foreign_keys = 'Reservation.customer_id', \
+        # foreign_keys = 'Reservation.customer_id', \
         back_populates = 'customer')
 
-    receptionist_reservations = db.relationship('Reservation', \
-        foreign_keys = 'Reservation.receptionist_id', \
-        back_populates = 'receptionist')
+    # receptionist_reservations = db.relationship('Reservation', \
+    #     foreign_keys = 'Reservation.receptionist_id', \
+    #     back_populates = 'receptionist')
 
     feedbacks       = db.relationship("Feedback", \
         back_populates="user")
+
+    histories       = db.relationship("History", \
+        back_populates="receptionist")
 
     @property
     def password(self):
@@ -80,23 +84,22 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __init__(self, _first_name, _last_name, _email, _password, _role, _is_active=True):
+    @staticmethod
+    def generate_password():
+        chars = string.ascii_uppercase + string.ascii_lowercase
+        return ''.join(random.choice(chars) for _ in range(12))
+
+    def __init__(self, _first_name, _last_name, _email, _password=generate_password.__func__(), _role=UserRole.ANON.value, _is_active=True):
         self.first_name     = _first_name
         self.last_name      = _last_name
         self.email          = _email
-        self.password_hash  = generate_password_hash(_password)
         self.role           = _role
+        self.password_hash  = generate_password_hash(_password)
         self.is_active      = _is_active
 
     def __repr__(self):
         return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (
             self.id, self.email, self.first_name, self.last_name, self.role)
-
-    # @staticmethod
-    # def has_role(user, role_name):
-    #     if not user.is_authenticated:
-    #         return False
-    #     return user.role.rate >= Role.query.filter_by(name=role_name).one().rate
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'
@@ -260,6 +263,7 @@ class ReservationRoom(db.Model):
     id              = db.Column(db.Integer, primary_key=True)
     date_from       = db.Column(db.Date)
     date_to         = db.Column(db.Date)
+    is_active       = db.Column(db.Boolean)
 
     room_id         = db.Column(db.Integer, \
         db.ForeignKey('rooms.id'))
@@ -272,9 +276,10 @@ class ReservationRoom(db.Model):
         back_populates="reservations_rooms")
 
 
-    def __init__(self, _date_from, _date_to):
+    def __init__(self, _date_from, _date_to, _is_active=True):
         self.date_from  = _date_from
         self.date_to    = _date_to
+        self.is_active  = _is_active
 
     def __repr__(self):
         return "<ReservationRoom(date_from='%s', date_to='%s')>" \
@@ -297,19 +302,21 @@ class Reservation(db.Model):
 
     customer_id     = db.Column(db.Integer, db.ForeignKey('users.id'))
     customer        = db.relationship('User', \
-        foreign_keys = customer_id, \
+        # foreign_keys = customer_id, \
         back_populates = 'customer_reservations')
 
-    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    receptionist    = db.relationship('User', \
-        foreign_keys = receptionist_id, \
-        back_populates = 'receptionist_reservations')
+    # receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # receptionist    = db.relationship('User', \
+    #     foreign_keys = receptionist_id, \
+    #     back_populates = 'receptionist_reservations')
 
+    histories       = db.relationship("History", \
+        back_populates="reservation")
 
-    def __init__(self, _status, _customer, _receptionist, _payment):
+    def __init__(self, _status, _customer, _payment):
         self.status         = _status
         self.customer       = _customer
-        self.receptionist   = _receptionist
+        # self.receptionist   = _receptionist
         self.payment        = _payment
 
     def __repr__(self):
@@ -324,18 +331,45 @@ class Payment(db.Model):
     full_amount     = db.Column(db.Numeric)
     tax             = db.Column(db.Numeric)
     is_blocked      = db.Column(db.Boolean)
-    is_payed        = db.Column(db.Boolean)
+    is_paid        = db.Column(db.Boolean)
 
     reservation     = db.relationship("Reservation", \
         back_populates="payment")
 
-    def __init__(self, _block_amount, _full_amount, _tax, _is_blocked=False, _is_payed=False):
+    def __init__(self, _block_amount, _full_amount, _tax=None, _is_blocked=False, _is_paid=False):
         self.block_amount   = _block_amount
         self.full_amount    = _full_amount
         self.tax            = _tax
         self.is_blocked     = _is_blocked
-        self.is_payed       = _is_payed
+        self.is_paid        = _is_paid
 
     def __repr__(self):
-        return "<Payment(block_amount='%s', full_amount='%s', is_blocked='%s', is_payed='%s')>" \
-            % (self.block_amount, self.full_amount, self.is_blocked, self.is_payed)
+        return "<Payment(block_amount='%s', full_amount='%s', is_blocked='%s', is_paid='%s')>" \
+            % (self.block_amount, self.full_amount, self.is_blocked, self.is_paid)
+
+class History(db.Model):
+    __tablename__  = 'histories'
+
+    id                 = db.Column(db.Integer, primary_key=True)
+    change_date        = db.Column(db.Date)
+
+    reservation_status = db.Column(db.Integer, \
+        CheckConstraint("reservation_status in (%s)" % (", ".join([str(s.value) for s in ReservationStatus]))))
+
+    reservation_id     = db.Column(db.Integer, db.ForeignKey('reservations.id'))
+    reservation        = db.relationship("Reservation", \
+        back_populates="histories")
+
+    receptionist_id    = db.Column(db.Integer, db.ForeignKey('users.id'))
+    receptionist       = db.relationship("User", \
+        back_populates="histories")
+
+    def __init__(self, _reservation, _reservation_status, _change_date, _receptionist):
+        self.reservation        = _reservation
+        self.reservation_status = _reservation_status
+        self.change_date        = _change_date
+        self.receptionist       = _receptionist
+
+    def __repr__(self):
+        return "<History(reservation='%s', reservation_status='%s', change_date='%s', receptionist='%s')>" \
+            % (self.reservation, self.reservation_status, self.change_date, self.receptionist)

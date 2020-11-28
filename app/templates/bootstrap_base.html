@@ -10,16 +10,15 @@
     {% block styles %}
     <!-- Bootstrap CSS -->
     {{ bootstrap.load_css() }}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/toastr.min.css') }}">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://iishotel.herokuapp.com/static/css/styles.css">
+    <link rel="stylesheet" href="https://iishotel.herokuapp.com/static/css/toastr.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     {% endblock %}
 
     {% block scripts %}
-    <!-- Optional JavaScript -->
-    <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/daypilot-all.min.js') }}"></script>
+    <script src="https://iishotel.herokuapp.com/static/js/jquery-3.5.1.js"></script>
+    <script src="https://iishotel.herokuapp.com/static/js/toastr.min.js"></script>
+    <script src="https://iishotel.herokuapp.com/static/js/daypilot-all.min.js"></script>
     <script src="{{ url_for('static', filename='js/global.js') }}"></script>
     {{ bootstrap.load_js() }}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>

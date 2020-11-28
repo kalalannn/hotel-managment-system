@@ -229,7 +229,7 @@ def load_models_data():
 
     #     payment = Payment() # full = for each room (room_category.price * days)
     #                             # block = 0.5 full
-    #                             # is_payed, is_blocked = False, False
+    #                             # is_paid, is_blocked = False, False
     #     reservation = Reservation(customer or anon, payment)
     #     status = History(reservation, ReservationStatus, date_change=today, receptionist=None)
 
@@ -249,13 +249,13 @@ def load_models_data():
 
     db.session.add_all([payment1, payment2, payment3])
 
-    reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_0, payment1)
-    reserv2 = Reservation(ReservationStatus.CONFIRMED.value, customer_1, receptionist_0, payment1)
-    reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment1)
-    reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, receptionist_1, payment2)
-    reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, receptionist_3, payment3)
-    reserv6 = Reservation(ReservationStatus.CONFIRMED.value, customer_3, receptionist_1, payment3)
-    reserv7 = Reservation(ReservationStatus.NEW.value, customer_0, receptionist_2, payment2)
+    reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, payment1)
+    reserv2 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, payment1)
+    reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, payment1)
+    reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, payment2)
+    reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, payment3)
+    reserv6 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_3, payment3)
+    reserv7 = Reservation(ReservationStatus.NEW.value, customer_0, payment2)
 
     res_room = ReservationRoom(datetime.today(), datetime.today() + timedelta(days=5))
     res_room.room = room_2_0_1

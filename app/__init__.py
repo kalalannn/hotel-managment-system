@@ -21,6 +21,10 @@ def create_app(config_name):
     bootstrap.init_app(app)
     login_manager.init_app(app)
 
+    @app.route('/documentation')
+    def documentation():
+        return render_template('doc.html')
+
     @app.route('/favicon.ico')
     def favicon():
         return send_from_directory(os.path.join(app.root_path, 'static', 'img'),

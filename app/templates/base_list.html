@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block inner_scripts %}
+<script>
+    $(document).ready(function () {
+        var city = $('#city')
+        city.parent('div').hide()
+
+        var country = $('#country')
+        if (country[0]) {
+            country[0].addEventListener('change', function () {
+                if (country.val() == '__None') {
+                    city.parent('div').hide()
+                } else {
+                    city.parent('div').show()
+                };
+            });
+        }
+
+        $("#date_from").datepicker({ dateFormat: "dd-mm-yy" })
+        $("#date_to").datepicker({ dateFormat: "dd-mm-yy" })
+    });
+</script>
+{% endblock inner_scripts %}
+
+{% block inner_content %}
+<div class="row align-items-start justify-content-center no-gutters p-3">
+    {% block form_placeholder %}
+    <div name="search_form" class="col col-md-3 p-3">
+        <form method="post" action="">
+            {{ form.csrf_token }}
+            {% for field in form %}
+            {# <p> {{ field.type }} </p> #}
+            {{ render_field(field) }}
+            {% endfor %}
+        </form>
+    </div>
+    {% endblock form_placeholder %}
+    <div class="col">
+        {% block list_content %}
+        {% endblock list_content %}
+    </div>
+</div>
+{% endblock inner_content %}

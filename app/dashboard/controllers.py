@@ -15,6 +15,36 @@ from ..models import User, UserRole, Hotel, Room, RoomCategory, ReservationRoom,
 from app import db
 
 
+@dashboard.route('/list')
+def list():
+    reservations = Reservation.query.filter_by(customer_id=9).all()
+    reservations = filter(lambda r: any([rr.is_active for rr in r.reservations_rooms]), reservations)
+    print(reservations)
+
+    return render_template('dashboard/list.html', reservations=reservations)
+
+
+@dashboard.route('/reservation_details')
+def reservation_details():
+
+    reservation_id = request.args.get('reservation_id')
+    reservation = Reservation.query.filter_by(id=reservation_id).first()
+
+    # serialize rooms and categories
+    rooms_categories = []
+    for reserv_room in reservation.reservations_rooms:
+        room_category = {}
+        room_category['room'] = reserv_room.room.serialize
+        room_category['category'] = reserv_room.room.room_category.serialize
+        rooms_categories.append(room_category)
+    details = {
+        'reservation': reservation.serialize,
+        'rooms_categories': rooms_categories,
+        'payment': reservation.payment.serialize
+    }
+    return details
+
+
 @dashboard.route('/show')
 def show():
     user_form = UserForm()

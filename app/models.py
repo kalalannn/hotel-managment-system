@@ -280,7 +280,7 @@ class RoomCategory(db.Model):
         return {
             'id': self.id,
             'price': float(self.price),
-            'type': self.type,
+            'type': RoomType(self.type).name,
             'description': self.description,
             'hotel_id': self.hotel_id,
         }
@@ -376,6 +376,15 @@ class Reservation(db.Model):
     histories       = db.relationship("History", \
         back_populates="reservation")
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'status': ReservationStatus(self.status).name,
+            'payment_id': self.payment_id,
+            'customer_id': self.customer_id
+        }
+
     def __init__(self, _status, _customer, _payment):
         self.status         = _status
         self.customer       = _customer
@@ -398,6 +407,17 @@ class Payment(db.Model):
 
     reservation     = db.relationship("Reservation", \
         back_populates="payment")
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'block_amount': float(self.block_amount),
+            'full_amount': float(self.full_amount),
+            'tax': float(self.tax),
+            'is_blocked': self.is_blocked,
+            'is_paid': self.is_paid,
+        }
 
     def __init__(self, _block_amount, _full_amount, _tax=None, _is_blocked=False, _is_paid=False):
         self.block_amount   = _block_amount

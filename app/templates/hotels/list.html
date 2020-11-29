@@ -5,6 +5,7 @@
 {% block inner_scripts %}
 <script>
 $(document).ready(function () {
+    // $('#navbar_title').html('Hotels');
     var city = $('#city')
     city.parent('div').hide()
 
@@ -26,47 +27,55 @@ $(document).ready(function () {
 {% block inner_content %}
 
 <h2 class="p-3"> Hotels </h2>
-<div class="row align-items-start no-gutters p-3">
+<div class="row align-items-start justify-content-center no-gutters p-3">
     <div name="search_form" class="col col-md-3 p-3">
-        <form method="post" action="">
-            {{ form.csrf_token }}
-            {% for field in form %}
-                {# <p> {{ field.type }} </p> #}
-                {{ render_field(field) }}
-            {% endfor %}
-        </form>
+        {% block form_placeholder %}
+
+            <form method="post" action="">
+                {{ form.csrf_token }}
+                {% for field in form %}
+                    {# <p> {{ field.type }} </p> #}
+                    {{ render_field(field) }}
+                {% endfor %}
+            </form>
+
+        {% endblock %}
     </div>
     <div class="col col-md-7 p-3">
-        {% for hotel in hotels %}
-        <div class="row" style="margin-bottom: 5px;">
-            <div class="col col-md-4 text-center" >
-                <img src="{{ url_for('static', filename='img/hotel_image.png') }}">
-            </div>
-            <div class="col col-md-4">
-                <div class="row">
-                    <a href="{{ url_for('hotels.show', hotel_id=hotel.id) }}" > <b> {{ hotel.name }} {{ '*' * hotel.stars }} </b> </a>
-                </div>
+        {% block list %}
 
-                <div class="row">
-                    {{ hotel.address.post_code }} {{ hotel.address.city }}, {{ hotel.address.country }}
+            {% for hotel in hotels %}
+            <div class="row" style="margin-bottom: 5px;">
+                <div class="col col-md-4 text-center" >
+                    <img src="{{ url_for('static', filename='img/hotel_image.png') }}">
                 </div>
+                <div class="col col-md-4">
+                    <div class="row">
+                        <a href="{{ url_for('hotels.show', hotel_id=hotel.id) }}" > <b> {{ hotel.name }} {{ '*' * hotel.stars }} </b> </a>
+                    </div>
 
-                <div class="row"> &nbsp; </div>
+                    <div class="row">
+                        {{ hotel.address.post_code }} {{ hotel.address.city }}, {{ hotel.address.country }}
+                    </div>
 
-                {% for room_category in hotel.room_categories %}
-                <div class="row">
-                    {{ RoomType(room_category.type).name }} - {{ room_category.price }}
+                    <div class="row"> &nbsp; </div>
+
+                    {% for room_category in hotel.room_categories %}
+                    <div class="row">
+                        {{ RoomType(room_category.type).name }} - {{ room_category.price }}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+                <div class="col-md-4 text-center">
+                    <button type="button" class="btn btn-primary"
+                        onclick="location.href=`{{ url_for('hotels.show', hotel_id=hotel.id) }}`">
+                        Show hotel
+                    </button>
+                </div>
             </div>
-            <div class="col-md-4 text-center">
-                <button type="button" class="btn btn-primary"
-                    onclick="location.href=`{{ url_for('hotels.show', hotel_id=hotel.id) }}`">
-                    Show hotel
-                </button>
-            </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+
+        {% endblock %}
     </div>
 </div>
 <br> <hr> <br>

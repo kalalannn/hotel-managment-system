@@ -3,10 +3,12 @@ from flask import Flask, url_for, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user
+from flask_jsglue import JSGlue
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
+jsglue = JSGlue()
 
 def create_app(config_name):
     app = Flask(__name__, static_url_path='/static')
@@ -51,5 +53,7 @@ def create_app(config_name):
 
     from .dashboard import dashboard as dashboard_blueprint
     app.register_blueprint(dashboard_blueprint, url_prefix='/dashboard')
+
+    jsglue.init_app(app)
 
     return app

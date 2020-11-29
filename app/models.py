@@ -231,6 +231,16 @@ class RoomCategory(db.Model):
         return "<RoomCategory(type='%s', price='%s')>" \
             % (self.type, self.price)
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'price': float(self.price),
+            'type': self.type,
+            'description': self.description,
+            'hotel_id': self.hotel_id,
+        }
+
 class Room(db.Model):
     __tablename__  = 'rooms'
 
@@ -256,6 +266,15 @@ class Room(db.Model):
             self.id, self.number, self.beds, \
             RoomType(self.room_category.type).name, self.room_category.price
             )
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'number': self.number,
+            'beds': self.beds,
+            'room_category_id': self.room_category_id,
+        }
 
 class ReservationRoom(db.Model):
     __tablename__  = 'reservations_rooms'

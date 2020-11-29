@@ -98,9 +98,6 @@ class HotelForm(FlaskForm):
         del self.address_city     
         del self.address_street   
         del self.address_number   
-        # read_only(self.name)
-        # read_only(self.stars)
-        # read_only(self.owner)
 
 class RoomCategoryForm(FlaskForm):
     type = QuerySelectField('Type',      \
@@ -109,7 +106,8 @@ class RoomCategoryForm(FlaskForm):
         get_label       = lambda t: RoomType(t.value).name, \
         validators=[Required()])
 
-    price = IntegerField('Price CZK')
+    price = IntegerField('Price CZK',
+        validators=[Required()])
     description = StringField('Description',     \
         widget=TextArea(),
         validators=[Required()])
@@ -118,22 +116,30 @@ class RoomCategoryForm(FlaskForm):
 
 class RoomForm(FlaskForm):
     room_category = QuerySelectField('Category',      \
-        get_pk          = lambda c: c.type,   \
+        get_pk          = lambda c: c.id,   \
         get_label       = lambda c: "{} ({},- CZK)".format(RoomType(c.type).name, c.price), \
         validators = [Required()])
 
-    beds            = IntegerField('Beds')
+    number = IntegerField('Room #',
+        validators=[Required()])
 
-    numbers_from    = IntegerField(u'\u2116 From')
-    numbers_to      = IntegerField(u'\u2116 To')
+    beds            = IntegerField('Beds',
+        validators=[Required()])
 
-    submit         = SubmitField('Add Rooms')
+    submit         = SubmitField('Save')
     
     def __init__(self, *args, **kwargs):
         super(RoomForm, self).__init__(*args, **kwargs)
+        if 'obj' in kwargs:
+            self.room_category.query_factory = \
+                lambda: RoomCategory.query.filter_by(hotel_id=kwargs['obj'].room_category.hotel_id) #.distinct("type")
+
         if 'hotel_id' in kwargs:
             self.room_category.query_factory = \
-                lambda: RoomCategory.query.filter_by(hotel_id=kwargs['hotel_id']).distinct("type")
+                lambda: RoomCategory.query.filter_by(hotel_id=kwargs['hotel_id']) #.distinct("type")
+
+class SubmitForm(FlaskForm):
+    submit = SubmitField('Submit')
 
 
 

@@ -42,14 +42,11 @@ def create_app(config_name):
         return 'Not Found ...', 404
 
     # Blueprints
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    from .users import users as users_blueprint
+    app.register_blueprint(users_blueprint, url_prefix='/users')
 
     from .hotels import hotels as hotels_blueprint
     app.register_blueprint(hotels_blueprint, url_prefix='/hotels')
-
-    from .profile import profile as profile_blueprint
-    app.register_blueprint(profile_blueprint, url_prefix='/profile')
 
     from .dashboard import dashboard as dashboard_blueprint
     app.register_blueprint(dashboard_blueprint, url_prefix='/dashboard')

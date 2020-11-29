@@ -7,7 +7,7 @@
 <div>
     <ul>
     <li>E-mail: {{ current_user.email }}</li>
-    <form action="{{ url_for('auth.new_password') }}" method="GET">
+    <form action="{{ url_for('users.new_password') }}" method="GET">
     <li>Change password?
         <button type="submit">Click!</button>
     </li>

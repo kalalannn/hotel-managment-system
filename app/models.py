@@ -106,6 +106,10 @@ class User(UserMixin, db.Model):
             self.id, self.email, self.first_name, self.last_name, self.role, self.recept_hotel_id)
     
     @staticmethod
+    def First(user_id):
+        return User.query.filter_by(id=user_id).first()
+
+    @staticmethod
     def New(_first_name, _last_name, _email,
                 _password=generate_password.__func__(), _role=UserRole.ANON.value,
                 _is_active=True, _recept_hotels=None):
@@ -128,6 +132,7 @@ class User(UserMixin, db.Model):
             query = query.filter(User.email.ilike("%{}%".format(email)))
         if (role and role != 0):
             query = query.filter(User.role == role)
+        query = query.filter(User.is_active == True)
         return query.all()
 
     @property
@@ -138,7 +143,7 @@ class User(UserMixin, db.Model):
                 'email': self.email,
                 'role': self.role,
                 'is_active': self.is_active,
-                'recept_hotel_id': self.recept_hotels_id}
+                'recept_hotel_id': self.recept_hotel_id}
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'

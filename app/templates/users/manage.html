@@ -5,32 +5,59 @@
 
 {% block inner_scripts %}
 <script>
+    function LoadUser(user_id) {
+        var modal;
+        if (user_id) {
+            modal = $('#modalEditUser');
+            modal.find('.modal-title').text('Update User');
+            $.ajax({
+                url: Flask.url_for('users.get_user', {user_id: user_id})
+            }).done(function (data) {
+                var user = data;
+                modal.find('form').attr('action', Flask.url_for('users.new_or_update_user', { user_id: user_id }));
+                modal.find('#email').val(user.email);
+                modal.find('#first_name').val(user.first_name);
+                modal.find('#last_name').val(user.last_name);
+                modal.find('#role').val(user.role);
+                console.log(modal.find('form'))
+            });
+        } else {
+            modal = $('#modalUser');
+            modal.find('.modal-title').text('New User');
+            var form = modal.find('form');
+            form[0].reset();
+            form.attr('action', Flask.url_for('users.new_or_update_user'));
+        };
+        modal.modal('show');
+        return false;
+    };
+
+    function DeleteUser(user_id) {
+        if (!user_id) {
+            return false;
+        };
+        var modal = $('#modalDeleteUser');
+        modal.find('form').attr('action', Flask.url_for('users.delete', { user_id: user_id }))
+        modal.modal('show');
+        return false;
+    };
+
     $(document).ready(function () {
         // shows success message after page reload
         if (sessionStorage.getItem('showmsg') === '1') {
-            Utils.showToast('success', sessionStorage.getItem('message'))
+            Utils.showToast('success', sessionStorage.getItem('message'));
             sessionStorage.removeItem('showmsg');
             sessionStorage.removeItem('message');
         }
+    });
 
-        $('#user_dialog').on('show.bs.modal', function (e) {
-            let $modal = $(this);
+        /*
+        $('#confirm').on('show.bs.modal', function (e) {
             let $button = $(e.relatedTarget);
-            $modal.data('user-url', $button.data('user-url'));
-            $modal.data('action', $button.data('action'));
-
-            if ($modal.data('action') === 'add') {
-                $modal.find('.modal-title').text('Add new user');
-                $modal.find('form')[0].reset();
-            } else if ($modal.data('action') === 'edit') {
-                $modal.find('.modal-title').text('Edit user info');
-                $.get($button.data('user-url'), function (data) {
-                    fillUserForm($modal.find('form'), data);
-                });
-            }
+            $('#confirm').data('user-url', $button.data('user-url'));
         });
 
-        $('.btn-save').on('click', function () {
+        $('#user_dialog').find('#submit').on('click', function () {
             let $modal = $(this).closest('.modal');
             let url = $modal.data('user-url');
 
@@ -39,23 +66,19 @@
                     $modal.modal('hide');
                     sessionStorage.setItem('showmsg', '1');
                     sessionStorage.setItem('message', data.message);
-                    location.reload();
+                    // location.reload();
                 } else {
                     Utils.showToast('error', data.message);
                 }
             });
+            return true;
         });
 
-        $('#confirm').on('show.bs.modal', function (e) {
-            let $button = $(e.relatedTarget);
-            $('#confirm').data('user-url', $button.data('user-url'));
-        });
-
-        $('.btn-delete').on('click', function () {
+        $('#confirm').find('#submit').on('click', function () {
             let $modal = $(this).closest('.modal');
-
             let url = $modal.data('user-url');
-            $.get(url, function (data) {
+            
+            $.post(url, data = $modal.find('form').serialize(), function (data) {
                 if (data.status == 200) {
                     $modal.modal('hide');
                     sessionStorage.setItem('showmsg', '1');
@@ -66,95 +89,114 @@
                 }
             })
         });
-    });
-
-    function fillUserForm(form, data) {
-        form.find('#first_name').val(data.first_name);
-        form.find('#last_name').val(data.last_name);
-        form.find('#email').val(data.email);
-        form.find('#role').val(data.role);
-    }
+    */
 </script>
 {% endblock inner_scripts %}
 
 {% block inner_content %}
 <h2 class="p-3"> Users Management
-    (<a href="{{ url_for('users.register') }}"> New </a>)
+    (<a href="#" onClick="LoadUser(); return false"> New </a>)
 </h2>
 <div name="search_form" class="d-inline-block mr-5 align-top">
     <form method="POST">
-    {{ user_search_form.csrf_token }}
-    {% for field in user_search_form %}
+    {{ search_form.csrf_token }}
+    {% for field in search_form %}
         {{ render_field(field) }}
     {% endfor %}
     </form>
 </div>
 <div class="d-inline-block col-7">
-    <!-- <button id="add_user" class="btn btn-primary float-right" data-toggle="modal" style="margin-bottom: 5px; margin-right: 5px;"
-        data-target="#user_dialog" data-user-url="{{ url_for('users.add_user') }}" data-action="add">
-        Add user
-    </button> -->
     <table class="table table-sm">
-        {% for role, items in users|groupby('role')|sort(reverse=True) %}
-        <tr>
-            <th>{{ UserRole(role).name|capitalize() }}</th>
-            <td></td>
-            <td></td>
-        </tr>
-        {% for user in items %}
-        <tr>
-            <td></td>
-            <td>{{ user.first_name }} {{ user.last_name }}</td>
-            <td>
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#user_dialog"
-                    data-user-url="{{ url_for('users.edit_user', id=user.id) }}" data-action="edit"> Edit
-                </button>
-                {% if current_user.role == UserRole.ADMIN.value and user.role != UserRole.ADMIN.value %}
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#confirm"
-                    data-user-url="{{ url_for('users.delete_user', id=user.id) }}"> Delete </button>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-        {% endfor %}
+        <thead>
+            <tr>
+                <th> User Role </th>
+                <th> Name, Surname </th>
+                <th colspan="2"> Action </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for role, items in users|groupby('role')|sort(reverse=True) %}
+            <tr>
+                <td>{{ UserRole(role).name|capitalize() }}s</td>
+                <td colspan="3"></td>
+            </tr>
+                {% for user in items %}
+                <tr>
+                    <td></td>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>
+                        <button class="btn btn-primary" onClick="LoadUser({{ user.id }}); return false">
+                            Edit {#{ user.id }#} 
+                        </button>
+                    </td>
+                    <td> 
+                        <button class="btn btn-primary btn-delete" onClick="DeleteUser({{ user.id }}); return false">
+                            Delete {#{ user.id }#} 
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
     </table>
 </div>
 
-<div class="modal fade" id="user_dialog" role="dialog">
+<div class="modal fade" id="modalUser" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Title</h5>
+                <h5 class="modal-title">New User</h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                {{ render_form(user_form) }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary btn-save">Save</button>
+                <form method="POST">
+                    {{ new_form.csrf_token }}
+                    {% for field in new_form %}
+                        {{ render_field(field) }}
+                    {% endfor %}
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="confirm" role="dialog">
+<div class="modal fade" id="modalEditUser" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmation</h5>
+                <h5 class="modal-title">Edit User</h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Sure you want to delete this user?
+                <form method="POST">
+                    {{ edit_form.csrf_token }}
+                    {% for field in edit_form %}
+                        {{ render_field(field) }}
+                    {% endfor %}
+                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary btn-delete">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDeleteUser" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete User</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {{ submit_form.csrf_token }}
+                    Sure you want to delete this user?
+                    {{ render_field(submit_form.submit) }}
+                </form>
             </div>
         </div>
     </div>

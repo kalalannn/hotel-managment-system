@@ -4,7 +4,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 
 from . import hotels
 from .forms import SearchForm, HotelForm
-from .forms import RoomForm, RoomCategoryForm, SubmitForm
+from .forms import RoomForm, RoomCategoryForm
+from ..forms import SubmitForm
 from ..models import Hotel, Address, User, HotelStars, UserRole
 from ..models import Room, RoomCategory, RoomType
 from app import db
@@ -208,6 +209,7 @@ def show(hotel_id):
 @hotels.route('/delete/room/<int:room_id>', methods=['POST'])
 @login_required
 def delete(hotel_id=None, room_category_id=None, room_id=None):
+    # TODO
     if not ((current_user.role == UserRole.DIRECTOR.value
                 and hotel_id
                 and current_user == hotel.owner)

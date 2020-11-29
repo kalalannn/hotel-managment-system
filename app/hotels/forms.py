@@ -137,9 +137,3 @@ class RoomForm(FlaskForm):
         if 'hotel_id' in kwargs:
             self.room_category.query_factory = \
                 lambda: RoomCategory.query.filter_by(hotel_id=kwargs['hotel_id']) #.distinct("type")
-
-class SubmitForm(FlaskForm):
-    submit = SubmitField('Submit')
-
-
-

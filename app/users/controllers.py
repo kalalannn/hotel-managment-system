@@ -2,7 +2,8 @@ from flask import request, render_template, session, redirect, url_for, flash, j
 from flask_login import current_user, login_user, logout_user, login_required
 
 from . import users
-from .forms import LoginForm, RegistrationForm, NewPasswordForm, UserForm, UserSearchForm
+from .forms import LoginForm, UserForm, EditUserForm, NewPasswordForm, UserSearchForm
+from ..forms import SubmitForm
 from ..models import User, UserRole, Hotel
 from app import db
 
@@ -24,44 +25,77 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.')
+    flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
-
-@users.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm(request.form)
-
-    if current_user.is_authenticated and current_user.role == UserRole.ADMIN.value:
-        form.admin()
-    elif current_user.is_authenticated and current_user.role == UserRole.DIRECTOR.value:
-        form.director()
+@users.route('/new_or_update_user', methods=['POST'])
+@users.route('/new_or_update_user/<int:user_id>', methods=['GET', 'POST'])
+def new_or_update_user(user_id=None):
+    user = None
+    if user_id:
+        user = User.First(user_id)
+        if user:
+            form = EditUserForm(request.form, obj=user)
+        else:
+            return redirect(url_for('error'))
     else:
-        form.others()
+        form = UserForm(request.form)
+
+    if current_user.is_authenticated:
+        if current_user.role == UserRole.ADMIN.value:
+            form.admin()
+        elif current_user.role == UserRole.DIRECTOR.value:
+            form.director()
+        else:
+            return redirect(url_for('forbidden'))
+    else:
+        form.anon()
+
+    # print(form.data)
+    # print(request.form)
 
     # POST
     if form.validate_on_submit():
-        if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value:
-            role = form.role.data
+        if current_user.is_authenticated:
+            if current_user.role == UserRole.DIRECTOR.value \
+                and int(form.role.data) not in [UserRole.CUSTOMER.value, UserRole.RECEPTIONIST.value]:
+                return redirect(url_for('forbidden'))
+            role = int(form.role.data)
         else:
             role = UserRole.CUSTOMER.value
 
-        user = User(form.first_name.data,
-                    form.last_name.data,
-                    form.email.data,
-                    form.password.data,
-                    role)
-        db.session.add(user)
-        db.session.commit()
-        if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value:
-            flash('User {} was created'.format(user.email))
+        # TODO opravneni!!
+        if user_id:
+            user.first_name = form.first_name.data
+            user.last_name = form.last_name.data
+            user.email = form.email.data
+            user.role = role
+            db.session.commit()
+            flash('User {} {} was updated'.format(user.first_name, user.last_name), 'info')
+        else:
+            user = User.New(form.first_name.data,
+                            form.last_name.data,
+                            form.email.data,
+                            form.password.data,
+                            role)
+            flash('User {} {} was created. Now you can log in.'.format(user.first_name, user.last_name), 'info')
+
+        if current_user.is_authenticated:
+            if current_user.role >= UserRole.DIRECTOR.value:
+                # To reload usersdata
+                if session.get('usersdata'):
+                    session.pop('usersdata')
+
+    elif request.method == 'POST':
+        flash('Wrong Form! {}'.format(form.errors), 'error')
+
+    if request.method == 'POST':
+        if current_user.is_authenticated:
             return redirect (url_for('users.manage'))
         else:
-            flash('You can now log in.')
             return redirect(url_for('users.login'))
 
     return render_template('users/register.html', form=form)
-
 
 @users.route('/new_password', methods=['GET', 'POST'])
 @login_required
@@ -72,9 +106,11 @@ def new_password():
             current_user.password = form.new_password.data
             db.session.commit()
             logout_user()
-            flash('You can now log in with a new password.', 'info')
+            flash('Now you can log in with a new password.', 'info')
             return redirect(url_for('users.login'))
-        flash('You entered wrong current password.', 'error')
+        flash('Wrong current password!', 'error')
+    else:
+        flash('Wrong Form!', 'error')
     return render_template('users/new_password.html', form=form)
 
 
@@ -82,113 +118,112 @@ def new_password():
 def home():
     return render_template('users/home.html')
 
-
+# TODO Opravneni
+@users.route('/user/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    user = User.First(user_id)
+    if user:
+        return jsonify(user.serialize)
+    else:
+        return (404, 'Not Found')
 
 @users.route('/manage', methods=['GET', 'POST'])
+@login_required
 def manage():
-    user_search_form = UserSearchForm(role=0)
-    # find all users for admin, subordinates for director
-    users = User.query.filter_by(is_active=True).order_by(User.role.desc()).all()
+    search_form = UserSearchForm(obj=request.form)
+
+    # session.pop('formdata')
+    # session.pop('usersdata')
+
+    if current_user.role == UserRole.ADMIN.value:
+        search_form.admin()
+    elif current_user.role == UserRole.DIRECTOR.value:
+        search_form.director()
+    else:
+        return redirect(url_for('forbidden'))
+
+    query = None
     if current_user.role == UserRole.DIRECTOR.value:
-        users = list(filter(lambda u: u.role < UserRole.DIRECTOR.value, users))
+        query = User.query.join(Hotel, User.recept_hotels).filter(Hotel.id.in_([h.id for h in current_user.own_hotels]))
+        # TODO Customers, that have done reservations (not edit, not delete)
+
+    if search_form.validate_on_submit():
+        users = User.All(query, search_form.first_name.data, search_form.last_name.data, search_form.email.data, search_form.role.data)
+        
+        # print ("save formdata {}".format(request.form))
+        # formdata reload
+        if session.get('formdata'):
+            session.pop('formdata')
+        session['formdata'] = request.form
+
+        # usersdata reload
+        if session.get('usersdata'):
+            session.pop('usersdata')
+        session['usersdata'] = jsonpickle.encode(users)
+
+        return redirect(url_for('users.manage'))
 
     if (session.get('formdata')):
         formdata = session.get('formdata')
-        user_search_form = UserSearchForm(
-            first_name=formdata['first_name'], \
-            last_name=formdata['last_name'], \
-            email=formdata['email'], \
-            role=int(formdata['role']))
-        session.pop('formdata')
+        # print ("load formdata {}".format(formdata))
+        # WARNING: not replace csrf_token!!
+        search_form.first_name.data = formdata['first_name']
+        search_form.last_name.data  = formdata['last_name']
+        search_form.email.data      = formdata['email']
+        search_form.role.data       = int(formdata['role'])
 
     if (session.get('usersdata')):
         usersdata = session.get('usersdata')
+        # print ("load userdata {}".format(usersdata))
         users = jsonpickle.decode(usersdata)
-        session.pop('usersdata')
-
-    # filter users bassed on form fields data
-    if request.method == 'POST':
-        form = UserSearchForm(request.form)
-        if (form.first_name.data):
-            users = list(filter(lambda u: form.first_name.data in u.first_name, users))
-        if (form.last_name.data):
-            users = list(filter(lambda u: form.last_name.data in u.last_name, users))
-        if (form.email.data):
-            users = list(filter(lambda u: form.email.data in u.email, users))
-        if (int(form.role.data) != 0):
-            users = list(filter(lambda u: int(form.role.data) == u.role, users))
-        
-        session['formdata'] = request.form
-        session['usersdata'] = jsonpickle.encode(users)
-        return redirect(url_for('users.manage'))
-    return render_template('users/manage.html', \
-        users=users, user_form=UserForm(), user_search_form=user_search_form)
-
-
-@users.route('/add_user', methods=['GET', 'POST'])
-def add_user():
-    form = UserForm()
-    if form.validate_on_submit():
-        email_exists = User.query.filter_by(email=form.data['email']).first()
-        if (not email_exists):
-            user = User(_first_name=form.data['first_name'],
-                        _last_name=form.data['last_name'],
-                        _email=form.data['email'],
-                        _role=UserRole(int(form.data['role'])).value,
-                        # only developers know password :D
-                        _password='testpassword')
-            db.session.add(user)
-            db.session.commit()
-            return jsonify(status=200, message='User successfully created.')
-        return jsonify(status=500, message='User with this email already exists!')
     else:
-        # return render_template('users/manage.html', user_form=form)
-        return jsonify(status=500, message='Some fields are missing or incorrect!')
+        users = User.All(query, search_form.first_name.data, search_form.last_name.data, search_form.email.data, search_form.role.data)
 
+    new_form = UserForm()
+    edit_form = EditUserForm()
+    if current_user.is_authenticated and current_user.role == UserRole.ADMIN.value:
+        new_form.admin()
+        edit_form.admin()
+    elif current_user.is_authenticated and current_user.role == UserRole.DIRECTOR.value:
+        new_form.director()
+        edit_form.director()
+    else:
+        new_form.anon()
+        edit_form.anon()
 
-@users.route('/edit_user/<id>', methods=['GET', 'POST'])
-def edit_user(id):
-    user = User.query.filter_by(id=id).one()
-    form = UserForm()
+    return render_template('users/manage.html',
+        users=users, search_form=search_form, new_form=new_form, edit_form=edit_form, submit_form=SubmitForm())
+
+@users.route('/delete/<int:user_id>', methods=['POST'])
+@login_required
+def delete(user_id):
+    form = SubmitForm(request.form)
+
+    user = User.First(user_id)
+    if not user:
+        flash('Wrong user!', 'error')
+        return redirect(url_for('users.manage'))
 
     if form.validate_on_submit():
-        found_user = User.query.filter_by(email=form.email.data).first()
-        if found_user != None and found_user.id != user.id:
-            return jsonify(status=500, message='User with this email already exists!')
+        if (user.role == UserRole.ADMIN.value):
+            flash('Cannot delete admin!', 'error')
+            return redirect(url_for('users.manage'))
+        if (user.id == current_user.id):
+            flash('Cannot delete current user!', 'error')
+            return redirect(url_for('users.manage'))
+        
+        if (user.role == UserRole.DIRECTOR.value):
+            # if director is deleted, admin becomes hotel owner :)
+            admin = User.query.filter_by(role=UserRole.ADMIN.value).first()
+            director_hotels = Hotel.query.filter_by(owner=user).all()
+            admin.own_hotels.extend(director_hotels)
 
-        user.first_name = form.first_name.data
-        user.last_name = form.last_name.data
-        user.email = form.email.data
-        user.role = form.role.data
-
-        db.session.add(user)
+        user.is_active = False
         db.session.commit()
-        return jsonify(status=200, message='User successfully updated.')
+        if session.get('usersdata'):
+            session.pop('usersdata')
+        flash('User {} {} was deactivated.'.format(user.first_name, user.last_name), 'info')
+    else:
+        flash('Wrong form!', 'error')
 
-    return jsonify({'id': user.id, 
-                    'first_name': user.first_name, 
-                    'last_name': user.last_name,
-                    'email': user.email,
-                    'role': user.role})
-
-
-@users.route('/delete_user/<id>', methods=['GET'])
-def delete_user(id):
-    user = User.query.filter_by(id=id).one()
-
-    if (user.role == UserRole.ADMIN.value):
-        return jsonify(status=500, message='Cannot delete admin!')
-    if (user.id == current_user.id):
-        return jsonify(status=500, message='Cannot delete current user!')
-    
-    if (user.role == UserRole.DIRECTOR.value):
-        # if director is deleted, admin becomes hotel owner :)
-        admin = User.query.filter_by(role=UserRole.ADMIN.value).first()
-        director_hotels = Hotel.query.filter_by(owner=user).all()
-        admin.own_hotels.extend(director_hotels)
-        db.session.add(admin)
-
-    user.is_active = False
-    db.session.add(user)
-    db.session.commit()
-    return jsonify(status=200, message='User successfully deleted.')
+    return redirect(url_for('users.manage'))

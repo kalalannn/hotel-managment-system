@@ -1,16 +1,90 @@
-from flask import request, render_template, session, redirect, url_for, jsonify
-from flask_login import current_user
-import jsonpickle
+from flask import request, render_template, session, redirect, url_for, flash, jsonify
+from flask_login import current_user, login_user, logout_user, login_required
 
-from . import profile
-# Import needed forms and models
-from .forms import UserForm, UserSearchForm
+from . import users
+from .forms import LoginForm, RegistrationForm, NewPasswordForm, UserForm, UserSearchForm
 from ..models import User, UserRole, Hotel
-# Import database object
 from app import db
 
+import jsonpickle
 
-@profile.route('/manage', methods=['GET', 'POST'])
+@users.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm(request.form)
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.verify_password(form.password.data):
+            login_user(user, form.remember_me.data)
+            return redirect(request.args.get('next') or url_for('users.home'))
+        flash('Invalid username or password.', 'error')
+    return render_template('users/login.html', form=form)
+
+
+@users.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.')
+    return redirect(url_for('index'))
+
+
+@users.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm(request.form)
+
+    if current_user.is_authenticated and current_user.role == UserRole.ADMIN.value:
+        form.admin()
+    elif current_user.is_authenticated and current_user.role == UserRole.DIRECTOR.value:
+        form.director()
+    else:
+        form.others()
+
+    # POST
+    if form.validate_on_submit():
+        if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value:
+            role = form.role.data
+        else:
+            role = UserRole.CUSTOMER.value
+
+        user = User(form.first_name.data,
+                    form.last_name.data,
+                    form.email.data,
+                    form.password.data,
+                    role)
+        db.session.add(user)
+        db.session.commit()
+        if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value:
+            flash('User {} was created'.format(user.email))
+            return redirect (url_for('users.manage'))
+        else:
+            flash('You can now log in.')
+            return redirect(url_for('users.login'))
+
+    return render_template('users/register.html', form=form)
+
+
+@users.route('/new_password', methods=['GET', 'POST'])
+@login_required
+def new_password():
+    form = NewPasswordForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+            current_user.password = form.new_password.data
+            db.session.commit()
+            logout_user()
+            flash('You can now log in with a new password.', 'info')
+            return redirect(url_for('users.login'))
+        flash('You entered wrong current password.', 'error')
+    return render_template('users/new_password.html', form=form)
+
+
+@users.route('/home/', methods=['GET'])
+def home():
+    return render_template('users/home.html')
+
+
+
+@users.route('/manage', methods=['GET', 'POST'])
 def manage():
     user_search_form = UserSearchForm(role=0)
     # find all users for admin, subordinates for director
@@ -46,12 +120,12 @@ def manage():
         
         session['formdata'] = request.form
         session['usersdata'] = jsonpickle.encode(users)
-        return redirect(url_for('profile.manage'))
-    return render_template('profile/manage.html', \
+        return redirect(url_for('users.manage'))
+    return render_template('users/manage.html', \
         users=users, user_form=UserForm(), user_search_form=user_search_form)
 
 
-@profile.route('/add_user', methods=['GET', 'POST'])
+@users.route('/add_user', methods=['GET', 'POST'])
 def add_user():
     form = UserForm()
     if form.validate_on_submit():
@@ -68,11 +142,11 @@ def add_user():
             return jsonify(status=200, message='User successfully created.')
         return jsonify(status=500, message='User with this email already exists!')
     else:
-        # return render_template('profile/manage.html', user_form=form)
+        # return render_template('users/manage.html', user_form=form)
         return jsonify(status=500, message='Some fields are missing or incorrect!')
 
 
-@profile.route('/edit_user/<id>', methods=['GET', 'POST'])
+@users.route('/edit_user/<id>', methods=['GET', 'POST'])
 def edit_user(id):
     user = User.query.filter_by(id=id).one()
     form = UserForm()
@@ -98,7 +172,7 @@ def edit_user(id):
                     'role': user.role})
 
 
-@profile.route('/delete_user/<id>', methods=['GET'])
+@users.route('/delete_user/<id>', methods=['GET'])
 def delete_user(id):
     user = User.query.filter_by(id=id).one()
 

@@ -3,10 +3,12 @@ from flask import Flask, url_for, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user
+from flask_jsglue import JSGlue
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
+jsglue = JSGlue()
 
 def create_app(config_name):
     app = Flask(__name__, static_url_path='/static')
@@ -40,16 +42,15 @@ def create_app(config_name):
         return 'Not Found ...', 404
 
     # Blueprints
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    from .users import users as users_blueprint
+    app.register_blueprint(users_blueprint, url_prefix='/users')
 
     from .hotels import hotels as hotels_blueprint
     app.register_blueprint(hotels_blueprint, url_prefix='/hotels')
 
-    from .profile import profile as profile_blueprint
-    app.register_blueprint(profile_blueprint, url_prefix='/profile')
-
     from .dashboard import dashboard as dashboard_blueprint
     app.register_blueprint(dashboard_blueprint, url_prefix='/dashboard')
+
+    jsglue.init_app(app)
 
     return app

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from 'bootstrap/form.html' import render_form %}
 
-{% block title %}Auth home{% endblock %}
+{% block title %} Users home {% endblock %}
 
 {% block inner_scripts %}
 <script>
@@ -79,7 +79,7 @@
 
 {% block inner_content %}
 <h2 class="p-3"> Users Management
-    (<a href="{{ url_for('auth.register') }}"> New </a>)
+    (<a href="{{ url_for('users.register') }}"> New </a>)
 </h2>
 <div name="search_form" class="d-inline-block mr-5 align-top">
     <form method="POST">
@@ -91,7 +91,7 @@
 </div>
 <div class="d-inline-block col-7">
     <!-- <button id="add_user" class="btn btn-primary float-right" data-toggle="modal" style="margin-bottom: 5px; margin-right: 5px;"
-        data-target="#user_dialog" data-user-url="{{ url_for('profile.add_user') }}" data-action="add">
+        data-target="#user_dialog" data-user-url="{{ url_for('users.add_user') }}" data-action="add">
         Add user
     </button> -->
     <table class="table table-sm">
@@ -107,11 +107,11 @@
             <td>{{ user.first_name }} {{ user.last_name }}</td>
             <td>
                 <button type="button" class="btn btn-light" data-toggle="modal" data-target="#user_dialog"
-                    data-user-url="{{ url_for('profile.edit_user', id=user.id) }}" data-action="edit"> Edit
+                    data-user-url="{{ url_for('users.edit_user', id=user.id) }}" data-action="edit"> Edit
                 </button>
                 {% if current_user.role == UserRole.ADMIN.value and user.role != UserRole.ADMIN.value %}
                 <button type="button" class="btn btn-light" data-toggle="modal" data-target="#confirm"
-                    data-user-url="{{ url_for('profile.delete_user', id=user.id) }}"> Delete </button>
+                    data-user-url="{{ url_for('users.delete_user', id=user.id) }}"> Delete </button>
                 {% endif %}
             </td>
         </tr>

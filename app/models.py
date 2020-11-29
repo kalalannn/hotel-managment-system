@@ -89,17 +89,56 @@ class User(UserMixin, db.Model):
         chars = string.ascii_uppercase + string.ascii_lowercase
         return ''.join(random.choice(chars) for _ in range(12))
 
-    def __init__(self, _first_name, _last_name, _email, _password=generate_password.__func__(), _role=UserRole.ANON.value, _is_active=True):
+    def __init__(self, _first_name, _last_name, _email,
+                _password=generate_password.__func__(), _role=UserRole.ANON.value,
+                _is_active=True, _recept_hotels=None):
+
         self.first_name     = _first_name
         self.last_name      = _last_name
         self.email          = _email
-        self.role           = _role
         self.password_hash  = generate_password_hash(_password)
+        self.role           = _role
         self.is_active      = _is_active
+        self.recept_hotels= _recept_hotels
 
     def __repr__(self):
-        return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s')>" % (
-            self.id, self.email, self.first_name, self.last_name, self.role)
+        return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s', recept_hotel_id='%s')>" % (
+            self.id, self.email, self.first_name, self.last_name, self.role, self.recept_hotel_id)
+    
+    @staticmethod
+    def New(_first_name, _last_name, _email,
+                _password=generate_password.__func__(), _role=UserRole.ANON.value,
+                _is_active=True, _recept_hotels=None):
+        user = User(_first_name, _last_name, _email,
+            generate_password_hash(_password), _role,
+            _is_active, _recept_hotels)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+    @staticmethod
+    def All(query, first_name, last_name, email, role):
+        if not query:
+            query = User.query
+        if (first_name):
+            query = query.filter(User.first_name.ilike("%{}%".format(first_name)))
+        if (last_name):
+            query = query.filter(User.last_name.ilike("%{}%".format(last_name)))
+        if (email):
+            query = query.filter(User.email.ilike("%{}%".format(email)))
+        if (role and role != 0):
+            query = query.filter(User.role == role)
+        return query.all()
+
+    @property
+    def serialize(self):
+        return {'id': self.id, 
+                'first_name': self.first_name, 
+                'last_name': self.last_name,
+                'email': self.email,
+                'role': self.role,
+                'is_active': self.is_active,
+                'recept_hotel_id': self.recept_hotels_id}
 
 class Hotel(db.Model):
     __tablename__  = 'hotels'
@@ -231,6 +270,16 @@ class RoomCategory(db.Model):
         return "<RoomCategory(type='%s', price='%s')>" \
             % (self.type, self.price)
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'price': float(self.price),
+            'type': self.type,
+            'description': self.description,
+            'hotel_id': self.hotel_id,
+        }
+
 class Room(db.Model):
     __tablename__  = 'rooms'
 
@@ -256,6 +305,15 @@ class Room(db.Model):
             self.id, self.number, self.beds, \
             RoomType(self.room_category.type).name, self.room_category.price
             )
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'number': self.number,
+            'beds': self.beds,
+            'room_category_id': self.room_category_id,
+        }
 
 class ReservationRoom(db.Model):
     __tablename__  = 'reservations_rooms'

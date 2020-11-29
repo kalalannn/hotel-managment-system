@@ -13,7 +13,7 @@ role3 = Role('RECEPTIONIST')
 role4 = Role('CUSTOMER')
 role5 = Role('ANON')
 
-/auth: [
+/users: [
     signin,
     signup,
 ]

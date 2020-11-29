@@ -4,18 +4,15 @@
 {% block title %} Base {% endblock %}
 
 {% block scripts %}
-{{ super() }}
-{% block inner_scripts %}
-{% endblock inner_scripts %}
+    {{ super() }}
+    {% block inner_scripts %} {% endblock inner_scripts %}
 {% endblock scripts %}
 
 {% block content %}
+    <div class="container-fluid">
+        {% include 'navbar.html' %}
+        {{ render_messages() }}
 
-<div class="container-fluid">
-{% include 'navbar.html' %}
-{{ render_messages() }}
-{% block inner_content %}
-{% endblock inner_content %}
-</div>
-
+        {% block inner_content %} {% endblock inner_content %}
+    </div>
 {% endblock content %}

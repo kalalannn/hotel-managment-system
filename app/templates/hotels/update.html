@@ -51,6 +51,62 @@ textarea {
 </div>
 
 {% if hotel is defined and op == 'Edit' %}
+<script>
+function DeleteRoom(room_id) {
+    var modal = $('#modalDeleteRoom');
+    modal.find('form').attr('action', Flask.url_for('hotels.delete', { room_id: room_id }));
+    modal.modal('show');
+    return false;
+};
+
+function DeleteRoomCategory(room_category_id) {
+
+};
+
+function LoadRoom(room_id) {
+    var modal = $('#modalRoom');
+    if (room_id) {
+        $.ajax({
+            url: Flask.url_for('hotels.get_rooms', {room_id: room_id})
+        }).done(function (data) {
+            room = data[0]
+            modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room', {hotel_id: {{ hotel.id }}, room_id: room_id}))
+            modal.find('#room_category').val(room.room_category_id)
+            modal.find('#beds').val(room.beds)
+            modal.find('#number').val(room.number)
+        });
+    } else {
+        modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room', {hotel_id: {{ hotel.id }} }))
+        // modal.find('#room_category').val(room.room_category_id)
+        modal.find('#beds').val('')
+        modal.find('#number').val('')
+    };
+    modal.modal('show');
+    return false;
+};
+
+function LoadRoomCategory(room_category_id) {
+    var modal = $('#modalRoomCategory');
+    if (room_category_id) {
+        $.ajax({
+            url: Flask.url_for('hotels.get_room_categories', {room_category_id: room_category_id})
+        }).done(function (data) {
+            room_category = data[0]
+            modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room_category', {hotel_id: {{ hotel.id }}, room_category_id: room_category_id}))
+            modal.find('#price').val(room_category.price)
+            modal.find('#type').val(room_category.type)
+            modal.find('#description').val(room_category.description)
+        });
+    } else {
+        modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room_category', {hotel_id: {{ hotel.id }} }))
+        modal.find('#price').val('')
+        modal.find('#type').val({{ RoomType.STANDARD.value }})
+        modal.find('#description').val('')
+    };
+    modal.modal('show');
+    return false;
+};
+</script>
 <style>
 .table-align-valign-center > tbody > tr > td,
 .table-align-valign-center > thead > tr > th {
@@ -61,10 +117,15 @@ textarea {
     text-align: center;
 }
 </style>
-<h2 class="p-3"> Rooms (<a href=""> New </a>) and Categories (<a href=""> New </a>) </h2>
+<h2 class="p-3">
+    Rooms
+    (<a href="#" onClick="LoadRoom(); return false"> New </a>)
+    and Categories
+    (<a href="#" onClick="LoadRoomCategory(); return false"> New </a>)
+</h2>
 <div class="row justify-content-start p-3">
     <div class="col col-md-6">
-        <table class="table table-striped table-align-valign-center">
+        <table class="table table-align-valign-center">
             <thead class="thead-dark">
                 <tr>
                 {% for field in category_form %}
@@ -72,18 +133,22 @@ textarea {
                         <th> {{ field.label }} </th>
                     {% endif %}
                 {% endfor %}
-                    <th> Action </th>
+                    <th colspan="2"> Action </th>
                 </tr>
             </thead>
 
             <tbody>
                 {% for room_category in hotel.room_categories %}
-                <tr>
+                <tr class="table-active">
                     <td><b> {{ RoomType(room_category.type).name }}  </b></td>
                     <td><b> {{ "{},-".format(room_category.price) }} </b></td>
                     <td> {{ room_category.description }} </td>
-                    <td> <button class="btn btn-primary" onClick="$('#modalRoomCategory').modal('show'); return false;">
+                    <td> <button class="btn btn-primary" onClick="LoadRoomCategory({{ room_category.id }}); return false">
                         Update {#{ room_category.id }#}
+                        </button>
+                    </td>
+                    <td> <button class="btn btn-primary btn-delete" onClick="DeleteRoomCategory({{ room_category.id }}); return false">
+                        Delete {#{ room_category.id }#}
                         </button>
                     </td>
                 </tr>
@@ -93,8 +158,12 @@ textarea {
                         <td> &nbsp; </td>
                         <td> Room #{{ room.number }} </td>
                         <td> {{ room.beds }} Beds  </td>
-                        <td> <button class="btn btn-primary" onClick="$('#modalRoom').modal('show'); return false;">
+                        <td> <button class="btn btn-primary" onClick="LoadRoom({{ room.id }}); return false">
                             Update {#{ room.id }#} 
+                            </button>
+                        </td>
+                        <td> <button class="btn btn-primary btn-delete" onClick="DeleteRoom({{ room.id }}); return false">
+                            Delete {#{ room.id }#} 
                             </button>
                         </td>
                     </tr>
@@ -103,6 +172,50 @@ textarea {
                 {% endfor %}
             </tbody>
             </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDeleteRoomCategory" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Delete Room Category </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Sure you want to delete this Room Category and their Rooms?
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-delete">Delete</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDeleteRoom" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Delete Room </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {{ submit_form.csrf_token }}
+                    Sure you want to delete this Room?
+                    {{ render_field(submit_form.submit) }}
+                </form>
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-delete">Delete</button>
+            </div> -->
+        </div>
     </div>
 </div>
 
@@ -116,7 +229,7 @@ textarea {
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="../{{ hotel.id }}/room_categories/new">
+                <form method="POST">
                 {{ category_form.csrf_token }}
                 {% for field in category_form %}
                     {{ render_field(field) }}
@@ -137,7 +250,7 @@ textarea {
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="../{{ hotel.id }}/room_categories/rooms/new">
+                <form method="POST">
                     {{ room_form.csrf_token }}
                     {% for field in room_form %}
                         {{ render_field(field) }}

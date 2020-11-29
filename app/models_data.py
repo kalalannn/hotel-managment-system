@@ -35,11 +35,6 @@ def load_models_data():
     director_1 = User('Ivan', 'Director 1', 'director1@gmail.com', 'd1qwerty', UserRole.DIRECTOR.value)
     director_2 = User('Ivan', 'Director 2', 'director2@gmail.com', 'd2qwerty', UserRole.DIRECTOR.value)
 
-    receptionist_0 = User('Oleg', 'Receptionist 0', 'receptionist0@gmail.com', 'r0qwerty', UserRole.RECEPTIONIST.value)
-    receptionist_1 = User('Oleg', 'Receptionist 1', 'receptionist1@gmail.com', 'r1qwerty', UserRole.RECEPTIONIST.value)
-    receptionist_2 = User('Oleg', 'Receptionist 2', 'receptionist2@gmail.com', 'r2qwerty', UserRole.RECEPTIONIST.value)
-    receptionist_3 = User('Oleg', 'Receptionist 3', 'receptionist3@gmail.com', 'r3qwerty', UserRole.RECEPTIONIST.value)
-
     customer_0 = User('Vasia', 'Customer 0', 'customer0@gmail.com', 'c0qwerty', UserRole.CUSTOMER.value)
     customer_1 = User('Vasia', 'Customer 1', 'customer1@gmail.com', 'c1qwerty', UserRole.CUSTOMER.value)
     customer_2 = User('Vasia', 'Customer 2', 'customer2@gmail.com', 'c2qwerty', UserRole.CUSTOMER.value)
@@ -53,7 +48,6 @@ def load_models_data():
     db.session.add_all([
         admin_0,
         director_0, director_1, director_2,
-        receptionist_0, receptionist_1, receptionist_2, receptionist_3,
         customer_0, customer_1, customer_2, customer_3,
         customer_4, customer_5, customer_6, customer_7,
     ])
@@ -70,13 +64,22 @@ def load_models_data():
         'Luxusni hotel v Brne pro podnikatele',
         HotelStars.FIVE.value, address_0, director_0)
 
+    receptionist_0_1 = User('JM Oleg',  'Receptionist 1', 'JMreceptionist1@gmail.com', 'JMr1qwerty', UserRole.RECEPTIONIST.value, True, hotel_0)
+    receptionist_0_2 = User('JM Petra', 'Receptionist 2', 'JMreceptionist2@gmail.com', 'JMr2qwerty', UserRole.RECEPTIONIST.value, True, hotel_0)
+
     hotel_1 = Hotel('Praha President Hotel',
         'Nejlepsi hotel v Praze pro prezidenty',
         HotelStars.FOUR.value, address_1, director_1)
 
+    receptionist_1_1 = User('PP Martin', 'Receptionist 1', 'PPreceptionist1@gmail.com', 'PPr1qwerty', UserRole.RECEPTIONIST.value, True, hotel_1)
+    receptionist_1_2 = User('PP Jirka',  'Receptionist 2', 'PPreceptionist2@gmail.com', 'PPr2qwerty', UserRole.RECEPTIONIST.value, True, hotel_1)
+
     hotel_2 = Hotel('Brno Grand Hotel',
         'Kolem hotelu je vzdycky hodne opilcu, bezdomovcu a vselijakych sebrancu',
         HotelStars.THREE.value, address_2, director_2)
+
+    receptionist_2_1 = User('BG Honza',     'Receptionist 1', 'BGreceptionist1@gmail.com', 'PPr1qwerty', UserRole.RECEPTIONIST.value, True, hotel_2)
+    receptionist_2_2 = User('BG Katarina',  'Receptionist 2', 'BGreceptionist2@gmail.com', 'PPr2qwerty', UserRole.RECEPTIONIST.value, True, hotel_2)
 
     hotel_3 = Hotel('Prague Hotel Carl Inn Free Parking',
         "Prague Hotel Carl Inn Free Parking se nachází vedle autobusové zastávky "+
@@ -94,6 +97,8 @@ def load_models_data():
         "Na požádání a za příplatek lze zajistit kyvadlovou dopravu.",
         HotelStars.FOUR.value, address_3, director_0)
 
+    receptionist_3_1 = User('PH Marek',     'Receptionist 1', 'PHreceptionist1@gmail.com', 'PHr1qwerty', UserRole.RECEPTIONIST.value, True, hotel_3)
+    receptionist_3_2 = User('PH Iveta',     'Receptionist 2', 'PHreceptionist2@gmail.com', 'PHr2qwerty', UserRole.RECEPTIONIST.value, True, hotel_3)
 
     address_0.hotel_id = hotel_0.id
     address_1.hotel_id = hotel_1.id
@@ -105,6 +110,14 @@ def load_models_data():
         address_0, address_1, address_2, address_3,
         hotel_0, hotel_1, hotel_2, hotel_3
     ])
+
+    db.session.add_all([
+        receptionist_0_1, receptionist_0_2,
+        receptionist_1_1, receptionist_1_2,
+        receptionist_2_1, receptionist_2_2,
+        receptionist_3_1, receptionist_3_2,
+    ])
+
 
     # ROOMS_CATEORIES
     # def __init__(self, _type, _price, _hotel):

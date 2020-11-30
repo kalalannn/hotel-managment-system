@@ -34,18 +34,20 @@
 	
 	<h2>Uživatelé systému pro testování</h2>
 	<table>
-	<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-	<tr><td>admin@gmail.com</td><td>a0qwerty</td><td>Administrátor</td></tr>
-	<tr><td>director0@gmail.com</td><td>d0qwerty</td><td>Director 0</td></tr>
-	<tr><td>director1@gmail.com</td><td>d1qwerty</td><td>Director 1</td></tr></tr>
-	<tr><td>director2@gmail.com</td><td>d2qwerty</td><td>Director 2</td></tr></tr>
-	<tr><td>receptionist0@gmail.com</td><td>r0qwerty</td><td>Recepční</td></tr>
-	<tr><td>customer0@gmail.com</td><td>c0qwerty</td><td>Zákazník</td></tr>
-	</table> 
-	<p>Loginy a hesla dalších recepčních (celkem 4) a zákazníků (celkem 8) jsou tvořeny podle pravidla:</p>
+		<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+		<tr><td>admin@gmail.com</td><td>a0qwerty</td><td>Administrátor</td></tr>
+		<tr><td>director0@gmail.com</td><td>d0qwerty</td><td><strong>Director 0</strong> (Jizni Morava International, Prague Hotel Carl Inn Free Parking)</td></tr>
+		<tr><td>JMreceptionist1@gmail.com</td><td>JMr1qwerty</td><td>Recepční Jizni Morava International</td></tr>
+		<tr><td>PHreceptionist1@gmail.com</td><td>PHr1qwerty</td><td>Recepční Prague Hotel Carl Inn Free Parking</td></tr>
+		<tr><td>director1@gmail.com</td><td>d1qwerty</td><td><strong>Director 1</strong> (Praha President Hotel)</td></tr></tr>
+		<tr><td>PPreceptionist1@gmail.com</td><td>PPr1qwerty</td><td>Recepční Praha President Hotel</td></tr>
+		<tr><td>director2@gmail.com</td><td>d2qwerty</td><td><strong>Director 2</strong> (Brno Grand Hotel)</td></tr></tr>
+		<tr><td>BGreceptionist1@gmail.com</td><td>BGr1qwerty</td><td>Recepční Brno Grand Hotel</td></tr>
+		<tr><td>customer0@gmail.com</td><td>c0qwerty</td><td>Zákazník</td></tr>
+		</table>
+	<p>Loginy a hesla dalších zákazníků (celkem 8) jsou tvořeny podle pravidla:</p>
 	<p style="font-size: 15px;"><strong>Login: </strong>{role}{číslo od 0}@gmail.com <strong>Heslo: </strong>{první písmeno role <strong>r nebo c</strong>}{číslo od 0}qwerty</p>
-	<pre>	<strong>login: </strong>receptionist<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>r1</strong>qwerty , ...
-	<strong>login: </strong>customer<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>c1</strong>qwerty , ... </pre>
+	<pre>	<strong>login: </strong>customer<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>c1</strong>qwerty , ... </pre>
 	<h2>Implementace</h2>
 	<p>Projekt je implementován v jazyce Python pomocí frameworku Flask. Klientská část byla napsána v jazycích JavaScript, HTML, CSS.
 		Interakce uživatele a systému probíhá bezpečně prostřednictvím forem které jsme vytvořili použitím Flask Forms.

@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <title>Projekt IIS</title>
+    <title>IIS Project</title>
     <style type="text/css">
     	table { border-collapse: collapse; }
     	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
@@ -13,120 +13,135 @@
     </style>
 </head>
 <body>
+	<h1>Hotel: rezervace a správa ubytování</h1> 
+	<dl>
+		<dt>Autoři</dt>
+		<dd>Luhin Artsiom<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xautor01@stud.fit.vutbr.cz">xluhin00@stud.fit.vutbr.cz</a> -
+			vedoucí
+		</dd>
+		<dd>Sharlaieva Arina<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xautor02@stud.fit.vutbr.cz">xsharl00@stud.fit.vutbr.cz</a> - 
+			popis činnosti v týmu
+		</dd>
+	  <dd>Vorobiev Nikolaj<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xautor03@stud.fit.vutbr.cz">xvorob00@stud.fit.vutbr.cz</a> - 
+			popis činnosti v týmu
+		</dd>
+		<dt>URL aplikace</dt>
+		<dd><a href="https://iishotel.herokuapp.com/">https://iishotel.herokuapp.com/</a></dd>
+	</dl>
+	
+	<h2>Uživatelé systému pro testování</h2>
+	<table>
+	<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+	<tr><td>admin@gmail.com</td><td>a0qwerty</td><td>Administrátor</td></tr>
+	<tr><td>director0@gmail.com</td><td>d0qwerty</td><td>Director 0</td></tr>
+	<tr><td>director1@gmail.com</td><td>d1qwerty</td><td>Director 1</td></tr></tr>
+	<tr><td>director2@gmail.com</td><td>d2qwerty</td><td>Director 2</td></tr></tr>
+	<tr><td>receptionist0@gmail.com</td><td>r0qwerty</td><td>Recepční</td></tr>
+	<tr><td>customer0@gmail.com</td><td>c0qwerty</td><td>Zákazník</td></tr>
+	</table> 
+	<p>Loginy a hesla dalších recepčních (celkem 4) a zákazníků (celkem 8) jsou tvořeny podle pravidla:</p>
+	<p style="font-size: 15px;"><strong>Login: </strong>{role}{číslo od 0}@gmail.com <strong>Heslo: </strong>{první písmeno role <strong>r nebo c</strong>}{číslo od 0}qwerty</p>
+	<pre>	<strong>login: </strong>receptionist<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>r1</strong>qwerty , ...
+	<strong>login: </strong>customer<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>c1</strong>qwerty , ... </pre>
+	<h2>Implementace</h2>
+	<p>Projekt je implementován v jazyce Python pomocí frameworku Flask. Klientská část byla napsána v jazycích JavaScript, HTML, CSS.
+		Interakce uživatele a systému probíhá bezpečně prostřednictvím forem které jsme vytvořili použitím Flask Forms.
+	</p>
+	
+	<h4>Správa účtů /users/</h4>
+	<p>
+		Komponenta pro správu přihlašování a odhlašování uživatelů, úpravu profilů. Autorizace jsme realizovali pomocí Flask Login.
+		Uživatel se může přihlásit do účtu nebo vytvořit si nový profil.
+		Administrátor a Director můžou spravovat účty recepčních a zákazníků hotelu.
+	</p>
+		<ul>
+			<li><strong>login</strong> přihlášení uživatele.</li>
+			<li><strong>logout</strong> odhlášení uživatele.</li>
+			<li><strong>register</strong> forma registrace a vytvoření účtu.</li>
+			<li><strong>get_or_create_user</strong> uživatel bud' existuje nebo je anonymní.</li>
+			<li><strong>new_or_update_user</strong> přidání uživatele nebo změna údajů podle role.</li>
+			<li><strong>new_password</strong> změna hesla přihlášeného uživatele.</li>
+			<li><strong>home</strong> domovská stránka.</li>
+			<li><strong>get_user</strong> zobrazuje uživatele.</li>
+			<li><strong>manage</strong> zobrazuje seznam uživatelů.</li>
+			<li><strong>delete</strong> vymazání uživatele.</li>
+		</ul>
+	
+		
+	<h4>Správa hotelů /hotels/</h4>
+	<p>
+	Přidávat a upravovat hotely můžou uživatele administrátor a director.
+	Director může editovat vlastní hotely a přidávat nové. Administrátor může přidávat hotely (specifikovat directora) a také editovat libovolný hotel.
+	V rámci editace hotelu je možně měnit informace o hotelu, přidávat nebo editovat kategorie pokojů a jednotlivé pokoje.
+	</p>
+		<ul>
+			<li><strong>list</strong> zobrazí seznam hotelů.</li>
+			<li><strong>update</strong> úprava nebo přidání nového hotelu.</li>
+			<li><strong>new_or_update_room</strong> úprava nebo přidání pokoje.</li>
+			<li><strong>new_or_update_room_category</strong> úprava nebo přidání kategorie pokojů.</li>
+			<li><strong>show</strong> zobrazení informace o hotelu.</li>
+			<li><strong>delete</strong> vymazání hotelu, kategorie nebo pokoje.</li>
+		</ul>
+	<h4>Správa rezervací /reservations/</h4>
+	<p>
+		Vytvářet rezervace v našem systému můžou všichni uživateli. V rámci jedné rezervace
+		uživatel může rezervovat najednou několik pokojů pro různá data.
+		Uživatel přidává rezervace pomocí formy, pro výběr dat jsme použili widget DatePicker.
+		Rezervace na stránkach recepčního se zobrazují pomocí widgetu DayPilot.
+	</p>
+		<ul>
+			<li><strong>reservation_list</strong> zobrazení rezervací uživatele.</li>
+			<li><strong>reservation_details</strong> informace o rezervaci.</li>
+			<li><strong>dashboard</strong> seznam rezervaci </li>
+			<li><strong>load_rooms</strong> zobrazení seznamu pokojů.</li>
+			<li><strong>load_reservations</strong> zobrazení seznamu rezervací.</li>
+			<li><strong>create_reservation</strong> vytvoření rezervace.</li>
+			<li><strong>edit_reservation</strong> úprava rezervace.</li>
+			<li><strong>delete_reservation</strong> převedení rezervace do stavu canceled.</li>
+			<li><strong>delete_reserv_room</strong> rušení rezervace pokoje.</li>
+			<li><strong>filter_rooms</strong> filtruje pokoje podle kapacity nebo typu.</li>
+			<li><strong>is_room_free</strong> zobrazuje stav pokoje.</li>
+			<li><strong>update_payment</strong> správa plateb.</li>
+		</ul>
+	
+	 <h2>Databáze</h2>
+	<p>
+		V projektu byl použit databázový systém PostgreSQL verze 11. Práce z databázou
+		jsme realizovali pomocí ORM nástroje SQLAlchemy.
+	</p>
+	<h3>Schéma databáze</h3>	
+	<img src="app/static/img/schema.png">
+	<br>
+	<br>
+	
+	<h2>Instalace</h2>
+	
+	<h4>Softwarové požadavky a instalace</h4>
+	<p>Požadavky jsou uvedené v souboru <b>requirements.txt</b> v hlavní složce projektu.
+	Nainstalovat nutné balíky je možně příkazem <code>pip intstall -r requirements.txt</code></p>
+	
+	<h4>Postup instalace na server</h4>
+	<p>
+		Jako platformu pro naší aplikace jsme zvolili Heroku. Heroku umožňuje jednoduché nasazení aplikace použitím git a podporuje PostgreSQL databáze.
+		Jako webserver jsme použili http server gunicorn.<br>
+		Nasazení probíhá v následujících krocích:
+		<ol>
+			<li>Vytvoření aplikace na Heroku příkazem <code>heroku create iishotel</code> (inicializuje se git repozitář).</li>
+			<li>Kopírování projektu do repozitáře.</li>
+			<li>Přidání databáze do aplikace. <code>heroku addons:create heroku-postgresql:hobby-dev --version=11 -a iishotel</code></li>
+			<li>Úprava config souboru pro spojení z databázou.</li>
+			<li>Inicializace databáze přikazem <code>python manage.py restart</code></li>
+			<li>Úprava souboru Procfile z označením webserveru a spustitelného souboru aplikace.</li>
+		</ol>
+	</p>
+	
+	
+	<h2>Známé problémy</h2>
 
-<h1>Hotel: rezervace a správa ubytování</h1> 
-<dl>
-	<dt>Autoři</dt>
-	<dd>Luhin Artsiom<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor01@stud.fit.vutbr.cz">xluhin00@stud.fit.vutbr.cz</a> -
-        vedoucí
-	</dd>
-	<dd>Sharlaieva Arina<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor02@stud.fit.vutbr.cz">xsharl00@stud.fit.vutbr.cz</a> - 
-		popis činnosti v týmu
-	</dd>
-  <dd>Vorobiev Nikolaj<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor03@stud.fit.vutbr.cz">xvorob00@stud.fit.vutbr.cz</a> - 
-		popis činnosti v týmu
-	</dd>
-	<dt>URL aplikace</dt>
-	<dd><a href="https://iishotel.herokuapp.com/">https://iishotel.herokuapp.com/</a></dd>
-</dl>
-
-<h2>Uživatelé systému pro testování</h2>
-<table>
-<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-<tr><td>admin@gmail.com</td><td>a0qwerty</td><td>Administrátor</td></tr>
-<tr><td>director0@gmail.com</td><td>d0qwerty</td><td>Vlastník 0</td></tr>
-<tr><td>director1@gmail.com</td><td>d1qwerty</td><td>Vlastník 1</td></tr></tr>
-<tr><td>director2@gmail.com</td><td>d2qwerty</td><td>Vlastník 2</td></tr></tr>
-<tr><td>receptionist0@gmail.com</td><td>r0qwerty</td><td>Recepční</td></tr>
-<tr><td>customer0@gmail.com</td><td>c0qwerty</td><td>Zákazník</td></tr>
-</table> 
-<p>Loginy a hesla dálších recepčních (celkem 4) a zákazníků (celkem 8) jsou tvořeny podle pravidla:</p>
-<p style="font-style: italic;"><strong>Login: </strong>(role)(číslo od 0)@gmail.com <strong>Heslo: </strong> (první písmeno role <strong>r nebo c</strong>)(číslo od 0)qwerty</p>
-<p><strong>login: </strong>receptionist<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>r1</strong>qwerty , ...</p>
-<p><strong>login: </strong>customer<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>c1</strong>qwerty , ...</p>
-<h2>Implementace</h2>
-<p>Projekt je implementován v jazyce Python pomocí frameworku Flask. Kientská část byla napsána v JavaScript, HTML, CSS.
-	Interakce uživatele a systému probíhá prostřednictvím form které jsme vytvořili použitím Flask Forms.
-</p>
-<h4> Autorizace /auth/ </h4>
-<p>
-	Komponenta pro spravu přihlášovaní a odhlášovaní uživatelů. Autorizace jsme realizovali pomocí Flask Login.
-	Uživatel se může přihlasit do učtu nebo vytvořit si nový profil.
-	<ul>
-		<li><strong>login</strong> Přihlášení uživatele.</li>
-		<li><strong>logout</strong> Odhlašení uživatele.</li>
-		<li><strong>register</strong> Forma registrace a vytvoření ůčtu.</li>
-		<li><strong>new_password</strong> Změna hesla přihlašeného uživatele.</li>
-	</ul>
-</p>
-<h4>Správa hotelů /hotels/</h4>
-<p>
-Přidávat a spravovat hotely mohou uživatele administrátor a vlastník.
-Vlastník může editovat vlastní hotely a přídávat nové. Administrátor může přídávat hotely (specifikovat vlastníka) a také editovat libovolný hotel.
-V rámci editace hotelu je možně měnit informace o hotelu, přídávat nebo editovat kategorie pokojů a jednotlivé pokoje.
-</p>
-	<ul>
-		<li><strong>list</strong> Zobrazí seznam hotelů.</li>
-		<li><strong>update(hotel_id)</strong> Úprava hotelu.</li>
-		<li><strong>new_room_category_rooms</strong> Úprava pokojů.</li>
-		<li><strong>new_room_category</strong> Úprava nebo přidání kategorie pokojů.</li>
-		<li><strong>show</strong> Zobrazení informace o hotelu.</li>
-	</ul>
-<h4>Správa rezervací /reservations/</h4>
-<p>
-	Vytvářet rezervace v našem systému mohou všichni uživateli. V rámci jedne rezervace
-	uživatel může rezervovat najednou několik pokojů pro různá data.
-	Uživatel přidává rezervace pomocí formy, pro výběr dat jsme použili widget DatePicker.
-	Rezervace na stránkach recepčního se zobrazují pomocí widgetu DayPilot.
-</p>
-	<ul>
-		<li><strong>show</strong> ... </li>
-		<li><strong>email_autocomplete</strong> ... </li>
-		<li><strong>find_user</strong> ... </li>
-		<li><strong>load_rooms</strong> Zobrazení seznamu pokojů.</li>
-		<li><strong>load_reservations</strong> Zobrazení seznamu rezervací.</li>
-		<li><strong>get_user</strong> Zobrazuje uživatele.</li>
-		<li><strong>create_reservation</strong> Vytváření rezervace.</li>
-		<li><strong>filter_rooms</strong> Filtruje pokoje podle kapacity nebo typu.</li>
-		<li><strong>is_room_free</strong> Zobrazuje stav pokoje.</li>
-	</ul>
-
-<h4>Správa účtů /profile/</h4>
-<p>
-	Administrátor a Vlastník mohou spravovat účty recepčních a zákazníků hotelu.
-</p>
-	<ul>
-		<li><strong>manage</strong> Zobrazuje seznam zákazníků a recepčních.</li>
-		<li><strong>add_user</strong> Зřidání uživatele.</li>
-		<li><strong>edit_user</strong> Úprava údajů uživatele včetně role.</li>
-		<li><strong>delete_user</strong> Vymazání uživatele.</li>
-	</ul>
- <h2>Databáze</h2>
-<p>
-	V projektu byl použit databázový systém PostgreSQL. Práce z databázou
-	jsme realizovali pomocí ORM násroje SQLAlchemy.
-</p>
-<h3>Schéma databáze</h3>	
-<img src="app/static/img/schema.png">
-
-<h2>Instalace</h2>
-
-<h4>Softwarové požadavky a instalace</h4>
-Požadavky jsou uvedené v souboru <b>requirements.txt</b> v hlavní složce projektu.
-<br>
-Nainstalovat nutné balíky je možně příkazem <code>pip intstall -r requirements.txt</code>
-
-<ul style="color: red;">
-<li>postup instalace na server,</li>
-<li>softwarové požadavky (verze PHP apod.),</li>
-<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
-</ul>
-
-<h2>Známé problémy</h2>
-<p>Zde popište, které body zadání nejsou implementovány a z jakého důvodu. Např. &bdquo;Z časových důvodů nebyla implementována správa uživatelů.&rdquo; Pomůžete tím zrychlit hodnocení, když neimplementované funkce nebudeme muset dlouze hledat.</p>
-
-</body>
-</html>
+	</body>
+	</html>
+	
+	

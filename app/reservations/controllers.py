@@ -1,4 +1,4 @@
-from flask import request, render_template, jsonify, json
+from flask import request, render_template, jsonify, json, flash, redirect, url_for
 from flask_login import current_user
 from datetime import datetime, date
 from decimal import Decimal
@@ -9,6 +9,7 @@ import jsonpickle
 from . import reservations
 # Import needed forms and models
 from .forms import UserForm, StatusForm
+from ..forms import SubmitForm
 from ..models import User, UserRole, Hotel, Room, RoomCategory, ReservationRoom, ReservationStatus, \
     RoomType, Payment, History, Reservation
 # Import database object
@@ -20,12 +21,11 @@ def reservation_list():
     reservations = Reservation.query.filter_by(customer_id=current_user.id).all()
     reservations = list(filter(lambda r: r.status != ReservationStatus.CANCELED.value, reservations))
 
-    return render_template('reservations/list.html', reservations=reservations)
+    return render_template('reservations/list.html', reservations=reservations, submit_form=SubmitForm())
 
 
 @reservations.route('/reservation_details')
 def reservation_details():
-
     reservation_id = request.args.get('reservation_id')
     reservation = Reservation.query.filter_by(id=reservation_id).first()
 
@@ -186,20 +186,27 @@ def edit_reservation():
     return jsonify(message='Reservation successfully updated')
 
 
-@reservations.route('/delete_reservation', methods=['GET', 'POST'])
-def delete_reservation():
-    reservation_id = request.args.get('reservation_id')
+@reservations.route('/delete_reservation/<int:reservation_id>', methods=['GET', 'POST'])
+def delete_reservation(reservation_id):
+    form = SubmitForm(request.form)
 
     reservation = Reservation.query.filter_by(id=reservation_id).first()
-    reservation.status = ReservationStatus.CANCELED.value
+    if not reservation:
+        flash('Wrong reservation!', 'error')
+        return redirect(url_for('reservations.reservation_list'))
 
-    for reserv_room in reservation.reservations_rooms:
-        reserv_room.is_active = False
+    if form.validate_on_submit():
+        reservation.status = ReservationStatus.CANCELED.value
+        for reserv_room in reservation.reservations_rooms:
+            reserv_room.is_active = False
 
-    db.session.add(reservation)
-    db.session.commit()
+        db.session.add(reservation)
+        db.session.commit()
+        flash('Reservation #{} was canceled.'.format(reservation.id), 'info')
+    else:
+        flash('Wrong form!', 'error')
 
-    return jsonify(message='Reservation successfully deleted')
+    return redirect(url_for('reservations.reservation_list'))
 
 
 @reservations.route('/delete_reserv_room', methods=['GET', 'POST'])

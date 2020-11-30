@@ -11,26 +11,35 @@ from ..models import Room, RoomCategory, RoomType
 from app import db
 from app.helpers import Helper
 
-@hotels.route('/list', methods=['GET', 'POST'])
-@hotels.route('/list/<int:owner_id>', methods=['GET', 'POST'])
-def list(owner_id=None):
+
+@hotels.route('setcookie', methods=['GET', 'POST'])
+def setcookie():
+    if request.method == 'POST':
+        name = request.form['name']
+    print(name)
+    return redirect(url_for('hotels.hotel_list'))
+
+
+@hotels.route('/hotel_list', methods=['GET', 'POST'])
+@hotels.route('/hotel_list/<int:owner_id>', methods=['GET', 'POST'])
+def hotel_list(owner_id=None):
     form = SearchForm(request.form)
 
-    query = Hotel.query
+    query = Hotel.query.join(Address, Hotel.address)
     if owner_id:
         query = query.filter(Hotel.owner_id == owner_id)
-
     # POST
     if form.validate_on_submit():
-
         if form.name.data is not None:
-            query = query.filter(Hotel.name.like("%{}%".format(form.name.data)))
-
-        # if form.stars.data:
-        #     query = query.filter(Hotel.stars == form.stars.data.value)
+            query = Hotel.filter(query, name=form.name.data)
+        if form.country.data is not None:
+            query = Address.filter(query, country=form.country.data.country)
+        if form.date_from.data and form.date_to.data:
+            # TODO
+            free_rooms = Room.free_rooms_by_dates(form.date_from.data, form.date_to.data)
     else:
         query = query.order_by(Hotel.stars).limit(10)
-    
+
     hotels = query.all()
     return render_template('hotels/list.html', form=form, hotels=hotels)
 
@@ -203,6 +212,8 @@ def show(hotel_id):
     hotel = Hotel.query.filter_by(id=hotel_id).one()
     return render_template('hotels/update.html',
         op='Show', hotel=hotel)
+
+
 
 @hotels.route('/delete/<int:hotel_id>', methods=['POST'])
 @hotels.route('/delete/room_category/<int:room_category_id>', methods=['POST'])

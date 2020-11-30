@@ -316,16 +316,16 @@ class Hotel(db.Model):
     @staticmethod
     def filter(query, name=None, description=None, owner_id=None, stars=None, address_id=None, is_active=True):
         if name:
-            query = query.filter(Hotel.name.ilike("%{}%").format(name))
+            query = query.filter(Hotel.name.ilike("%{}%".format(name)))
         if description:
-            query = query.filter(Hotel.description.ilike("%{}%").format(description))
+            query = query.filter(Hotel.description.ilike("%{}%".format(description)))
         if owner_id:
             query = query.filter(Hotel.owner_id == owner_id)
         if stars:
             query = query.filter(Hotel.stars == stars)
         if address_id:
             query = query.filter(Hotel.address_id == address_id)
-        query = query.filter(Hotel.is_active == is_active)
+        # query = query.filter(Hotel.is_active == is_active)
         return query
     
     # Which Hotels can <get> and <edit> current_user
@@ -390,6 +390,22 @@ class Address(db.Model):
 
     def text(self):
         return '{} {}, {} {}, {}'.format(self.street, self.number, self.post_code, self.city, self.country)
+
+    @staticmethod
+    def filter(query, country=None, city=None, post_code=None, street=None, number=None, hotel=None):
+        if country:
+            query = query.filter(Address.country.ilike("%{}%".format(country)))
+        if city:
+            query = query.filter(Address.city.ilike("%{}%".format(city)))
+        if post_code:
+            query = query.filter(Address.post_code.ilike("%{}%".format(post_code)))
+        if street:
+            query = query.filter(Address.street.ilike("%{}%".format(street)))
+        if number:
+            query = query.filter(Address.number == number)
+        if hotel:
+            query = query.filter(Address.hotel == hotel)
+        return query
 
 class Feedback(db.Model):
     __tablename__  = 'feedbacks'
@@ -490,6 +506,30 @@ class Room(db.Model):
             'beds': self.beds,
             'room_category_id': self.room_category_id,
         }
+
+    @staticmethod
+    def free_rooms_by_dates(date_from, date_to):
+        rooms = Room.query.all()
+        free_rooms = []
+        for room in rooms:
+            if not room.reservations_rooms:
+                free_rooms.append(room)
+            else:
+                to_append = True
+                for reservation_room in room.reservations_rooms:
+                    if reservation_room.is_active:
+                        if reservation_room.date_from >= date_from and reservation_room.date_from < date_to:
+                            to_append = False
+                            break
+                        elif reservation_room.date_to > date_from and reservation_room.date_to < date_to:
+                            to_append = False
+                            break
+                        elif reservation_room.date_from < date_from and reservation_room.date_to > date_to:
+                            to_append = False
+                            break
+                if to_append:
+                    free_rooms.append(room)
+        return free_rooms
 
 class ReservationRoom(db.Model):
     __tablename__  = 'reservations_rooms'

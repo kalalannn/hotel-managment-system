@@ -70,13 +70,13 @@ function LoadRoom(room_id) {
             url: Flask.url_for('hotels.get_rooms', {room_id: room_id})
         }).done(function (data) {
             room = data[0]
-            modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room', {hotel_id: {{ hotel.id }}, room_id: room_id}))
+            modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room', {hotel_id: '{{ hotel.id }}', room_id: room_id}))
             modal.find('#room_category').val(room.room_category_id)
             modal.find('#beds').val(room.beds)
             modal.find('#number').val(room.number)
         });
     } else {
-        modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room', {hotel_id: {{ hotel.id }} }))
+        modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room', {hotel_id: '{{ hotel.id }}' }))
         // modal.find('#room_category').val(room.room_category_id)
         modal.find('#beds').val('')
         modal.find('#number').val('')
@@ -92,15 +92,15 @@ function LoadRoomCategory(room_category_id) {
             url: Flask.url_for('hotels.get_room_categories', {room_category_id: room_category_id})
         }).done(function (data) {
             room_category = data[0]
-            modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room_category', {hotel_id: {{ hotel.id }}, room_category_id: room_category_id}))
+            modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room_category', {hotel_id: '{{ hotel.id }}', room_category_id: room_category_id}))
             modal.find('#price').val(room_category.price)
             modal.find('#type').val(room_category.type)
             modal.find('#description').val(room_category.description)
         });
     } else {
-        modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room_category', {hotel_id: {{ hotel.id }} }))
+        modal.find('form').attr('action', Flask.url_for('hotels.new_or_update_room_category', {hotel_id: '{{ hotel.id }}' }))
         modal.find('#price').val('')
-        modal.find('#type').val({{ RoomType.STANDARD.value }})
+        modal.find('#type').val('{{ RoomType.STANDARD.value }}')
         modal.find('#description').val('')
     };
     modal.modal('show');
@@ -143,11 +143,11 @@ function LoadRoomCategory(room_category_id) {
                     <td><b> {{ RoomType(room_category.type).name }}  </b></td>
                     <td><b> {{ "{},-".format(room_category.price) }} </b></td>
                     <td> {{ room_category.description }} </td>
-                    <td> <button class="btn btn-primary" onClick="LoadRoomCategory({{ room_category.id }}); return false">
+                    <td> <button class="btn btn-primary" onClick="LoadRoomCategory('{{ room_category.id }}'); return false">
                         Update {#{ room_category.id }#}
                         </button>
                     </td>
-                    <td> <button class="btn btn-primary btn-delete" onClick="DeleteRoomCategory({{ room_category.id }}); return false">
+                    <td> <button class="btn btn-primary btn-delete" onClick="DeleteRoomCategory('{{ room_category.id }}'); return false">
                         Delete {#{ room_category.id }#}
                         </button>
                     </td>
@@ -158,11 +158,11 @@ function LoadRoomCategory(room_category_id) {
                         <td> &nbsp; </td>
                         <td> Room #{{ room.number }} </td>
                         <td> {{ room.beds }} Beds  </td>
-                        <td> <button class="btn btn-primary" onClick="LoadRoom({{ room.id }}); return false">
+                        <td> <button class="btn btn-primary" onClick="LoadRoom('{{ room.id }}'); return false">
                             Update {#{ room.id }#} 
                             </button>
                         </td>
-                        <td> <button class="btn btn-primary btn-delete" onClick="DeleteRoom({{ room.id }}); return false">
+                        <td> <button class="btn btn-primary btn-delete" onClick="DeleteRoom('{{ room.id }}'); return false">
                             Delete {#{ room.id }#} 
                             </button>
                         </td>

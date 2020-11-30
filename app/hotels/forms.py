@@ -33,9 +33,9 @@ class SearchForm(FlaskForm):
         allow_blank     = True)
 
     date_from           = DateField('From', \
-        default = datetime.today)
+        default = datetime.today, format='%d-%m-%Y')
     date_to             = DateField('To',   \
-        default = datetime.today() + timedelta(days=1))
+        default = datetime.today() + timedelta(days=1), format='%d-%m-%Y')
 
     people_count        = StringField('Persons',   default=2)
     # rooms_count         = StringField('Rooms',    default=1)

@@ -35,6 +35,15 @@
 </style>
 
 <script>
+    function cancelReservation(reservation_id) {
+        if (!reservation_id) {
+            Utils.showToast('error', 'Some error occurred. Try to reload the page');
+        }
+        let modal = $('#modalDeleteReservation');
+        modal.find('form').attr('action', Flask.url_for('reservations.delete_reservation', { reservation_id: reservation_id} ))
+        modal.modal('show');
+    }
+
     $(document).ready(function () {
         $('.reserv-details').on('click', function () {
             $.ajax({
@@ -49,22 +58,7 @@
             });
         });
 
-        $('.reserv-cancel').on('click', function () {
-            $.ajax({
-                url: "{{ url_for('reservations.delete_reservation') }}",
-                data: { reservation_id: $(this).data('reservation-id') },
-                // TODO
-                success: function (data) {
-                    Utils.showToast('success', data.message)
-                },
-                error: function () {
-                    Utils.showToast('error', 'Some error occured. Try to reload the page')
-                }
-            });
-        });
-
         function showReservationDetails(data) {
-            console.log(data)
             let $modal = $('#detailsDialog');
 
             let status;
@@ -130,7 +124,7 @@
         <div class="pr-3"><button class="btn btn-info btn-sm reserv-details"
                 data-reservation-id="{{ reservation.id }}">Details</button></div>
         <div><button class="btn btn-danger btn-sm reserv-cancel"
-                data-reservation-id="{{ reservation.id }}">Cancel</button></div>
+                onClick="cancelReservation('{{ reservation.id }}'); return false">Cancel</button></div>
     </div>
 </div>
 {% endfor %}
@@ -145,7 +139,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <h4><div class="d-flex justify-content-center pb-2 check"></div></h4>
+                <h4>
+                    <div class="d-flex justify-content-center pb-2 check"></div>
+                </h4>
                 <div class="row justify-content-around">
                     <div id="placeholder"></div>
                     <div class="d-flex flex-column">
@@ -156,6 +152,26 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDeleteReservation" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel reservation</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {{ submit_form.csrf_token }}
+                    Sure you want to cancel this reservation?
+                    {{ render_field(submit_form.submit) }}
+                </form>
             </div>
         </div>
     </div>

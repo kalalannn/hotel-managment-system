@@ -5,91 +5,42 @@
 
 {% block inner_scripts %}
 <script>
-    function LoadUser(user_id) {
-        var modal;
-        if (user_id) {
-            modal = $('#modalEditUser');
-            modal.find('.modal-title').text('Update User');
-            $.ajax({
-                url: Flask.url_for('users.get_user', {user_id: user_id})
-            }).done(function (data) {
-                var user = data;
-                modal.find('form').attr('action', Flask.url_for('users.new_or_update_user', { user_id: user_id }));
-                modal.find('#email').val(user.email);
-                modal.find('#first_name').val(user.first_name);
-                modal.find('#last_name').val(user.last_name);
-                modal.find('#role').val(user.role);
-                console.log(modal.find('form'))
-            });
-        } else {
-            modal = $('#modalUser');
-            modal.find('.modal-title').text('New User');
-            var form = modal.find('form');
-            form[0].reset();
-            form.attr('action', Flask.url_for('users.new_or_update_user'));
-        };
-        modal.modal('show');
+function LoadUser(user_id) {
+    var modal;
+    if (user_id) {
+        modal = $('#modalEditUser');
+        modal.find('.modal-title').text('Update User');
+        $.ajax({
+            url: Flask.url_for('users.get_user', {user_id: user_id})
+        }).done(function (data) {
+            var user = data;
+            modal.find('form').attr('action', Flask.url_for('users.new_or_update_user', { user_id: user_id }));
+            modal.find('#email').val(user.email);
+            modal.find('#first_name').val(user.first_name);
+            modal.find('#last_name').val(user.last_name);
+            modal.find('#role').val(user.role);
+            console.log(modal.find('form'))
+        });
+    } else {
+        modal = $('#modalUser');
+        modal.find('.modal-title').text('New User');
+        var form = modal.find('form');
+        form[0].reset();
+        form.attr('action', Flask.url_for('users.new_or_update_user'));
+    };
+    modal.modal('show');
+    return false;
+};
+
+function DeleteUser(user_id) {
+    if (!user_id) {
         return false;
     };
-
-    function DeleteUser(user_id) {
-        if (!user_id) {
-            return false;
-        };
-        var modal = $('#modalDeleteUser');
-        modal.find('form').attr('action', Flask.url_for('users.delete', { user_id: user_id }))
-        modal.modal('show');
-        return false;
-    };
-
-    $(document).ready(function () {
-        // shows success message after page reload
-        if (sessionStorage.getItem('showmsg') === '1') {
-            Utils.showToast('success', sessionStorage.getItem('message'));
-            sessionStorage.removeItem('showmsg');
-            sessionStorage.removeItem('message');
-        }
-    });
-
-        /*
-        $('#confirm').on('show.bs.modal', function (e) {
-            let $button = $(e.relatedTarget);
-            $('#confirm').data('user-url', $button.data('user-url'));
-        });
-
-        $('#user_dialog').find('#submit').on('click', function () {
-            let $modal = $(this).closest('.modal');
-            let url = $modal.data('user-url');
-
-            $.post(url, data = $modal.find('form').serialize(), function (data) {
-                if (data.status === 200) {
-                    $modal.modal('hide');
-                    sessionStorage.setItem('showmsg', '1');
-                    sessionStorage.setItem('message', data.message);
-                    // location.reload();
-                } else {
-                    Utils.showToast('error', data.message);
-                }
-            });
-            return true;
-        });
-
-        $('#confirm').find('#submit').on('click', function () {
-            let $modal = $(this).closest('.modal');
-            let url = $modal.data('user-url');
-            
-            $.post(url, data = $modal.find('form').serialize(), function (data) {
-                if (data.status == 200) {
-                    $modal.modal('hide');
-                    sessionStorage.setItem('showmsg', '1');
-                    sessionStorage.setItem('message', data.message);
-                    location.reload();
-                } else if (data.status == 500) {
-                    Utils.showToast('error', data.message)
-                }
-            })
-        });
-    */
+    var modal = $('#modalDeleteUser');
+    modal.find('form').attr('action', Flask.url_for('users.delete', { user_id: user_id }))
+    modal.modal('show');
+    return false;
+};
 </script>
 {% endblock inner_scripts %}
 
@@ -125,12 +76,12 @@
                     <td></td>
                     <td>{{ user.first_name }} {{ user.last_name }}</td>
                     <td>
-                        <button class="btn btn-primary" onClick="LoadUser({{ user.id }}); return false">
+                        <button class="btn btn-outline-primary" onClick="LoadUser({{ user.id }}); return false">
                             Edit {#{ user.id }#} 
                         </button>
                     </td>
                     <td> 
-                        <button class="btn btn-primary btn-delete" onClick="DeleteUser({{ user.id }}); return false">
+                        <button class="btn btn-outline-danger" onClick="DeleteUser({{ user.id }}); return false">
                             Delete {#{ user.id }#} 
                         </button>
                     </td>

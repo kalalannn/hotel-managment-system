@@ -59,7 +59,7 @@ def get_or_create_user():
     return jsonify({'user_id': user.id})
 
 
-@users.route('/new_or_update_user', methods=['POST'])
+@users.route('/new_or_update_user', methods=['GET', 'POST'])
 @users.route('/new_or_update_user/<int:user_id>', methods=['GET', 'POST'])
 def new_or_update_user(user_id=None):
     user = None

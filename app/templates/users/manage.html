@@ -19,7 +19,8 @@ function LoadUser(user_id) {
             modal.find('#first_name').val(user.first_name);
             modal.find('#last_name').val(user.last_name);
             modal.find('#role').val(user.role);
-            console.log(modal.find('form'))
+            modal.find('#recept_hotel_id').val(user.recept_hotel_id);
+            roleOnChange(modal);
         });
     } else {
         modal = $('#modalUser');
@@ -27,6 +28,7 @@ function LoadUser(user_id) {
         var form = modal.find('form');
         form[0].reset();
         form.attr('action', Flask.url_for('users.new_or_update_user'));
+        roleOnChange(modal);
     };
     modal.modal('show');
     return false;
@@ -41,6 +43,26 @@ function DeleteUser(user_id) {
     modal.modal('show');
     return false;
 };
+
+function roleOnChange(modal) {
+    if ($(modal).find('#role option:selected').text() == 'RECEPTIONIST') {
+        modal.find('#recept_hotel_id').parents('div.input-group').show();
+    } else {
+        modal.find('#recept_hotel_id').parents('div.input-group').hide();
+    };
+};
+
+$(document).ready(function() {
+    var modal = $('#modalUser');
+    modal.find('#role')[0].addEventListener('change', function () {
+        roleOnChange(modal);
+    });
+
+    var modalEdit = $('#modalEditUser');
+    modalEdit.find('#role')[0].addEventListener('change', function () {
+        roleOnChange(modalEdit);
+    });
+});
 </script>
 {% endblock inner_scripts %}
 

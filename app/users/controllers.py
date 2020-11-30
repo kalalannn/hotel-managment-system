@@ -1,5 +1,6 @@
 from flask import request, render_template, session, redirect, url_for, flash, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
+from ..permissions import role_required
 
 from . import users
 from .forms import LoginForm, UserForm, EditUserForm, NewPasswordForm, UserSearchForm
@@ -64,11 +65,11 @@ def get_or_create_user():
 def new_or_update_user(user_id=None):
     user = None
     if user_id:
-        user = User.First(user_id)
+        user = User.by_ids(User.subordinates_editable(User.query, current_user), [user_id]).first()
         if user:
             form = EditUserForm(request.form, obj=user)
         else:
-            return redirect(url_for('error'))
+            return redirect(url_for('forbidden'))
     else:
         form = UserForm(request.form)
 
@@ -76,49 +77,78 @@ def new_or_update_user(user_id=None):
         if current_user.role == UserRole.ADMIN.value:
             form.admin()
         elif current_user.role == UserRole.DIRECTOR.value:
-            form.director()
+            form.director(current_user)
         else:
-            return redirect(url_for('forbidden'))
+            form.anon()
     else:
         form.anon()
 
-    # print(form.data)
-    # print(request.form)
-
     # POST
     if form.validate_on_submit():
-        if current_user.is_authenticated:
-            if current_user.role == UserRole.DIRECTOR.value \
-                and int(form.role.data) not in [UserRole.CUSTOMER.value, UserRole.RECEPTIONIST.value]:
-                return redirect(url_for('forbidden'))
-            role = int(form.role.data)
+        # Not Present in UserForm neither EditUserForm
+        if user:
+            is_active = user.is_active
         else:
+            is_active = True
+
+        if form.role and int(form.role.data) != 0:
+            role = int(form.role.data)
+        elif user:
+            role = user.role
+        else: # AnonMixin want to register
             role = UserRole.CUSTOMER.value
 
-        # TODO opravneni!!
-        if user_id:
+        # Can Be present in UserForm or EditUserForm
+        if form.recept_hotel_id and int(form.recept_hotel_id.data) != 0:
+            recept_hotels = Hotel.by_ids(Hotel.subordinates_editable(Hotel.query, current_user), [int(form.recept_hotel_id.data)]).first()
+            if not recept_hotels:
+                return redirect(url_for('forbidden'))
+        elif user:
+            recept_hotels = user.recept_hotels
+        else:
+            recept_hotels = None
+
+        ok, err = User.can_write(current_user, user,
+                form.first_name.data,
+                form.last_name.data,
+                form.email.data,
+                role,
+                is_active,
+                recept_hotels)
+        if not ok:
+            print ('Permission ERROR: '+ err)
+            # flash(err, 'error') # REMOVE, need to log!
+            return redirect(url_for('forbidden'))
+
+        if user: # Edit
             user.first_name = form.first_name.data
             user.last_name = form.last_name.data
             user.email = form.email.data
             user.role = role
-            db.session.commit()
             flash('User {} {} was updated'.format(user.first_name, user.last_name), 'info')
-        else:
-            user = User.New(form.first_name.data,
+        else: # New
+            user = User.new(form.first_name.data,
                             form.last_name.data,
                             form.email.data,
                             form.password.data,
-                            role)
+                            role,
+                            True,
+                            recept_hotels)
             flash('User {} {} was created. Now you can log in.'.format(user.first_name, user.last_name), 'info')
+        db.session.commit()
 
         if current_user.is_authenticated:
             if current_user.role >= UserRole.DIRECTOR.value:
                 # To reload usersdata
                 if session.get('usersdata'):
                     session.pop('usersdata')
-
     elif request.method == 'POST':
         flash('Wrong Form! {}'.format(form.errors), 'error')
+        if current_user.is_authenticated:
+            # TODO CUST + others
+            return redirect (url_for('users.manage'))
+        else:
+            return redirect(url_for('users.new_or_update_user'))
 
     if request.method == 'POST':
         if current_user.is_authenticated:
@@ -152,34 +182,24 @@ def home():
 # TODO Opravneni
 @users.route('/user/<int:user_id>', methods=['GET'])
 def get_user(user_id):
-    user = User.First(user_id)
+    user = User.by_ids(User.subordinates_editable(User.query, current_user), [user_id]).first()
     if user:
         return jsonify(user.serialize)
     else:
         return (404, 'Not Found')
 
 @users.route('/manage', methods=['GET', 'POST'])
-@login_required
+@role_required(UserRole.ADMIN, UserRole.DIRECTOR)
 def manage():
     search_form = UserSearchForm(obj=request.form)
 
     # session.pop('formdata')
     # session.pop('usersdata')
 
-    if current_user.role == UserRole.ADMIN.value:
-        search_form.admin()
-    elif current_user.role == UserRole.DIRECTOR.value:
-        search_form.director()
-    else:
-        return redirect(url_for('forbidden'))
-
-    query = None
-    if current_user.role == UserRole.DIRECTOR.value:
-        query = User.query.join(Hotel, User.recept_hotels).filter(Hotel.id.in_([h.id for h in current_user.own_hotels]))
-        # TODO Customers, that have done reservations (not edit, not delete)
-
+    query = User.subordinates_editable(User.query, current_user)
     if search_form.validate_on_submit():
-        users = User.All(query, search_form.first_name.data, search_form.last_name.data, search_form.email.data, search_form.role.data)
+        query = User.filter(query, search_form.first_name.data, search_form.last_name.data, search_form.email.data, search_form.role.data)
+        users = query.all()
         
         # print ("save formdata {}".format(request.form))
         # formdata reload
@@ -208,7 +228,7 @@ def manage():
         # print ("load userdata {}".format(usersdata))
         users = jsonpickle.decode(usersdata)
     else:
-        users = User.All(query, search_form.first_name.data, search_form.last_name.data, search_form.email.data, search_form.role.data)
+        users = User.filter(query, search_form.first_name.data, search_form.last_name.data, search_form.email.data, search_form.role.data)
 
     new_form = UserForm()
     edit_form = EditUserForm()
@@ -216,8 +236,8 @@ def manage():
         new_form.admin()
         edit_form.admin()
     elif current_user.is_authenticated and current_user.role == UserRole.DIRECTOR.value:
-        new_form.director()
-        edit_form.director()
+        new_form.director(current_user)
+        edit_form.director(current_user)
     else:
         new_form.anon()
         edit_form.anon()
@@ -230,7 +250,9 @@ def manage():
 def delete(user_id):
     form = SubmitForm(request.form)
 
-    user = User.First(user_id)
+    # TODO opravneni
+
+    user = User.by_ids(User.subordinates_editable(User.query, current_user), [user_id]).first()
     if not user:
         flash('Wrong user!', 'error')
         return redirect(url_for('users.manage'))

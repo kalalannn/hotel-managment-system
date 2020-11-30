@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, ValidationError, SelectField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required, Email, Length, EqualTo
-from ..models import User, UserRole
+from ..models import User, UserRole, Hotel
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[Email(), Required(message='Forgot your email address?')])
@@ -17,16 +17,24 @@ class UserForm(FlaskForm):
     password = PasswordField('Password', validators=[Required(), EqualTo('confirm_password', message='Passwords must match.')])
     confirm_password = PasswordField('Confirm password', validators=[Required()])
     role = SelectField('Role', coerce=int, validators=[Required()])
+    recept_hotel_id = SelectField('Recept Hotel', coerce=int)
     submit = SubmitField('New User')
 
     def admin(self):
         self.role.choices = [(r.value, r.name) for r in UserRole]
+        choices = [(h.id, h.name) for h in Hotel.filter(Hotel.query).order_by(Hotel.id).all()]
+        choices.insert(0, ('0',''))
+        self.recept_hotel_id.choices = choices
 
-    def director(self):
+    def director(self, current_user):
         self.role.choices = [(r.value, r.name) for r in UserRole if r in (UserRole.CUSTOMER, UserRole.RECEPTIONIST)]
+        choices = [(h.id, h.name) for h in Hotel.subordinates_editable(Hotel.query, current_user).order_by(Hotel.id).all()]
+        choices.insert(0, ('0',''))
+        self.recept_hotel_id.choices = choices
 
     def anon(self):
         del self.role
+        del self.recept_hotel_id
 
     def validate_email(self, email_field):
         if User.query.filter_by(email=email_field.data).first():

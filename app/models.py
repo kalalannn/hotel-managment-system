@@ -104,36 +104,152 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return "<User(id='%s', email='%s', first_name='%s', last_name='%s', role='%s', recept_hotel_id='%s')>" % (
             self.id, self.email, self.first_name, self.last_name, self.role, self.recept_hotel_id)
-    
-    @staticmethod
-    def First(user_id):
-        return User.query.filter_by(id=user_id).first()
 
-    @staticmethod
-    def New(_first_name, _last_name, _email,
+    @staticmethod # -> User
+    def new(_first_name, _last_name, _email,
                 _password=generate_password.__func__(), _role=UserRole.ANON.value,
                 _is_active=True, _recept_hotels=None):
         user = User(_first_name, _last_name, _email,
             generate_password_hash(_password), _role,
             _is_active, _recept_hotels)
         db.session.add(user)
-        db.session.commit()
         return user
 
-    @staticmethod
-    def All(query, first_name, last_name, email, role):
-        if not query:
-            query = User.query
-        if (first_name):
+    @staticmethod # -> query
+    def filter(query, first_name=None, last_name=None, email=None, role=None, is_active=True):
+        if first_name:
             query = query.filter(User.first_name.ilike("%{}%".format(first_name)))
-        if (last_name):
+        if last_name:
             query = query.filter(User.last_name.ilike("%{}%".format(last_name)))
-        if (email):
+        if email:
             query = query.filter(User.email.ilike("%{}%".format(email)))
-        if (role and role != 0):
+        if role and role != 0:
             query = query.filter(User.role == role)
-        query = query.filter(User.is_active == True)
-        return query.all()
+        query = query.filter(User.is_active == is_active)
+        return query
+
+    @staticmethod # -> query
+    def by_ids(query, user_ids):
+        return query.filter(User.id.in_(user_ids))
+
+    # Which Users can <get> and <edit> current_user
+    @staticmethod # -> query
+    def subordinates_editable(query, current_user):
+        if current_user.is_authenticated:
+            if current_user.role == UserRole.ADMIN.value:
+                pass # ALL
+            elif current_user.role == UserRole.DIRECTOR.value:
+                query = Hotel.by_ids(query.join(Hotel, User.recept_hotels), [h.id for h in current_user.own_hotels])
+            else:
+                # RECEPTIONIST, CUSTOMER, ANON
+                query = query.filter(id=current_user.id) # ONLY self
+        else:
+            # AnonMixin
+            query = query.filter(False) # Neither
+        return query
+
+    # Which Users can <get>, but can NOT <edit> current_use
+    @staticmethod # -> query
+    def subordinates_not_editable(query, current_user):
+        if current_user.is_authenticated:
+            # ADMIN can <see> and <edit> ALL Users
+            if current_user.role in [UserRole.DIRECTOR.value, UserRole.RECEPTIONIST.value]:
+                # TODO CUSTOMERs + ANONs, that have done reservations
+                pass
+            else:
+                # ADMIN, CUSTOMER, ANON
+                query = query.filter(False) # Neither
+        else:
+            # AnonMixin
+            query = query.filter(False) # Neither
+        return query
+
+    # Which attributes can INSERT OR UPDATE current_user
+    # Which attribute values can be setten by current_user
+    # user -> OLD User or None !!!! Must be subordinates_editable
+    # other -> NEW values
+    # first_name, last_name, email for now are without value rules
+    @staticmethod # -> Bool
+    def can_write(current_user, user, first_name, last_name, email, role, is_active, recept_hotel_id):
+        _, _, _ = first_name, last_name, email
+        if not user:
+            # New user MUST be active
+            if not is_active:
+                return False
+
+        # IF RECEPTIONIST then recept_hotel_id
+        temp = bool(role == UserRole.RECEPTIONIST.value) + bool(recept_hotel_id is not None)
+        if temp != 0 and temp != 2:
+            return False, 'IF RECEPTIONIST then recept_hotel_id'
+
+
+        if current_user.is_authenticated:
+            if user: # Edit
+                if current_user == user: # self
+                    # Nobody can not activate or deactivate self
+                    if user.is_active != is_active:
+                        return False, 'Nobody can not activate or deactivate self'
+
+                    # Nobody Can not edit self.recept_hotel_id
+                    if user.recept_hotel_id != recept_hotel_id:
+                        return False, 'Nobody Can not edit self.recept_hotel_id'
+
+                    # Only ANON can edit self role to CUSTOMER
+                    if current_user.role != UserRole.ANON.value:
+                        if user.role != role and role != UserRole.CUSTOMER.value:
+                            return False, 'Only ANON can edit self role'
+
+                else: # ONLY for his subordinates_editable !!!
+                    # Nobody can not edit password of another
+                    # PASSWORD is not readable
+                    # if user.password != password:
+                    #     return False
+
+                    # Only ADMIN can edit role
+                    if current_user.role != UserRole.ADMIN.value:
+                        if user.role != role:
+                            return False, 'Only ADMIN can edit role'
+
+                    # Only ADMIN or DIRECTOR can activate or deactviate
+                    # Only ADMIN or DIRECTOR can edit recept_hotel_id 
+                    if current_user.role <= UserRole.DIRECTOR.value:
+                        if user.is_active != is_active:
+                            return False, 'Only ADMIN or DIRECTOR can activate or deactviate'
+                        if user.recept_hotel_id != recept_hotel_id:
+                            return False, 'Only ADMIN or DIRECTOR can edit recept_hotel_id'
+
+            else: # New
+                # ADMIN can create ALL Roles
+                if current_user.role == UserRole.ADMIN.value:
+                    pass
+                # DIRECTOR can create RECEPTIOISTs + ANONs
+                elif current_user.role >= UserRole.DIRECTOR.value:
+                    if role not in [UserRole.RECEPTIONIST.value, UserRole.ANON.value]:
+                        return False, 'DIRECTOR can create RECEPTIOISTs + ANONs'
+                # RECEPTIONIST can create ONLY ANONs
+                elif current_user.role == UserRole.RECEPTIONIST.value:
+                    if role != UserRole.ANON.value:
+                        return False, 'RECEPTIONIST can create ONLY ANONs'
+                # ANON OR CUSTOMER can not create users
+                else:
+                    return False, 'ANON OR CUSTOMER can not create users'
+
+                # Only DIRECTOR+ can create RECEPTIONISTS
+                if current_user.role < UserRole.DIRECTOR.value and recept_hotel_id:
+                    return False, 'Only DIRECTOR+ can create RECEPTIONISTS'
+        else: # AnonMixin
+            if user: # Edit
+                # AnonMixin can not edit any User
+                return False, 'AnonMixin can not edit any User'
+            else: # New
+                # AnonMixin can create CUSTOMER or ANON
+                if role not in [UserRole.CUSTOMER.value, UserRole.ANON.value]:
+                    return False, 'AnonMixin can create CUSTOMER or ANON'
+
+                # AnonMixin can not set recept_hotel_is
+                if recept_hotel_id:
+                    return False, 'AnonMixin can not set recept_hotel_is'
+        return True,''
 
     @property
     def serialize(self):
@@ -153,6 +269,7 @@ class Hotel(db.Model):
     description     = db.Column(db.Text)
     stars           = db.Column(db.Integer, \
         CheckConstraint('stars in (%s)' % (', '.join(str(s.value) for s in HotelStars))))
+    is_active       = db.Column(db.Boolean)
 
     address         = db.relationship('Address', \
         back_populates='hotel', \
@@ -175,11 +292,10 @@ class Hotel(db.Model):
     feedbacks       = db.relationship("Feedback", \
         back_populates="hotel")
 
-    def __init__(self, _name, _description, _stars, _address, _owner):
+    def __init__(self, _name, _description, _stars, _address, _owner, _is_active=True):
         super(Hotel, self).__init__()
         self.name           = _name
         self.description    = _description
-        self.owner          = _owner
         self.stars          = _stars
         self.address        = _address
         self.owner          = _owner
@@ -188,6 +304,61 @@ class Hotel(db.Model):
         return "<Hotel(name={}, stars={}, description={})>".format(
             self.name, self.stars, self.description
         )
+
+    @staticmethod # -> query
+    def except_ids(query, *hotel_ids):
+        return query.filter(Hotel.id.notin_(hotel_ids))
+
+    @staticmethod # -> query
+    def by_ids(query, hotel_ids):
+        return query.filter(Hotel.id.in_(hotel_ids))
+    
+    @staticmethod
+    def filter(query, name=None, description=None, owner_id=None, stars=None, address_id=None, is_active=True):
+        if name:
+            query = query.filter(Hotel.name.ilike("%{}%").format(name))
+        if description:
+            query = query.filter(Hotel.description.ilike("%{}%").format(description))
+        if owner_id:
+            query = query.filter(Hotel.owner_id == owner_id)
+        if stars:
+            query = query.filter(Hotel.stars == stars)
+        if address_id:
+            query = query.filter(Hotel.address_id == address_id)
+        query = query.filter(Hotel.is_active == is_active)
+        return query
+    
+    # Which Hotels can <get> and <edit> current_user
+    @staticmethod
+    def subordinates_editable(query, current_user):
+        if current_user.is_authenticated:
+            if current_user.role == UserRole.ADMIN.value:
+                pass
+            elif current_user.role == UserRole.DIRECTOR.value:
+                query = Hotel.by_ids(query, [h.id for h in current_user.own_hotels])
+            else:
+                # RECEPTIONIST, CUSTOMER, ANON
+                query = query.filter(False) # Neither
+        else:
+            # AnonMixin
+            query = query.filter(False) # Neither
+        return query
+
+    # Which Hotels can <get>, but can NOT <edit> current_user
+    @staticmethod # -> query
+    def subordinates_not_editable(query, current_user):
+        if current_user.is_authenticated:
+            if current_user.role == UserRole.ADMIN.value:
+                # ADMIN can edit ALL Hotels
+                query = query.filter(False)
+            elif current_user.role == UserRole.DIRECTOR.value:
+                # DIRECTOR can edit ONLY his Hotels
+                # that mean except DIRECTOR editable Hotels
+                query = Hotel.except_ids(query, [h.id for h in current_user.own_hotels])
+            else:
+                # ALL can see ALL hotels
+                pass
+        return query
 
 class Address(db.Model):
     __tablename__  = 'addresses'

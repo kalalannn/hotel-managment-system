@@ -7,23 +7,6 @@ from .models import User, Feedback, Hotel, Address, Payment, Reservation, Reserv
 def load_models_data():
     print ('Inserting data')
 
-    # ROLES
-    # def __init__(self, _name):
-
-    # role_admin          = Role('ADMIN', 99)
-    # role_director       = Role('DIRECTOR', 50)
-    # role_receptionist   = Role('RECEPTIONIST', 25)
-    # role_customer       = Role('CUSTOMER', 10)
-    # role_anon           = Role('ANON', )
-
-    # db.session.add_all([
-    #     role_admin,
-    #     role_director,
-    #     role_receptionist,
-    #     role_customer 
-    #     #, role_anon
-    # ])
-
     # USERS
     # def __init__(self, _username, _password, _first_name, _last_name, _email, _birth_date):
 

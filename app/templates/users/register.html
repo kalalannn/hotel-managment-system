@@ -3,6 +3,20 @@
 {% block title %}Registration{% endblock %}
 
 {% block inner_content %}
+<script>
+function roleOnChange() {
+    if ($('#role option:selected').text() == 'RECEPTIONIST') {
+        $('#recept_hotel_id').parents('div.input-group').show();
+    } else {
+        $('#recept_hotel_id').parents('div.input-group').hide();
+    };
+};
+
+$(document).ready(function() {
+    $('#role')[0].addEventListener('change', roleOnChange, false);
+    roleOnChange();
+});
+</script>
 <h2 class="p-3"> Register </h2>
 <div class="col col-md-6 p-3">
     <form method="post">

@@ -23,12 +23,19 @@
         </li>
         {% endif %}
 
-        {% if current_user.is_authenticated%}
-        <li class="nav-item active">
-            <a class="navbar-brand" href="{{ url_for('dashboard.show') }}"> Board </a>
+        {% if current_user.is_authenticated and current_user.role >= UserRole.RECEPTIONIST.value %}
+        <li class="nav-item active dropdown">
+            <a class="navbar-brand dropdown-toggle" href="" role="button" data-toggle="dropdown">
+                Reservations
+            </a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{ url_for('reservations.reservation_list') }}"> My reservations </a>
+                <a class="dropdown-item" href="{{ url_for('reservations.dashboard') }}"> Dashboard</a>
+            </div>
         </li>
+        {% elif current_user.is_authenticated: %}
         <li class="nav-item active">
-            <a class="navbar-brand" href="{{ url_for('dashboard.list') }}"> Reservations </a>
+            <a class="navbar-brand" href="{{ url_for('reservations.reservation_list') }}"> My reservations </a>
         </li>
         {% endif %}
     </ul>

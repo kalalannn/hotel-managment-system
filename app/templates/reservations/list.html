@@ -28,13 +28,17 @@
     .status.paid {
         color: green;
     }
+
+    div.check {
+        color: darkgray;
+    }
 </style>
 
 <script>
     $(document).ready(function () {
         $('.reserv-details').on('click', function () {
             $.ajax({
-                url: "{{ url_for('dashboard.reservation_details') }}",
+                url: "{{ url_for('reservations.reservation_details') }}",
                 data: { reservation_id: $(this).data('reservation-id') },
                 success: function (data) {
                     showReservationDetails(data);
@@ -47,8 +51,8 @@
 
         $('.reserv-cancel').on('click', function () {
             $.ajax({
-                url: "{{ url_for('dashboard.delete_reservation') }}",
-                data: { reserv_room_id: $(this).data('reservation-id') },
+                url: "{{ url_for('reservations.delete_reservation') }}",
+                data: { reservation_id: $(this).data('reservation-id') },
                 // TODO
                 success: function (data) {
                     Utils.showToast('success', data.message)
@@ -81,6 +85,13 @@
             }
             table += '</tbody></table>';
             $modal.find('#placeholder').html(table);
+
+            $modal.find('.check').html('');
+            if (data.reservation.status == 'CHECKED_IN') {
+                $modal.find('.check').html('You are checked in!');
+            } else if (data.reservation.status == 'CHECKED_OUT') {
+                $modal.find('.check').html('You are checked out.');
+            }
 
             $modal.find('.full-price').html(data.payment.full_amount + ' Kč');
 
@@ -119,7 +130,7 @@
         <div class="pr-3"><button class="btn btn-info btn-sm reserv-details"
                 data-reservation-id="{{ reservation.id }}">Details</button></div>
         <div><button class="btn btn-danger btn-sm reserv-cancel"
-                data-reservation-id="{{ reserv_room.id }}">Cancel</button></div>
+                data-reservation-id="{{ reservation.id }}">Cancel</button></div>
     </div>
 </div>
 {% endfor %}
@@ -134,13 +145,14 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form class="row justify-content-around">
+                <h4><div class="d-flex justify-content-center pb-2 check"></div></h4>
+                <div class="row justify-content-around">
                     <div id="placeholder"></div>
                     <div class="d-flex flex-column">
                         <h5><div class="row">Status:<div class="pl-2 status"></div></div></h5>
                         <div class="row">Full price:<div class="pl-2 full-price"></div></div>
                     </div>
-                </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

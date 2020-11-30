@@ -6,7 +6,7 @@ import uuid
 
 import jsonpickle
 
-from . import dashboard
+from . import reservations
 # Import needed forms and models
 from .forms import UserForm, StatusForm
 from ..models import User, UserRole, Hotel, Room, RoomCategory, ReservationRoom, ReservationStatus, \
@@ -15,16 +15,15 @@ from ..models import User, UserRole, Hotel, Room, RoomCategory, ReservationRoom,
 from app import db
 
 
-@dashboard.route('/list')
-def list():
-    reservations = Reservation.query.filter_by(customer_id=9).all()
-    reservations = filter(lambda r: any([rr.is_active for rr in r.reservations_rooms]), reservations)
-    print(reservations)
+@reservations.route('/reservation_list')
+def reservation_list():
+    reservations = Reservation.query.filter_by(customer_id=current_user.id).all()
+    reservations = list(filter(lambda r: r.status != ReservationStatus.CANCELED.value, reservations))
 
-    return render_template('dashboard/list.html', reservations=reservations)
+    return render_template('reservations/list.html', reservations=reservations)
 
 
-@dashboard.route('/reservation_details')
+@reservations.route('/reservation_details')
 def reservation_details():
 
     reservation_id = request.args.get('reservation_id')
@@ -33,10 +32,11 @@ def reservation_details():
     # serialize rooms and categories
     rooms_categories = []
     for reserv_room in reservation.reservations_rooms:
-        room_category = {}
-        room_category['room'] = reserv_room.room.serialize
-        room_category['category'] = reserv_room.room.room_category.serialize
-        rooms_categories.append(room_category)
+        if reserv_room.is_active:
+            room_category = {}
+            room_category['room'] = reserv_room.room.serialize
+            room_category['category'] = reserv_room.room.room_category.serialize
+            rooms_categories.append(room_category)
     details = {
         'reservation': reservation.serialize,
         'rooms_categories': rooms_categories,
@@ -45,14 +45,14 @@ def reservation_details():
     return details
 
 
-@dashboard.route('/show')
-def show():
+@reservations.route('/dashboard')
+def dashboard():
     user_form = UserForm()
     status_form = StatusForm()
-    return render_template('dashboard/show.html', user_form=user_form, status_form=status_form)
+    return render_template('reservations/dashboard.html', user_form=user_form, status_form=status_form)
 
 
-@dashboard.route('/email_autocomplete', methods=['GET'])
+@reservations.route('/email_autocomplete', methods=['GET'])
 def email_autocomplete():
     users = User.query.all()
     emails = list(map(lambda u: u.email, users))
@@ -60,17 +60,7 @@ def email_autocomplete():
     return jsonify(json_emails=emails)
 
 
-@dashboard.route('/find_user', methods=['GET'])
-def find_user():
-    email = request.args.get('email')
-    user = User.query.filter_by(email=email).first()
-
-    return jsonify(
-        {'first_name': user.first_name,
-        'last_name': user.last_name})
-
-
-@dashboard.route('/load_rooms', methods=['GET', 'POST'])
+@reservations.route('/load_rooms', methods=['GET', 'POST'])
 def load_rooms():
     selected_capacity = int(json.loads(request.data)['capacity'])
     selected_type = int(json.loads(request.data)['type'])
@@ -109,10 +99,11 @@ def load_rooms():
     return jsonify(json_result)
 
 
-@dashboard.route('/load_reservations', methods=['GET', 'POST'])
+@reservations.route('/load_reservations', methods=['GET', 'POST'])
 def load_reservations():
     res_rooms = ReservationRoom.query.all()
-    res_rooms = list(filter(lambda rr: rr.is_active, res_rooms))
+    res_rooms = list(filter(lambda rr: rr.reservation.status != ReservationStatus.CANCELED.value \
+        and rr.is_active == True, res_rooms))
 
     json_result = []
     for res_room in res_rooms:
@@ -131,28 +122,7 @@ def load_reservations():
     return jsonify(json_result)
 
 
-## TOhle sem rozhodne nepatri
-@dashboard.route('/get_user', methods=['GET', 'POST'])
-def get_user():
-    data = request.get_json()
-    email = data['email']
-    first_name = data['first_name']
-    last_name = data['last_name']
-
-    user = User.query.filter_by(email=email).first()
-    # if no user found in database, create ANON
-    if not user:
-        user = User(_first_name=first_name,
-            _last_name=last_name,
-            _email=email,
-            _role=UserRole.ANON.value)
-        db.session.add(user)
-        db.session.commit()
-
-    return jsonify({'user_id': user.id})
-
-
-@dashboard.route('/create_reservation', methods=['GET', 'POST'])
+@reservations.route('/create_reservation', methods=['GET', 'POST'])
 def create_reservation():
     data = request.get_json()
     customer_id = data['customer_id']
@@ -191,7 +161,7 @@ def create_reservation():
     return jsonify(reserv_room_ids=reserv_room_ids, message='Reservation successfully created')
 
 
-@dashboard.route('/edit_reservation', methods=['GET', 'POST'])
+@reservations.route('/edit_reservation', methods=['GET', 'POST'])
 def edit_reservation():
     data = request.get_json()
     reserv_room_id = data['reserv_room_id']
@@ -216,8 +186,24 @@ def edit_reservation():
     return jsonify(message='Reservation successfully updated')
 
 
-@dashboard.route('/delete_reservation', methods=['GET', 'POST'])
+@reservations.route('/delete_reservation', methods=['GET', 'POST'])
 def delete_reservation():
+    reservation_id = request.args.get('reservation_id')
+
+    reservation = Reservation.query.filter_by(id=reservation_id).first()
+    reservation.status = ReservationStatus.CANCELED.value
+
+    for reserv_room in reservation.reservations_rooms:
+        reserv_room.is_active = False
+
+    db.session.add(reservation)
+    db.session.commit()
+
+    return jsonify(message='Reservation successfully deleted')
+
+
+@reservations.route('/delete_reserv_room', methods=['GET', 'POST'])
+def delete_reserv_room():
     reserv_room_id = request.args.get('reserv_room_id')
 
     # inactivate selected reservation_room

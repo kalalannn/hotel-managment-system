@@ -22,17 +22,14 @@
 
     .paid-text {
         color: #1a9d13;
-        font-size: 9pt;
     }
 
     .blocked-text {
         color: #5d86ec;
-        font-size: 9pt;
     }
 
     .unpaid-text {
         color: #ea3624;
-        font-size: 9pt;
     }
 
     .date-bg a {
@@ -128,7 +125,7 @@
             $form[0].reset();
 
             $.ajax({
-                url: '{{ url_for("dashboard.email_autocomplete") }}'
+                url: '{{ url_for("reservations.email_autocomplete") }}'
             }).done(function (data) {
                 $('#email').autocomplete({
                     source: function (request, response) {
@@ -138,6 +135,7 @@
                     minLength: 2,
                     select: function (event, ui) {
                         loadUserByEmail(ui.item.value);
+                        $form.validate({ errorClass: "unpaid-text" }).resetForm();
                     }
                 });
             });
@@ -193,7 +191,7 @@
             $modal = $(this).closest('.modal');
 
             $.ajax({
-                url: "{{ url_for('dashboard.edit_reservation') }}",
+                url: "{{ url_for('reservations.edit_reservation') }}",
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
@@ -220,7 +218,7 @@
             $modal = $(this).closest('.modal');
 
             $.ajax({
-                url: "{{ url_for('dashboard.delete_reservation') }}",
+                url: "{{ url_for('reservations.delete_reserv_room') }}",
                 data: { reserv_room_id: $modal.data('reserv-room-id') },
                 success: function (data) {
                     $modal.modal('hide');
@@ -244,7 +242,7 @@
 
             if ($form.valid()) {
                 $.ajax({
-                    url: "{{ url_for('dashboard.get_user') }}",
+                    url: "{{ url_for('users.get_or_create_user') }}",
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
@@ -254,7 +252,7 @@
                     }),
                     success: function (data) {
                         $.ajax({
-                            url: "{{ url_for('dashboard.create_reservation') }}",
+                            url: "{{ url_for('reservations.create_reservation') }}",
                             type: 'POST',
                             contentType: 'application/json',
                             data: JSON.stringify({
@@ -310,7 +308,7 @@
 
 
         function setEditDilogData(data) {
-            let status = data.status.toLowerCase() == 'new' 
+            let status = data.status.toLowerCase() == 'new'
                 ? 1 : (data.status.toLowerCase() == 'checked_in' ? 3 : 4);
             $('#status').val(status);
 
@@ -388,7 +386,7 @@
 
         function loadUserByEmail(email) {
             $.ajax({
-                url: '{{ url_for("dashboard.find_user") }}',
+                url: '{{ url_for("users.find_user") }}',
                 data: { email: email },
                 success: function (data) {
                     $('#first_name').val(data.first_name).prop('disabled', true)
@@ -402,7 +400,7 @@
 
         function loadRooms() {
             DayPilot.Http.ajax({
-                url: "{{ url_for('dashboard.load_rooms') }}",
+                url: "{{ url_for('reservations.load_rooms') }}",
                 data: {
                     capacity: $('#capacityFilter').val(),
                     type: $('#typeFilter').val()
@@ -424,7 +422,7 @@
             let start = board.visibleStart();
             let end = board.visibleEnd();
             DayPilot.Http.ajax({
-                url: "{{ url_for('dashboard.load_reservations') }}",
+                url: "{{ url_for('reservations.load_reservations') }}",
                 data: {
                     start: start.toString(),
                     end: end.toString()
@@ -476,7 +474,7 @@
         <div id="dashboard"></div>
     </div>
 
-    {% include 'dashboard/modals.html' %}
+    {% include 'reservations/modals.html' %}
     {% endif %}
 </div>
 {% endblock inner_content %}

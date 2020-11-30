@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-dashboard = Blueprint('dashboard', __name__)
+reservations = Blueprint('reservations', __name__)
 
 from . import controllers

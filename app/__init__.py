@@ -52,8 +52,8 @@ def create_app(config_name):
     from .hotels import hotels as hotels_blueprint
     app.register_blueprint(hotels_blueprint, url_prefix='/hotels')
 
-    from .dashboard import dashboard as dashboard_blueprint
-    app.register_blueprint(dashboard_blueprint, url_prefix='/dashboard')
+    from .reservations import reservations as reservations_blueprint
+    app.register_blueprint(reservations_blueprint, url_prefix='/reservations')
 
     jsglue.init_app(app)
 

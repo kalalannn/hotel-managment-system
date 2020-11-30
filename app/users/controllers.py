@@ -28,6 +28,37 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
+
+@users.route('/find_user', methods=['GET'])
+def find_user():
+    email = request.args.get('email')
+    user = User.query.filter_by(email=email).first()
+
+    return jsonify(
+        {'first_name': user.first_name,
+        'last_name': user.last_name})
+
+
+@users.route('/get_or_create_user', methods=['GET', 'POST'])
+def get_or_create_user():
+    data = request.get_json()
+    email = data['email']
+    first_name = data['first_name']
+    last_name = data['last_name']
+
+    user = User.query.filter_by(email=email).first()
+    # if no user found in database, create ANON
+    if not user:
+        user = User(_first_name=first_name,
+            _last_name=last_name,
+            _email=email,
+            _role=UserRole.ANON.value)
+        db.session.add(user)
+        db.session.commit()
+
+    return jsonify({'user_id': user.id})
+
+
 @users.route('/new_or_update_user', methods=['POST'])
 @users.route('/new_or_update_user/<int:user_id>', methods=['GET', 'POST'])
 def new_or_update_user(user_id=None):

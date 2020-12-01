@@ -225,14 +225,11 @@ def load_models_data():
     history_0_1 = History(reservation_0, ReservationStatus.CHECKED_IN.value, date(2020, 11, 15), receptionist_0_1)
     # Datum DOKDY "2020-11-20"
     history_0_2 = History(reservation_0, ReservationStatus.CHECKED_OUT.value, date(2020, 11, 20), receptionist_0_2)
-
-    history_0_3 = History(reservation_0, ReservationStatus.CHECKED_IN.value, date(2020, 12, 1), receptionist_0_2)
-
     res_room_0_0_0_0 = ReservationRoom("2020-11-15", "2020-11-20")
     res_room_0_0_0_0.room = room_0_0_0
     reservation_0.reservations_rooms.append(res_room_0_0_0_0)
 
-    res_room_0_1_0_0 = ReservationRoom("2020-12-01", "2020-12-06")
+    res_room_0_1_0_0 = ReservationRoom("2020-11-15", "2020-11-20")
     res_room_0_1_0_0.room = room_0_1_0
     reservation_0.reservations_rooms.append(res_room_0_1_0_0)
 
@@ -251,11 +248,11 @@ def load_models_data():
     history_1_0 = History(reservation_1, ReservationStatus.NEW.value, date(2020, 11, 26), None)
     history_1_1 = History(reservation_1, ReservationStatus.CHECKED_IN.value, date(2020, 11, 25), receptionist_1_1)
 
-    res_room_1_0_0_1 = ReservationRoom("2020-11-25", "2020-12-5")
+    res_room_1_0_0_1 = ReservationRoom("2020-11-25", "2020-12-05")
     res_room_1_0_0_1.room = room_1_0_0
     reservation_1.reservations_rooms.append(res_room_1_0_0_1)
 
-    res_room_1_1_0_1 = ReservationRoom("2020-12-01", "2020-12-06")
+    res_room_1_1_0_1 = ReservationRoom("2020-11-25", "2020-12-05")
     res_room_1_1_0_1.room = room_1_1_0
     reservation_1.reservations_rooms.append(res_room_1_1_0_1)
 
@@ -271,14 +268,13 @@ def load_models_data():
     reservation_2 = Reservation(customer_2, payment_2)
 
     history_2_0 = History(reservation_2, ReservationStatus.NEW.value, date(2020, 11, 11), None)
-    history_2_1 = History(reservation_2, ReservationStatus.CHECKED_IN.value, date(2020, 11, 20), receptionist_0_1)
-    history_2_2 = History(reservation_2, ReservationStatus.CHECKED_OUT.value, date(2020, 11, 26), receptionist_0_1)
+    history_2_1 = History(reservation_2, ReservationStatus.CHECKED_IN.value, date(2020, 11, 26), receptionist_0_1)
 
-    res_room_0_0_0_2 = ReservationRoom("2020-11-26", "2020-12-7")
+    res_room_0_0_0_2 = ReservationRoom("2020-11-26", "2020-12-07")
     res_room_0_0_0_2.room = room_0_0_1
     reservation_2.reservations_rooms.append(res_room_0_0_0_2)
 
-    res_room_1_1_0_2 = ReservationRoom("2020-12-07", "2020-12-14")
+    res_room_1_1_0_2 = ReservationRoom("2020-12-26", "2020-12-07")
     res_room_1_1_0_2.room = room_1_1_0
     reservation_2.reservations_rooms.append(res_room_1_1_0_2)
 
@@ -299,7 +295,7 @@ def load_models_data():
     res_room_0_0_0_3.room = room_0_0_0
     reservation_3.reservations_rooms.append(res_room_0_0_0_3)
 
-    res_room_0_1_1_3 = ReservationRoom("2020-12-01", "2020-12-09")
+    res_room_0_1_1_3 = ReservationRoom("2020-12-10", "2020-12-15")
     res_room_0_1_1_3.room = room_2_1_0
     reservation_3.reservations_rooms.append(res_room_0_1_1_3)
 
@@ -315,9 +311,8 @@ def load_models_data():
     reservation_4 = Reservation(customer_4, payment_4)
 
     history_4_0 = History(reservation_4, ReservationStatus.NEW.value, date(2020, 11, 29), None)
-    history_4_1 = History(reservation_4, ReservationStatus.CHECKED_IN.value, date(2020, 12, 1), receptionist_1_2)
 
-    res_room_0_0_0_4 = ReservationRoom("2020-12-1", "2020-12-10")
+    res_room_0_0_0_4 = ReservationRoom("2020-12-11", "2020-12-19")
     res_room_0_0_0_4.room = room_1_0_0
     reservation_4.reservations_rooms.append(res_room_0_0_0_4)
 
@@ -343,7 +338,7 @@ def load_models_data():
     res_room_3_0_0_5.room = room_3_0_0
     reservation_5.reservations_rooms.append(res_room_3_0_0_5)
 
-    res_room_3_1_0_5 = ReservationRoom("2020-12-11", "2020-12-19")
+    res_room_3_1_0_5 = ReservationRoom("2020-12-2", "2020-12-8")
     res_room_3_1_0_5.room = room_3_1_0
     reservation_5.reservations_rooms.append(res_room_3_1_0_5)
 
@@ -361,9 +356,7 @@ def load_models_data():
     reservation_6 = Reservation(customer_6, payment_6)
 
     history_6_0 = History(reservation_6, ReservationStatus.NEW.value, date(2020, 12, 1), None)
-    history_6_1 = History(reservation_6, ReservationStatus.CHECKED_IN.value, date(2020, 12, 10), receptionist_1_1)
-
-    res_room_1_0_0_6 = ReservationRoom("2020-12-10", "2020-12-20")
+    res_room_1_0_0_6 = ReservationRoom("2020-12-11", "2020-12-19")
     res_room_1_0_0_6.room = room_1_0_0
     reservation_6.reservations_rooms.append(res_room_1_0_0_6)
 
@@ -390,7 +383,7 @@ def load_models_data():
     res_room_2_0_0_7.room = room_2_0_0
     reservation_7.reservations_rooms.append(res_room_2_0_0_7)
 
-    res_room_2_1_0_7 = ReservationRoom("2020-12-11", "2020-12-19")
+    res_room_2_1_0_7 = ReservationRoom("2020-11-24", "2020-12-04")
     res_room_2_1_0_7.room = room_2_1_0
     reservation_7.reservations_rooms.append(res_room_2_1_0_7)
 

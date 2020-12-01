@@ -245,7 +245,7 @@ def load_models_data():
     payment_1 = Payment(block_amount_1, full_amount_1, tax_1, True, True)
     reservation_1 = Reservation(customer_1, payment_1)
 
-    history_1_0 = History(reservation_1, ReservationStatus.NEW.value, date(2020, 11, 26), None)
+    history_1_0 = History(reservation_1, ReservationStatus.NEW.value, date(2020, 11, 24), None)
     history_1_1 = History(reservation_1, ReservationStatus.CHECKED_IN.value, date(2020, 11, 25), receptionist_1_1)
 
     res_room_1_0_0_1 = ReservationRoom("2020-11-25", "2020-12-05")
@@ -278,7 +278,7 @@ def load_models_data():
     res_room_1_1_0_2.room = room_1_1_0
     reservation_2.reservations_rooms.append(res_room_1_1_0_2)
 
-    db.session.add_all([payment_2, reservation_2, history_2_0, history_2_1, history_2_2, res_room_0_0_0_2, res_room_1_1_0_2])
+    db.session.add_all([payment_2, reservation_2, history_2_0, history_2_1, res_room_0_0_0_2, res_room_1_1_0_2])
 
         #CUSTOMER_3
     real_amount_3 = (room_cat_2_0.price + room_cat_2_1.price) * 5 # 5 days
@@ -320,7 +320,7 @@ def load_models_data():
     res_room_0_1_1_4.room = room_1_1_0
     reservation_4.reservations_rooms.append(res_room_0_1_1_4)
 
-    db.session.add_all([payment_4, reservation_4, history_4_0, history_4_1, res_room_0_0_0_4, res_room_0_1_1_4])
+    db.session.add_all([payment_4, reservation_4, history_4_0, res_room_0_0_0_4, res_room_0_1_1_4])
 
 
         #CUSTOMER_5
@@ -364,7 +364,7 @@ def load_models_data():
     res_room_1_1_0_6.room = room_1_1_0
     reservation_6.reservations_rooms.append(res_room_1_1_0_6)
 
-    db.session.add_all([payment_6, reservation_6, history_6_0, history_6_1, res_room_1_0_0_6, res_room_1_1_0_6])
+    db.session.add_all([payment_6, reservation_6, history_6_0, res_room_1_0_0_6, res_room_1_1_0_6])
 
 
         #CUSTOMER_7
@@ -376,7 +376,7 @@ def load_models_data():
     payment_7 = Payment(block_amount_7, full_amount_7, tax_7, True, True)
     reservation_7 = Reservation(customer_7, payment_7)
 
-    history_7_0 = History(reservation_0, ReservationStatus.NEW.value, date(2020, 11, 25), None)
+    history_7_0 = History(reservation_0, ReservationStatus.NEW.value, date(2020, 11, 23), None)
     history_7_1 = History(reservation_0, ReservationStatus.CHECKED_IN.value, date(2020, 11, 24), receptionist_0_1)
 
     res_room_2_0_0_7 = ReservationRoom("2020-11-24", "2020-12-04")

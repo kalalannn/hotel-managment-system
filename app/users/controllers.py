@@ -65,7 +65,10 @@ def get_or_create_user():
 def new_or_update_user(user_id=None):
     user = None
     if user_id:
-        user = User.by_ids(User.subordinates_editable(User.query, current_user), [user_id]).first()
+        if user_id == current_user.id:
+            user = User.by_ids(User.query, [current_user.id]).first()
+        else:
+            user = User.by_ids(User.subordinates_editable(User.query, current_user), [user_id]).first()
         if user:
             form = EditUserForm(request.form, obj=user)
         else:
@@ -184,14 +187,17 @@ def new_password(user_id=None):
 @users.route('/home/<int:user_id>', methods=['GET'])
 @login_required
 def home(user_id):
-    user = User.subordinates_editable(User.by_ids(User.query, [user_id]), current_user).first()
+    if user_id == current_user.id: # self
+        user = User.by_ids(User.query, [current_user.id]).first()
+    else:
+        user = User.subordinates_editable(User.by_ids(User.query, [user_id]), current_user).first()
     if not user:
         return redirect(url_for('forbidden'))
     form = EditUserForm(obj=user)
     if current_user.role == UserRole.ADMIN.value:
         form.admin()
     elif current_user.role == UserRole.DIRECTOR.value:
-        form.director(current_user)
+        form.director(current_user, True)
     else:
         form.anon()
     return render_template('users/home.html', form=form, user=user)

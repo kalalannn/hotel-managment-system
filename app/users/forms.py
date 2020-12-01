@@ -26,11 +26,15 @@ class UserForm(FlaskForm):
         choices.insert(0, ('0',''))
         self.recept_hotel_id.choices = choices
 
-    def director(self, current_user):
-        self.role.choices = [(r.value, r.name) for r in UserRole if r in (UserRole.CUSTOMER, UserRole.RECEPTIONIST)]
-        choices = [(h.id, h.name) for h in Hotel.subordinates_editable(Hotel.query, current_user).order_by(Hotel.id).all()]
-        choices.insert(0, ('0',''))
-        self.recept_hotel_id.choices = choices
+    def director(self, current_user, is_self=False):
+        if is_self:
+            del self.recept_hotel_id
+            del self.role
+        else:
+            self.role.choices = [(r.value, r.name) for r in UserRole if r in (UserRole.CUSTOMER, UserRole.RECEPTIONIST)]
+            choices = [(h.id, h.name) for h in Hotel.subordinates_editable(Hotel.query, current_user).order_by(Hotel.id).all()]
+            choices.insert(0, ('0',''))
+            self.recept_hotel_id.choices = choices
 
     def anon(self):
         del self.role

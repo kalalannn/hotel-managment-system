@@ -463,6 +463,7 @@ class Address(db.Model):
         }
         if hotel:
             hash['hotel'] = self.hotel.serialize()
+        return hash
 
 class Feedback(db.Model):
     __tablename__  = 'feedbacks'
@@ -750,7 +751,7 @@ class Reservation(db.Model):
             hash['customer'] = self.customer.serialize()
         if histories:
             hash['histories'] = []
-            for history in histories:
+            for history in self.histories:
                 hash['histories'].append(history.serialize())
         return hash
 
@@ -789,7 +790,7 @@ class Payment(db.Model):
         }
         if reservation:
             hash['reservation'] = self.reservation.serialize()
-
+        return hash
 
 class History(db.Model):
     __tablename__  = 'histories'
@@ -817,6 +818,18 @@ class History(db.Model):
     def __repr__(self):
         return "<History(reservation='%s', reservation_status='%s', change_date='%s', receptionist='%s')>" \
             % (self.reservation, self.reservation_status, self.change_date, self.receptionist)
+
+    # @staticmehtod
+    # def order_by(query, change_date):
+    #     if change_date:
+    #         query = query.order_by(History.change_date.desc())
+
+    @staticmethod
+    def filter(query, change_date, reservation_status, reservation_id, receptionist_id):
+        # if change_data:
+        #     query = query.filter(History.change_data <=)
+        if reservation_status:
+            query = query.filter(History.reservation_status == reservation_status)
 
     def serialize(self, reservation=False, receptionist=False):
         hash = {

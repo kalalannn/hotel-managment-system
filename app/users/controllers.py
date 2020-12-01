@@ -57,6 +57,7 @@ def get_or_create_user():
         db.session.add(user)
         db.session.commit()
 
+    login_user(user)
     return jsonify({'user_id': user.id})
 
 

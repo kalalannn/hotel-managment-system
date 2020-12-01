@@ -108,7 +108,7 @@ def create_reservation():
 
     customer = User.query.filter_by(id=customer_id).first()
     receptionist = None
-    if current_user is not customer:
+    if current_user.is_authenticated and current_user is not customer:
         receptionist = current_user
 
     real_amount = 0

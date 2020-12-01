@@ -1,10 +1,12 @@
-from flask import request, render_template, session, redirect, url_for, flash, json, jsonify
+from flask import request, render_template, session, redirect, url_for, flash, json, jsonify, make_response
 
 from flask_login import current_user, login_user, logout_user, login_required
+from ..permissions import role_required
 
 from . import hotels
 from .forms import SearchForm, HotelForm
 from .forms import RoomForm, RoomCategoryForm
+from ..reservations.forms import UserForm as ReservationForm
 from ..forms import SubmitForm
 from ..models import Hotel, Address, User, HotelStars, UserRole
 from ..models import Room, RoomCategory, RoomType
@@ -27,7 +29,7 @@ def hotel_list(owner_id=None):
 
     query = Hotel.query.join(Address, Hotel.address)
     if owner_id:
-        query = query.filter(Hotel.owner_id == owner_id)
+        query = Hotel.subordinates_editable(Hotel.query, current_user)
     # POST
     if form.validate_on_submit():
         if form.name.data is not None:
@@ -41,24 +43,34 @@ def hotel_list(owner_id=None):
         query = query.order_by(Hotel.stars).limit(10)
 
     hotels = query.all()
-    return render_template('hotels/list.html', form=form, hotels=hotels)
+
+    resp = make_response(render_template('hotels/list.html', form=form, hotels=hotels))
+
+    if form.validate_on_submit():
+        # date_from = '-'.join(list(reversed(str(form.date_from.data).split('-'))))
+        # date_to = '-'.join(list(reversed(str(form.date_to.data).split('-'))))
+        resp.set_cookie('date_from', str(form.date_from.data))
+        resp.set_cookie('date_to', str(form.date_to.data))
+        # resp.set_cookie('date_from', date_from)
+        # resp.set_cookie('date_to', date_to)
+
+    return resp
 
 @hotels.route('/new/', methods=['GET', 'POST'])          # Only admin
 @hotels.route('/edit/<int:hotel_id>', methods=['GET', 'POST']) # Director+
-@login_required
+@role_required(UserRole.ADMIN, UserRole.DIRECTOR)
 def update(hotel_id=None):
     if hotel_id:
-        hotel   = Hotel.query.filter_by(id=hotel_id).one()
+        hotel = Hotel.by_ids(Hotel.subordinates_editable(Hotel.query, current_user), [hotel_id]).first()
         form    = HotelForm(request.form, obj=hotel)
+        op = 'Edit'
+        if not hotel:
+            return redirect(url_for('forbidden'))
     else:
         hotel   = None
         form    = HotelForm(request.form)
+        op = 'New'
 
-    if not ((current_user.role == UserRole.DIRECTOR.value
-                and hotel_id
-                and current_user == hotel.owner)
-            or (current_user.role  == UserRole.ADMIN.value)):
-        return redirect(url_for('forbidden'))
 
     if current_user.role == UserRole.ADMIN.value:
         form.admin()
@@ -66,31 +78,38 @@ def update(hotel_id=None):
         form.director()
 
     if form.validate_on_submit():
+        # if current_user.role == UserRole.ADMIN.value:
+        address = Address(form.address_country.data, form.address_city.data, \
+            form.address_post_code.data, form.address_street.data, \
+            form.address_number.data)
+
         if current_user.role == UserRole.ADMIN.value:
-            address = Address(form.address_country.data, form.address_city.data, \
-                form.address_post_code.data, form.address_street.data, \
-                form.address_number.data)
+            owner = int(form.owner.data)
+        elif hotel:
+            owner = hotel.owner
+        else:
+            owner = current_user
+
         # EDIT
         if hotel_id:
-            if current_user.role == UserRole.ADMIN.value:
-                hotel.name = form.name.data
-                hotel.stars = form.stars.data.value
-                hotel.address = address
-                hotel.owner = form.owner.data
-
+            hotel.name = form.name.data
+            hotel.stars = form.stars.data.value
+            db.session.delete(hotel.address)
+            hotel.address = address
+            hotel.owner = owner
             hotel.description = form.description.data
         # NEW
-        elif current_user.role == UserRole.ADMIN.value:
-            db.session.add(address)
+        else:
             hotel = Hotel(
                 form.name.data,
                 form.description.data,
                 form.stars.data.value,
                 address,
-                form.owner.data,
-                # owner
+                owner,
             )
             db.session.add(hotel)
+        address.hotel_id = hotel.id
+        db.session.add(address)
         db.session.commit()
         return redirect(url_for('hotels.hotel_list'))
 
@@ -209,10 +228,15 @@ def new_or_update_room_category (hotel_id, room_category_id=None):
 
 @hotels.route('/show/<int:hotel_id>', methods=['GET'])
 def show(hotel_id):
-    hotel = Hotel.query.filter_by(id=hotel_id).one()
+    date_from = request.cookies.get('date_from')
+    date_to = request.cookies.get('date_to')
+    hotel = Hotel.by_ids(Hotel.query, [hotel_id]).first()
+    dates = {'date_from': date_from, 'date_to': date_to}
+    reservation_form = ReservationForm(dates=dates)
+    if current_user.is_authenticated:
+        reservation_form.registered()
     return render_template('hotels/update.html',
-        op='Show', hotel=hotel)
-
+        op='Show', hotel=hotel, reservation_form=reservation_form)
 
 
 @hotels.route('/delete/<int:hotel_id>', methods=['POST'])

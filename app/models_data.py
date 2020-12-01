@@ -464,8 +464,8 @@ def load_models_data():
     payment_11 = Payment(block_amount_11, full_amount_11, tax_11, True, False)
     reservation_11 = Reservation(customer_6, payment_11)
 
-    history_11_0 = History(reservation_10, ReservationStatus.NEW.value, date(2020, 11, 1), None)
-    history_11_1 = History(reservation_10, ReservationStatus.CHECKED_IN.value, date(2020, 11, 2), receptionist_3_1)
+    history_11_0 = History(reservation_11, ReservationStatus.NEW.value, date(2020, 11, 1), None)
+    history_11_1 = History(reservation_11, ReservationStatus.CHECKED_IN.value, date(2020, 11, 2), receptionist_3_1)
 
     res_room_3_0_0_11 = ReservationRoom("2020-12-02", "2020-12-07")
     res_room_3_0_0_11.room = room_3_0_0

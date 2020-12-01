@@ -17,7 +17,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
-            return redirect(request.args.get('next') or url_for('users.home'))
+            return redirect(request.args.get('next') or url_for('users.home', user_id=user.id))
         flash('Invalid username or password.', 'error')
     return render_template('users/login.html', form=form)
 
@@ -152,32 +152,49 @@ def new_or_update_user(user_id=None):
 
     if request.method == 'POST':
         if current_user.is_authenticated:
-            return redirect (url_for('users.manage'))
+            if current_user.role >= UserRole.DIRECTOR.value:
+                return redirect (url_for('users.manage'))
+            else:
+                return redirect (url_for('users.home', user_id=user.id))
         else:
             return redirect(url_for('users.login'))
 
     return render_template('users/register.html', form=form)
 
-@users.route('/new_password', methods=['GET', 'POST'])
+@users.route('/new_password/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-def new_password():
+def new_password(user_id=None):
+    user = User.subordinates_editable(User.by_ids(User.query, [user_id]), current_user).first()
+    if not user:
+        return redirect(url_for('forbidden'))
     form = NewPasswordForm()
     if form.validate_on_submit():
-        if current_user.verify_password(form.password.data):
-            current_user.password = form.new_password.data
+        if user.verify_password(form.password.data):
+            user.password = form.new_password.data
             db.session.commit()
             logout_user()
             flash('Now you can log in with a new password.', 'info')
             return redirect(url_for('users.login'))
         flash('Wrong current password!', 'error')
-    else:
-        flash('Wrong Form!', 'error')
+    # else:
+    #     flash('Wrong Form!', 'error')
     return render_template('users/new_password.html', form=form)
 
 
-@users.route('/home/', methods=['GET'])
-def home():
-    return render_template('users/home.html')
+@users.route('/home/<int:user_id>', methods=['GET'])
+@login_required
+def home(user_id):
+    user = User.subordinates_editable(User.by_ids(User.query, [user_id]), current_user).first()
+    if not user:
+        return redirect(url_for('forbidden'))
+    form = EditUserForm(obj=user)
+    if current_user.role == UserRole.ADMIN.value:
+        form.admin()
+    elif current_user.role == UserRole.DIRECTOR.value:
+        form.director(current_user)
+    else:
+        form.anon()
+    return render_template('users/home.html', form=form, user=user)
 
 # TODO Opravneni
 @users.route('/user/<int:user_id>', methods=['GET'])

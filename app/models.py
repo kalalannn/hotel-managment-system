@@ -142,7 +142,7 @@ class User(UserMixin, db.Model):
                 query = Hotel.by_ids(query, [h.id for h in current_user.own_hotels])
             else:
                 # RECEPTIONIST, CUSTOMER, ANON
-                query = query.filter(id=current_user.id) # ONLY self
+                query = query.filter(User.id == current_user.id) # ONLY self
         else:
             # AnonMixin
             query = query.filter(False) # Neither
@@ -735,7 +735,7 @@ class Reservation(db.Model):
         # CUSTOMER, ANON -> reservations, that he made
         return query
 
-    def serialize(self, reservations_rooms=False, payment=False, customer=False, histories=False):
+    def serialize(self, reservations_rooms=False, payment=False, customer=False, histories=False, room=False):
         hash = {
             'id': self.id,
             'payment_id': self.payment_id,
@@ -744,7 +744,7 @@ class Reservation(db.Model):
         if reservations_rooms:
             hash['reservations_rooms'] = []
             for reservation_room in self.reservations_rooms:
-                hash['reservations_rooms'].append(reservation_room.serialize())
+                hash['reservations_rooms'].append(reservation_room.serialize(room))
         if payment:
             hash['payment'] = self.payment.serialize()
         if customer:

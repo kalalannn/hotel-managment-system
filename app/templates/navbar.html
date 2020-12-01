@@ -4,9 +4,11 @@
         Index
     </a>
     <ul class="navbar-nav mr-auto">
+        {% if current_user.is_authenticated %}
         <li class="nav-item active">
-            <a class="navbar-brand" href="{{ url_for('users.home') }}">Home</a>
+            <a class="navbar-brand" href="{{ url_for('users.home', user_id=current_user.id) }}">Home</a>
         </li>
+        {% endif %}
         {% if current_user.is_authenticated and current_user.role >= UserRole.DIRECTOR.value %}
         <li class="nav-item active dropdown">
             <a class="navbar-brand dropdown-toggle" href="" role="button" data-toggle="dropdown">

@@ -5,6 +5,24 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager, current_user
 from flask_jsglue import JSGlue
 
+from datetime import datetime
+from werkzeug.routing import BaseConverter, ValidationError
+
+class DateConverter(BaseConverter):
+    """Extracts a ISO8601 date from the path and validates it."""
+
+    regex = r'\d{4}-\d{2}-\d{2}'
+
+    def to_python(self, value):
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            raise ValidationError()
+
+    def to_url(self, value):
+        return value.strftime('%Y-%m-%d')
+
+
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 login_manager = LoginManager()
@@ -20,6 +38,8 @@ def create_app(config_name):
     db.init_app(app)
     bootstrap.init_app(app)
     login_manager.init_app(app)
+
+    app.url_map.converters['date'] = DateConverter
 
     @app.route('/documentation')
     def documentation():

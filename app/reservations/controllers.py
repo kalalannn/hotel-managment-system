@@ -98,28 +98,41 @@ def load_rooms():
 
     return jsonify(json_result)
 
+@reservations.route('/get_reservations/<date:date_from>/<date:date_to>', methods=['GET'])
+def load_reservations(date_from, date_to):
+    print(date_from, date_to)
+    # reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, '2020-01-01', '2020-12-31'), 2).all()
+    # Reservation.query -> TO, co chci na vystup
+    # Reservation.subordinates_editable -> K cemu potrebuju opravneni + join
+    # ReservationRoom.filter -> podle ceho filtruju (Je potreba zavolat subordinates_editable pro join)
+    json_arr = []
+    reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, date_from, date_to), current_user).all()
+    print(reservations)
+    for reservation in reservations:
+        json_arr.append(reservation.serialize(True))
+    return jsonify(json_arr)
 
-@reservations.route('/load_reservations', methods=['GET', 'POST'])
-def load_reservations():
-    res_rooms = ReservationRoom.query.all()
-    res_rooms = list(filter(lambda rr: rr.reservation.status != ReservationStatus.CANCELED.value \
-        and rr.is_active == True, res_rooms))
+# @reservations.route('/load_reservations', methods=['GET', 'POST'])
+# def load_reservations():
+#     res_rooms = ReservationRoom.query.all()
+#     res_rooms = list(filter(lambda rr: rr.reservation.status != ReservationStatus.CANCELED.value \
+#         and rr.is_active == True, res_rooms))
 
-    json_result = []
-    for res_room in res_rooms:
-        json_reservation = {
-                'start': str(res_room.date_from),
-                'end': str(res_room.date_to),
-                'id': res_room.id,
-                'resource': res_room.room_id,
-                'text': res_room.reservation.customer.last_name,
-                'status': ReservationStatus(res_room.reservation.status).name,
-                'payment': 'paid' if res_room.reservation.payment.is_paid else \
-                    ('blocked' if res_room.reservation.payment.is_blocked else 'unpaid'),
-                'room_number': res_room.room.number
-            }
-        json_result.append(json_reservation)
-    return jsonify(json_result)
+#     json_result = []
+#     for res_room in res_rooms:
+#         json_reservation = {
+#                 'start': str(res_room.date_from),
+#                 'end': str(res_room.date_to),
+#                 'id': res_room.id,
+#                 'resource': res_room.room_id,
+#                 'text': res_room.reservation.customer.last_name,
+#                 'status': ReservationStatus(res_room.reservation.status).name,
+#                 'payment': 'paid' if res_room.reservation.payment.is_paid else \
+#                     ('blocked' if res_room.reservation.payment.is_blocked else 'unpaid'),
+#                 'room_number': res_room.room.number
+#             }
+#         json_result.append(json_reservation)
+#     return jsonify(json_result)
 
 
 @reservations.route('/create_reservation', methods=['GET', 'POST'])

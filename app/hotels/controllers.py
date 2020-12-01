@@ -119,7 +119,7 @@ def get_room_categories(hotel_id=None, room_category_id=None):
     if room_category_id:
         query = query.filter(RoomCategory.id == room_category_id)
 
-    return jsonify([i.serialize for i in query.all()])
+    return jsonify([i.serialize() for i in query.all()])
 
 @hotels.route('/rooms', methods=['GET'])
 @hotels.route('/rooms/<int:room_id>', methods=['GET'])
@@ -138,7 +138,7 @@ def get_rooms(hotel_id=None, room_category_id=None, room_id=None):
     if room_id:
         query = query.filter(Room.id == room_id)
 
-    return jsonify([i.serialize for i in query.all()])
+    return jsonify([i.serialize() for i in query.all()])
 
 @hotels.route('/<int:hotel_id>/rooms/new', methods=['POST'])
 @hotels.route('/<int:hotel_id>/rooms/<int:room_id>', methods=['POST'])

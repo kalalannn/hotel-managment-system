@@ -17,7 +17,7 @@ function LoadUser(user_id) {
             modal.find('#email').val(user.email);
             modal.find('#first_name').val(user.first_name);
             modal.find('#last_name').val(user.last_name);
-            modal.find('#role').val(user.role);
+            modal.find('#role').val(Object.keys(user.role)[0]);
             modal.find('#recept_hotel_id').val(user.recept_hotel_id);
             roleOnChange(modal);
         });

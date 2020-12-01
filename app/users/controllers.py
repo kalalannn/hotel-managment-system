@@ -184,7 +184,7 @@ def home():
 def get_user(user_id):
     user = User.by_ids(User.subordinates_editable(User.query, current_user), [user_id]).first()
     if user:
-        return jsonify(user.serialize)
+        return jsonify(user.serialize())
     else:
         return (404, 'Not Found')
 

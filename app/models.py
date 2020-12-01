@@ -760,7 +760,7 @@ class Reservation(db.Model):
             'id': self.id,
             'payment_id': self.payment_id,
             'customer_id': self.customer_id,
-            'status': self.last_status(self.histories).name
+            'status': self.last_status().name
         }
         if reservations_rooms:
             hash['reservations_rooms'] = []
@@ -776,9 +776,9 @@ class Reservation(db.Model):
                 hash['histories'].append(history.serialize())
         return hash
     
-    def last_status(self, histories):
-        if histories:
-            return ReservationStatus(histories[-1].reservation_status)
+    def last_status(self):
+        if self.histories:
+            return ReservationStatus(self.histories[-1].reservation_status)
         else:
             return ReservationStatus.NEW
 

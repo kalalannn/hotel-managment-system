@@ -102,7 +102,6 @@ def load_rooms():
 
 @reservations.route('/get_reservations/<date:date_from>/<date:date_to>', methods=['GET'])
 def load_reservations(date_from, date_to):
-    print(date_from)
     # reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, '2020-01-01', '2020-12-31'), 2).all()
     # Reservation.query -> TO, co chci na vystup
     # Reservation.subordinates_editable -> K cemu potrebuju opravneni + join
@@ -112,28 +111,6 @@ def load_reservations(date_from, date_to):
     for reservation in reservations:
         json_arr.append(reservation.serialize(True, True, True, True, True))
     return jsonify(json_arr)
-
-# @reservations.route('/load_reservations', methods=['GET', 'POST'])
-# def load_reservations():
-#     res_rooms = ReservationRoom.query.all()
-#     res_rooms = list(filter(lambda rr: rr.reservation.status != ReservationStatus.CANCELED.value \
-#         and rr.is_active == True, res_rooms))
-
-#     json_result = []
-#     for res_room in res_rooms:
-#         json_reservation = {
-#                 'start': str(res_room.date_from),
-#                 'end': str(res_room.date_to),
-#                 'id': res_room.id,
-#                 'resource': res_room.room_id,
-#                 'text': res_room.reservation.customer.last_name,
-#                 'status': ReservationStatus(res_room.reservation.status).name,
-#                 'payment': 'paid' if res_room.reservation.payment.is_paid else \
-#                     ('blocked' if res_room.reservation.payment.is_blocked else 'unpaid'),
-#                 'room_number': res_room.room.number
-#             }
-#         json_result.append(json_reservation)
-#     return jsonify(json_result)
 
 
 @reservations.route('/create_reservation', methods=['GET', 'POST'])
@@ -147,21 +124,25 @@ def create_reservation():
     if current_user is not customer:
         receptionist = current_user
 
-    full_amount = 0
+    real_amount = 0
     reservations_rooms = []
     for room_date in rooms_dates:
         room = Room.query.filter_by(id=room_date['room_id']).first()
         date_from = datetime.strptime(room_date['date_from'], '%d-%m-%Y')
         date_to = datetime.strptime(room_date['date_to'], '%d-%m-%Y')
 
-        full_amount += room.room_category.price * (date_to - date_from).days
+        real_amount += room.room_category.price * (date_to - date_from).days
 
         reservation_room = ReservationRoom(date_from, date_to)
         reservation_room.room = room
         reservations_rooms.append(reservation_room)
 
-    payment = Payment(float(full_amount) * 0.5, full_amount)
-    reservation = Reservation(ReservationStatus.NEW.value, customer, payment)
+    tax = float(real_amount) * 0.21
+    full_amount = float(real_amount) + tax
+    block_amount = full_amount * 0.5
+
+    payment = Payment(block_amount, full_amount, tax, False, False)
+    reservation = Reservation(customer, payment)
     reservation.reservations_rooms.extend(reservations_rooms)
     history = History(reservation, ReservationStatus.NEW.value, datetime.now(), receptionist)
 
@@ -192,9 +173,10 @@ def edit_reservation():
 
     reservation = Reservation.query.filter_by(id=reserv_room.reservation.id).first()
     if reservation:
-        reservation.status = ReservationStatus(status).value
+        if status != reservation.last_status():
+            history = History(reservation, status, datetime.now(), current_user)
+            db.session.add(history)
         update_payment(reservation, payment)
-        db.session.add(reservation)
         db.session.commit()
 
     return jsonify(message='Reservation successfully updated')

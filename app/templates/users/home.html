@@ -19,7 +19,7 @@ $(document).ready(function() {
     roleOnChange();
 });
 </script>
-<h2 class="p-3">Hello, {{ current_user.first_name }}! This is your's home page.</h2>
+<h2 class="p-3">Hello, {{ current_user.first_name }}! This is your home page.</h2>
 <div class="col col-md-6 p-3">
     <form method="post" action="{{ url_for('users.new_or_update_user', user_id=user.id) }}">
         {{ form.csrf_token }}

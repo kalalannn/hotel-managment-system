@@ -531,7 +531,7 @@ class RoomCategory(db.Model):
         hash = {
             'id': self.id,
             'price': float(self.price),
-            'type': {self.type: RoomType(self.type).name},
+            'type': RoomType(self.type).name,
             'description': self.description,
             'hotel_id': self.hotel_id,
         }
@@ -679,7 +679,7 @@ class ReservationRoom(db.Model):
             query = query.filter(False)
         return query
 
-    def serialize(self, room=False, reservation=False):
+    def serialize(self, room=False, reservation=False, room_category=False):
         hash = {
             'id': self.id,
             'date_from': self.date_from,
@@ -689,7 +689,7 @@ class ReservationRoom(db.Model):
             'reservation_id': self.reservation_id,
         }
         if room:
-            hash['room'] = self.room.serialize()
+            hash['room'] = self.room.serialize(room_category=room_category)
         if reservation:
             hash['reservation'] = self.reservation.serialize()
         return hash
@@ -729,33 +729,33 @@ class Reservation(db.Model):
 
     @staticmethod
     def join_Hotel(query):
-        query = query.join(ReservationRoom, Rservation.reservations_rooms).join(Room, ReservationRoom.room)\
+        query = query.join(ReservationRoom, Reservation.reservations_rooms).join(Room, ReservationRoom.room)\
             .join(RoomCategory, Room.room_category).join(Hotel, RoomCategory.hotel)
+        return query
 
     @staticmethod
     def subordinates_editable(query, current_user):
-        # if current_user.is_authenticated:
-        #     if current_user.role == UserRole.ADMIN.value:
-        #         pass
-        #     elif current_user.role == UserRole.DIRECTOR.value:
-        #         query = query.join_Hotel(query)
-        #         query = query.join(User, Hotel.owner)
-        #         query = query.filter(User.id = current_user.id)
-        #     elif current_user.role == UserRole.RECEPTIONIST.value:
-        #         query = query.join_Hotel(query)
-        #         query = query.join(User, Hotel.receptionists)
-        #         query = query.filter(User.id = current_user.id)
-        #     else:
-        #         query = query.filter(User.id = current_user.id)
-        # else:
-        #     query = query.filter(False)
-        # return query
-        # # DIRECTOR -> reservations in hotels, which he owns
-        # # RECEPTIONIST -> reservations in hotels, where he is receptionist
-        # # CUSTOMER, ANON -> reservations, that he made
+        # DIRECTOR -> reservations in hotels, which he owns
+        # RECEPTIONIST -> reservations in hotels, where he is receptionist
+        # CUSTOMER, ANON -> reservations, that he made
+        if current_user.is_authenticated:
+            if current_user.role == UserRole.ADMIN.value:
+                pass
+            elif current_user.role == UserRole.DIRECTOR.value:
+                query = Reservation.join_Hotel(query)
+                query = query.join(User, Hotel.owner)
+                query = User.by_ids(query, [current_user.id])
+            elif current_user.role == UserRole.RECEPTIONIST.value:
+                query = Reservation.join_Hotel(query)
+                query = query.join(User, Hotel.receptionists)
+                query = User.by_ids(query, [current_user.id])
+            else:
+                query = query.filter(Reservation.customer_id == current_user.id)
+        else:
+            query = query.filter(False)
         return query
 
-    def serialize(self, reservations_rooms=False, payment=False, customer=False, histories=False, room=False):
+    def serialize(self, reservations_rooms=False, payment=False, customer=False, histories=False, room=False, room_category=False):
         hash = {
             'id': self.id,
             'payment_id': self.payment_id,
@@ -765,7 +765,7 @@ class Reservation(db.Model):
         if reservations_rooms:
             hash['reservations_rooms'] = []
             for reservation_room in self.reservations_rooms:
-                hash['reservations_rooms'].append(reservation_room.serialize(reservation_room.room))
+                hash['reservations_rooms'].append(reservation_room.serialize(room=room, room_category=room_category))
         if payment:
             hash['payment'] = self.payment.serialize()
         if customer:

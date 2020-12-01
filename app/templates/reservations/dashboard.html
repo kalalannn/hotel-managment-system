@@ -291,18 +291,18 @@ $(document).ready(function () {
     $('#prevMonth').on('click', function () {
         board.startDate = board.startDate.addMonths(-1);
         board.days = board.startDate.daysInMonth();
+        board.update();
         loadRooms();
         loadReservations();
-        board.update();
         return false;
     });
 
     $('#nextMonth').on('click', function () {
         board.startDate = board.startDate.addMonths(1);
         board.days = board.startDate.daysInMonth();
+        board.update();
         loadRooms();
         loadReservations();
-        board.update();
         return false;
     });
 
@@ -449,7 +449,7 @@ $(document).ready(function () {
 
 {% block inner_content %}
 <div class="mb-5">
-    <h3>Auth Home page!</h3>
+    <h2 class="p-3">Dashboard</h2>
 
     {% if current_user.is_authenticated %}
     <h5 id="errorMessage"></h5>

@@ -563,8 +563,8 @@ class Reservation(db.Model):
     __tablename__  = 'reservations'
 
     id              = db.Column(db.Integer, primary_key=True)
-    status          = db.Column(db.Integer, \
-        CheckConstraint("status in (%s)" % (", ".join([str(s.value) for s in ReservationStatus]))))
+    # status          = db.Column(db.Integer, \
+    #     CheckConstraint("status in (%s)" % (", ".join([str(s.value) for s in ReservationStatus]))))
 
     reservations_rooms = db.relationship('ReservationRoom', \
         back_populates='reservation')
@@ -587,24 +587,28 @@ class Reservation(db.Model):
     histories       = db.relationship("History", \
         back_populates="reservation")
 
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'status': ReservationStatus(self.status).name,
-            'payment_id': self.payment_id,
-            'customer_id': self.customer_id
-        }
-
-    def __init__(self, _status, _customer, _payment):
-        self.status         = _status
+    def __init__(self, _customer, _payment):
+        # self.status         = _status
         self.customer       = _customer
         # self.receptionist   = _receptionist
         self.payment        = _payment
 
     def __repr__(self):
-        return "<Reservation(id='%s', status='%s')>" \
-            % (self.id, self.status)
+        return "<Reservation(id='%s', status='')>" \
+            % (self.id,) #self.status)
+
+    @staticmethod # -> query
+    def filter(query, payment_id, customer_id):
+        pass
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            # 'status': ReservationStatus(self.status).name,
+            'payment_id': self.payment_id,
+            'customer_id': self.customer_id
+        }
 
 class Payment(db.Model):
     __tablename__  = 'payments'

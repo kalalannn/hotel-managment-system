@@ -2,7 +2,7 @@ from app import db
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 from .models import User, Feedback, Hotel, Address, Payment, Reservation, ReservationRoom, Room, \
-    RoomCategory, UserRole, HotelStars, ReservationStatus, RoomType
+    RoomCategory, UserRole, HotelStars, ReservationStatus, RoomType, History
 
 def load_models_data():
     print ('Inserting data')
@@ -200,24 +200,6 @@ def load_models_data():
     room_3_1_1 = Room(6, TWO_BEDS,    room_cat_3_1)
     room_3_1_2 = Room(7, THREE_BEDS,  room_cat_3_1)
 
-
-    # EQUIPMENT
-    # def __init__(self, _type, _name):
-
-    # sofa_0  = Equipment('LUX',      'sofa')
-    # sofa_0  = Equipment('STANDARD', 'sofa')
-
-    # tv_0    = Equipment('LUX',      'TV')
-    # tv_1    = Equipment('STANDARD', 'TV')
-
-    # fridge_0 = Equipment('LUX',      'fridge')
-    # fridge_1 = Equipment('STANDARD', 'fridge')
-
-    # db.session.add_all([eq1, eq2, eq3])
-
-    # room1.equipments.extend([eq2, eq3])
-    # room2.equipments.extend([eq1, eq3])
-
     db.session.add_all([
         room_0_0_0, room_0_0_1, room_0_0_2, room_0_0_3,
         room_0_1_0, room_0_1_1, room_0_1_2, room_0_1_3,
@@ -228,85 +210,86 @@ def load_models_data():
         room_3_0_0, room_3_0_1, room_3_0_2, room_3_0_3, room_3_1_0, room_3_1_1, room_3_1_2,
     ])
 
-#####
-    # сам юзер делают резервацу
-    # - юзер устанавливает даты
-    # - ты выдаешь свободные комнаты на эти даты (отсортированные по категориям, с кол-вом комнат)
-    # - юзер выбирает комнату(ы) и жмет бронировать
-    #     if not authenticated:
-    #         anon = User(first_name, last_name, email, None, UserRole.ANON.value)
+    real_amount_0 = (room_cat_0_0.price + room_cat_0_1.price) * 5 # 5 days
+    tax_0 = real_amount_0 * 0.21
+    full_amount_0 = real_amount_0 + tax_0
+    block_amount_0 = full_amount_0 * 0.5
 
-    #     payment = Payment() # full = for each room (room_category.price * days)
-    #                             # block = 0.5 full
-    #                             # is_paid, is_blocked = False, False
-    #     reservation = Reservation(customer or anon, payment)
-    #     status = History(reservation, ReservationStatus, date_change=today, receptionist=None)
+    payment_0 = Payment(block_amount_0, full_amount_0, tax_0, True, True)
 
-    #     for room in rooms:
-    #         reservation_room = ReservationRoom(from, to)
-    #         reservation_room.room = room
-    #         reservation.reservations_rooms.append(reservation_room)
+    reservation_0 = Reservation(customer_0, payment_0)
 
-    # Hotel.room_categories.rooms
-    # rooms = filter(lambda r: is_free(r, date_from, date_to), rooms)
-    # rooms.sort()
-#####
+    # Datum v minulosti (2020-11-10)
+    history_0_0 = History(reservation_0, ReservationStatus.NEW.value, date(2020, 11, 10), None)
+    # Datum ODKDY "2020-11-15"
+    history_0_1 = History(reservation_0, ReservationStatus.CHECKED_IN.value, date(2020, 11, 15), receptionist_0_1)
+    # Datum DOKDY "2020-11-20"
+    history_0_2 = History(reservation_0, ReservationStatus.CHECKED_OUT.value, date(2020, 11, 20), receptionist_0_2)
 
-    payment1 = Payment(21.44, 30.5, 4.08)
-    payment2 = Payment(5.4, 10.5, 1.22)
-    payment3 = Payment(18.8, 19.3, 1.08)
+    res_room_0_0_0_0 = ReservationRoom("2020-11-15", "2020-11-20")
+    res_room_0_0_0_0.room = room_0_0_0
+    reservation_0.reservations_rooms.append(res_room_0_0_0_0)
 
-    db.session.add_all([payment1, payment2, payment3])
+    res_room_0_1_0_0 = ReservationRoom("2020-11-15", "2020-11-20")
+    res_room_0_1_0_0.room = room_0_1_0
+    reservation_0.reservations_rooms.append(res_room_0_1_0_0)
 
-    reserv1 = Reservation(ReservationStatus.NEW.value, customer_0, payment1)
-    reserv2 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, payment1)
-    reserv3 = Reservation(ReservationStatus.NEW.value, customer_0, payment1)
-    reserv4 = Reservation(ReservationStatus.CHECKED_IN.value, customer_1, payment2)
-    reserv5 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_2, payment3)
-    reserv6 = Reservation(ReservationStatus.CHECKED_OUT.value, customer_3, payment3)
-    reserv7 = Reservation(ReservationStatus.NEW.value, customer_0, payment2)
+    db.session.add_all([payment_0, reservation_0, history_0_0, history_0_1, history_0_1, history_0_2, res_room_0_0_0_0, res_room_0_1_0_0])
 
-    res_room = ReservationRoom("2020-12-01", "2020-12-06")
-    res_room.room = room_2_0_1
-    reserv1.reservations_rooms.append(res_room)
+    # db.session.add_all([payment_0, payment_1, payment_2])
 
-    res_room = ReservationRoom("2020-12-06", "2020-12-10")
-    res_room.room = room_1_0_2
-    reserv1.reservations_rooms.append(res_room)
+    # payment_1 = Payment(5.4, 10.5, 1.22)
+    # payment_2 = Payment(18.8, 19.3, 1.08)
 
-    res_room = ReservationRoom("2020-11-20", "2020-12-05")
-    res_room.room = room_1_0_2
-    reserv2.reservations_rooms.append(res_room)
+    # room_0_0_0 = Room(1, TWO_BEDS, room_cat_0_0)
+    # room_0_1_0 = Room(5, TWO_BEDS, room_cat_0_1)
 
-    res_room = ReservationRoom("2020-12-9", "2020-12-15")
-    res_room.room = room_1_0_0
-    reserv3.reservations_rooms.append(res_room)
+    # room_cat_0_0 = RoomCategory(RoomType.LUX.value,      2500, hotel_0,
+    # room_cat_0_1 = RoomCategory(RoomType.STANDARD.value, 2000, hotel_0,
 
-    res_room = ReservationRoom("2020-11-21", "2020-11-29")
-    res_room.room = room_2_0_1
-    reserv4.reservations_rooms.append(res_room)
-    res_room = ReservationRoom("2020-11-30", "2020-12-11")
-    res_room.room = room_2_0_2
-    reserv4.reservations_rooms.append(res_room)
+    # reservation_1 = Reservation(customer_0, payment_1)
+    # reservation_2 = Reservation(customer_1, payment_1)
+    # reservation_3 = Reservation(customer_0, payment_1)
+    # reservation_4 = Reservation(customer_1, payment_2)
+    # reservation_5 = Reservation(customer_2, payment_3)
+    # reservation_6 = Reservation(customer_3, payment_3)
+    # reservation_7 = Reservation(customer_0, payment_2)
 
-    res_room = ReservationRoom("2020-12-12", "2020-12-16")
-    res_room.room = room_0_0_2
-    reserv5.reservations_rooms.append(res_room)
+    # res_room = ReservationRoom("2020-11-20", "2020-12-05")
+    # res_room.room = room_1_0_2
+    # reservation_2.reservations_rooms.append(res_room)
 
-    res_room = ReservationRoom("2020-12-21", "2020-12-27")
-    res_room.room = room_0_1_1
-    reserv6.reservations_rooms.append(res_room)
+    # res_room = ReservationRoom("2020-12-9", "2020-12-15")
+    # res_room.room = room_1_0_0
+    # reservation_3.reservations_rooms.append(res_room)
 
-    res_room = ReservationRoom("2020-12-14", "2020-12-23")
-    res_room.room = room_1_0_2
-    reserv7.reservations_rooms.append(res_room)
+    # res_room = ReservationRoom("2020-11-21", "2020-11-29")
+    # res_room.room = room_2_0_1
+    # reservation_4.reservations_rooms.append(res_room)
+
+    # res_room = ReservationRoom("2020-11-30", "2020-12-11")
+    # res_room.room = room_2_0_2
+    # reservation_4.reservations_rooms.append(res_room)
+
+    # res_room = ReservationRoom("2020-12-12", "2020-12-16")
+    # res_room.room = room_0_0_2
+    # reservation_5.reservations_rooms.append(res_room)
+
+    # res_room = ReservationRoom("2020-12-21", "2020-12-27")
+    # res_room.room = room_0_1_1
+    # reservation_6.reservations_rooms.append(res_room)
+
+    # res_room = ReservationRoom("2020-12-14", "2020-12-23")
+    # res_room.room = room_1_0_2
+    # reservation_7.reservations_rooms.append(res_room)
 
     db.session.add_all([
-        reserv1,
-        reserv2,
-        reserv3,
-        reserv4,
-        reserv5
+        # reservation_0,
+        # reservation_1,
+        # reservation_2,
+        # reservation_3,
+        # reservation_4,
+        # reservation_5
     ])
 
     print('Data inserted. Commit.')

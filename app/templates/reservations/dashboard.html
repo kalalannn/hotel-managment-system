@@ -419,27 +419,29 @@ $(document).ready(function () {
     }
 
     function loadReservations() {
-        // DATES NOT WORKING, BECAUSE
-        var date_from = board.startDate.value.replace(/T.*/, '');
-        // TODO FIXME
-        // var date_to = board.endDate.value.replace(/T.*/, '');
-        var date_to = '2020-12-31';
-        $.get(Flask.url_for('reservations.load_reservations', {date_from: date_from, date_to: date_to}), function(data) {
-            // board.events.list = data;
+        var date_from = board.visibleStart().value.replace(/T.*/,'');
+        var date_to = board.visibleEnd().value.replace(/T.*/,'');
+
+        $.get(Flask.url_for('reservations.load_reservations', { date_from: date_from, date_to: date_to }), function (data) {
+            var events = [];
+            for (var obj of data) {
+                for (var reservation_room of obj.reservations_rooms) {
+                    var event = {
+                        'start': new Date(reservation_room.date_from).toISOString(),
+                        'end': new Date(reservation_room.date_to).toISOString(),
+                        'id': reservation_room.id,
+                        'text': obj.customer.last_name,
+                        'resource': reservation_room.room.id,
+                        'status': obj.status,
+                        'payment': obj.payment.is_paid ? 'paid' : (obj.payment.is_blocked ? 'blocked' : 'unpaid'),
+                        'room_number': reservation_room.room.number
+                    };
+                    events.push(event);
+                }
+            }
+            board.events.list = events;
             board.update();
         });
-        /* DayPilot.Http.ajax({
-            url: "{#{ url_for('reservations.load_reservations') }#}",
-            data: {
-                start: start.toString(),
-                end: end.toString()
-            },
-            success: function (xhr) {
-                board.events.list = xhr.data;
-                board.update();
-            }
-        });
-        */
     }
 });
 </script>

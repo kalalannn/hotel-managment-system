@@ -19,7 +19,9 @@ from app import db
 @reservations.route('/reservation_list')
 def reservation_list():
     reservations = Reservation.query.filter_by(customer_id=current_user.id).all()
-    reservations = list(filter(lambda r: r.status != ReservationStatus.CANCELED.value, reservations))
+    print(reservations)
+    reservations = list(filter(lambda r: r.last_status(r.histories) != ReservationStatus.CANCELED, reservations))
+    print(reservations)
 
     return render_template('reservations/list.html', reservations=reservations, submit_form=SubmitForm())
 
@@ -100,16 +102,15 @@ def load_rooms():
 
 @reservations.route('/get_reservations/<date:date_from>/<date:date_to>', methods=['GET'])
 def load_reservations(date_from, date_to):
-    print(date_from, date_to)
+    print(date_from)
     # reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, '2020-01-01', '2020-12-31'), 2).all()
     # Reservation.query -> TO, co chci na vystup
     # Reservation.subordinates_editable -> K cemu potrebuju opravneni + join
     # ReservationRoom.filter -> podle ceho filtruju (Je potreba zavolat subordinates_editable pro join)
     json_arr = []
     reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, date_from, date_to), current_user).all()
-    print(reservations)
     for reservation in reservations:
-        json_arr.append(reservation.serialize(True, True, True, True))
+        json_arr.append(reservation.serialize(True, True, True, True, True))
     return jsonify(json_arr)
 
 # @reservations.route('/load_reservations', methods=['GET', 'POST'])

@@ -728,11 +728,31 @@ class Reservation(db.Model):
         pass
 
     @staticmethod
+    def join_Hotel(query):
+        query = query.join(ReservationRoom, Rservation.reservations_rooms).join(Room, ReservationRoom.room)\
+            .join(RoomCategory, Room.room_category).join(Hotel, RoomCategory.hotel)
+
+    @staticmethod
     def subordinates_editable(query, current_user):
-        query = query.join(ReservationRoom, Reservation.reservations_rooms)
-        # DIRECTOR -> reservations in hotels, which he owns
-        # RECEPTIONIST -> reservations in hotels, where he is receptionist
-        # CUSTOMER, ANON -> reservations, that he made
+        # if current_user.is_authenticated:
+        #     if current_user.role == UserRole.ADMIN.value:
+        #         pass
+        #     elif current_user.role == UserRole.DIRECTOR.value:
+        #         query = query.join_Hotel(query)
+        #         query = query.join(User, Hotel.owner)
+        #         query = query.filter(User.id = current_user.id)
+        #     elif current_user.role == UserRole.RECEPTIONIST.value:
+        #         query = query.join_Hotel(query)
+        #         query = query.join(User, Hotel.receptionists)
+        #         query = query.filter(User.id = current_user.id)
+        #     else:
+        #         query = query.filter(User.id = current_user.id)
+        # else:
+        #     query = query.filter(False)
+        # return query
+        # # DIRECTOR -> reservations in hotels, which he owns
+        # # RECEPTIONIST -> reservations in hotels, where he is receptionist
+        # # CUSTOMER, ANON -> reservations, that he made
         return query
 
     def serialize(self, reservations_rooms=False, payment=False, customer=False, histories=False, room=False):
@@ -740,11 +760,12 @@ class Reservation(db.Model):
             'id': self.id,
             'payment_id': self.payment_id,
             'customer_id': self.customer_id,
+            'status': self.last_status(self.histories).name
         }
         if reservations_rooms:
             hash['reservations_rooms'] = []
             for reservation_room in self.reservations_rooms:
-                hash['reservations_rooms'].append(reservation_room.serialize(room))
+                hash['reservations_rooms'].append(reservation_room.serialize(reservation_room.room))
         if payment:
             hash['payment'] = self.payment.serialize()
         if customer:
@@ -754,6 +775,13 @@ class Reservation(db.Model):
             for history in self.histories:
                 hash['histories'].append(history.serialize())
         return hash
+    
+    def last_status(self, histories):
+        if histories:
+            return ReservationStatus(histories[-1].reservation_status)
+        else:
+            return ReservationStatus.NEW
+
 
 class Payment(db.Model):
     __tablename__  = 'payments'

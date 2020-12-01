@@ -37,5 +37,8 @@
             </button>
         </div>
     </div>
+    {% else %}
+    <div class="row"> <p class="p-3"> You have not got hotels, but if you are here, you can create a new one 
+        <a href="{{ url_for('hotels.update') }}"> here </a> </p> </div>
     {% endfor %}
 {% endblock list_content %}

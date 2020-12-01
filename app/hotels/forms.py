@@ -75,12 +75,6 @@ class HotelForm(FlaskForm):
         if 'obj' in kwargs:
             self.obj = kwargs['obj']
 
-    def __repr__(self):
-        return 'name={}, stars={}, desc={}'.format(self.name, self.stars, self.description)
-
-    def admin(self):
-        self.stars.query_factory = lambda: HotelStars
-        self.owner.query_factory = lambda: User.query.filter_by(role=UserRole.DIRECTOR.value).all()
         if hasattr(self, 'obj'):
             self.stars.data = HotelStars(self.obj.stars)
             self.address_country.data = self.obj.address.country
@@ -89,15 +83,14 @@ class HotelForm(FlaskForm):
             self.address_street.data = self.obj.address.street
             self.address_number.data = self.obj.address.number
 
+    def __repr__(self):
+        return 'name={}, stars={}, desc={}'.format(self.name, self.stars, self.description)
+
+    def admin(self):
+        self.owner.query_factory = lambda: User.query.filter_by(role=UserRole.DIRECTOR.value).all()
+
     def director(self):
-        del self.name
-        del self.stars
         del self.owner
-        del self.address_country  
-        del self.address_post_code
-        del self.address_city     
-        del self.address_street   
-        del self.address_number   
 
 class RoomCategoryForm(FlaskForm):
     type = QuerySelectField('Type',      \

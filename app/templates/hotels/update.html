@@ -30,10 +30,12 @@ textarea {
 
     {% if op == 'New' or op == 'Edit' %}
     <div class="col col-md-6 p-3">
-        {% if current_user.role == UserRole.DIRECTOR.value %}
+        {#% if op == 'Edit' and current_user.role == UserRole.DIRECTOR.value %}
             {{ hotel.name }} {{ '*' * hotel.stars }} <br>
             Address: {{ hotel.address.text() }}      <br> <br>
-        {% endif %}
+
+            // Povolime mu, vsak je to jeho hotel :)
+        {% endif %#}
         <form method="POST" action="">
             {{ form.csrf_token }}
             {% for field in form %}
@@ -50,7 +52,18 @@ textarea {
     {% endif %}
 </div>
 
-{% if hotel is defined and op == 'Edit' %}
+{% if hotel is defined %}
+<style>
+.table-align-valign-center > tbody > tr > td,
+.table-align-valign-center > thead > tr > th {
+    vertical-align: middle;
+}
+.table-align-valign-center > tbody > tr > td:not(:first-child),
+.table-align-valign-center > thead > tr > th:not(:first-child) {
+    text-align: center;
+}
+</style>
+    {% if op == 'Edit' %}
 <script>
 function DeleteRoom(room_id) {
     var modal = $('#modalDeleteRoom');
@@ -107,26 +120,23 @@ function LoadRoomCategory(room_category_id) {
     return false;
 };
 </script>
-<style>
-.table-align-valign-center > tbody > tr > td,
-.table-align-valign-center > thead > tr > th {
-    vertical-align: middle;
-}
-.table-align-valign-center > tbody > tr > td:not(:first-child),
-.table-align-valign-center > thead > tr > th:not(:first-child) {
-    text-align: center;
-}
-</style>
+    {% endif %}
+
 <h2 class="p-3">
     Rooms
-    (<a href="#" onClick="LoadRoom(); return false"> New </a>)
+    {% if op == 'Edit' %}
+        (<a href="#" onClick="LoadRoom(); return false"> New </a>)
+    {% endif %}
     and Categories
-    (<a href="#" onClick="LoadRoomCategory(); return false"> New </a>)
+    {% if op == 'Edit' %}
+        (<a href="#" onClick="LoadRoomCategory(); return false"> New </a>)
+    {% endif %}
 </h2>
 <div class="row justify-content-start p-3">
     <div class="col col-md-6">
         <table class="table table-align-valign-center">
             <thead class="thead-dark">
+                {% if op == 'Edit' %}
                 <tr>
                 {% for field in category_form %}
                     {% if field.type != 'CSRFTokenField' and field.type != 'SubmitField' %}
@@ -135,6 +145,14 @@ function LoadRoomCategory(room_category_id) {
                 {% endfor %}
                     <th colspan="2"> Action </th>
                 </tr>
+                {% elif op == 'Show' %}
+                <tr>
+                    <th> Category </th>
+                    <th> Price/Room </th>
+                    <th> Description </th>
+                    <th> Choose </th>
+                </tr>
+                {% endif %}
             </thead>
 
             <tbody>
@@ -143,6 +161,8 @@ function LoadRoomCategory(room_category_id) {
                     <td><b> {{ RoomType(room_category.type).name }}  </b></td>
                     <td><b> {{ "{},-".format(room_category.price) }} </b></td>
                     <td> {{ room_category.description }} </td>
+
+                    {% if op == 'Edit' %}
                     <td> <button class="btn btn-primary" onClick="LoadRoomCategory('{{ room_category.id }}'); return false">
                         Update {#{ room_category.id }#}
                         </button>
@@ -151,6 +171,12 @@ function LoadRoomCategory(room_category_id) {
                         Delete {#{ room_category.id }#}
                         </button>
                     </td>
+                    {% elif op == 'Show' %}
+                        <td>
+                            &nbsp;
+                            <!-- <input type="checkbox"> -->
+                        </td>
+                    {% endif %}
                 </tr>
 
                     {% for room in room_category.rooms %}
@@ -158,6 +184,7 @@ function LoadRoomCategory(room_category_id) {
                         <td> &nbsp; </td>
                         <td> Room #{{ room.number }} </td>
                         <td> {{ room.beds }} Beds  </td>
+                        {% if op == 'Edit' %}
                         <td> <button class="btn btn-primary" onClick="LoadRoom('{{ room.id }}'); return false">
                             Update {#{ room.id }#} 
                             </button>
@@ -166,6 +193,9 @@ function LoadRoomCategory(room_category_id) {
                             Delete {#{ room.id }#} 
                             </button>
                         </td>
+                        {% elif op == 'Show' %}
+                        <td><input id="{{ room.id }}" name="room" type="checkbox"></td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
 
@@ -173,8 +203,98 @@ function LoadRoomCategory(room_category_id) {
             </tbody>
             </table>
     </div>
+    {% if op == 'Show' %}
+    <script>
+    $(document).ready(function () {
+        var dates  = document.cookie.split('; ');
+        var date_from = dates[0].replace(/date_from=/, '');
+        var date_to = dates[1].replace(/date_to=/, '');
+        $('#create_date_from, #create_date_to').datepicker({
+            dateFormat: "dd-mm-yy",
+        });
+        $('#create_date_from').datepicker('setDate', new Date(date_from));
+        $('#create_date_to').datepicker('setDate', new Date(date_to));
+        $('#ajax_submit').on('click', function () {
+            var form = $(this).parents('form')
+            form.validate({
+                errorClass: "unpaid-text",
+            });
+
+            if (form.valid()) {
+                {% if not current_user.is_authenticated %}
+                $.ajax({
+                    url: "{{ url_for('users.get_or_create_user') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        email: form.find('#email').val(),
+                        first_name: form.find('#first_name').val(),
+                        last_name: form.find('#last_name').val(),
+                    }),
+                    success: function (data) {
+                {% endif %}
+                        reservations_rooms = []
+                        $('input[name=room]').each(function () {
+                            if(this.checked) {
+                                reservations_rooms.push(
+                                    { room_id: this.id,
+                                        date_from: form.find('#create_date_from').val(),
+                                        date_to: form.find('#create_date_to').val(),
+                                    },
+                                );
+                            };
+                        });
+
+                        $.ajax({
+                            url: "{{ url_for('reservations.create_reservation') }}",
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                {% if not current_user.is_authenticated %}
+                                customer_id: data.user_id,
+                                {% else %}
+                                customer_id: {{ current_user.id }},
+                                {% endif %}
+                                reservations_rooms: reservations_rooms,
+                            }),
+                            success: function (data) {
+                                // $modal.modal('hide');
+                                // loadReservations();
+                                // loadRooms();
+                                // board.update();
+                                Utils.showToast('success', data.message)
+                                location.href = '{{ url_for('reservations.reservation_list')}}'
+                            },
+                            error: function () {
+                                Utils.showToast('error', 'Some error occurred. Try to reload the page')
+                            }
+                        });
+                {% if not current_user.is_authenticated %}
+                    },
+                    error: function () {
+                        Utils.showToast('error', 'Some error occurred. Try to reload the page')
+                    }
+                });
+                {% endif %}
+            }
+        });
+    });
+    </script>
+    <div class="col col-md-4">
+        <div class="row p-3">
+            <form method="POST">
+                {{ reservation_form.csrf_token }}
+                {% for field in reservation_form %}
+                    {{ render_field(field) }}
+                {% endfor %}
+                <button id="ajax_submit" type="button" class="btn btn-primary btn-save float-right">Reservate</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
+{% if op == 'Edit'%}
 <div class="modal fade" id="modalDeleteRoomCategory" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -260,7 +380,8 @@ function LoadRoomCategory(room_category_id) {
         </div>
     </div>
 </div>
-{% endif %}
 
+{% endif %}
+{% endif %}
 <br><br>
 {% endblock inner_content %}

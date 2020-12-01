@@ -72,18 +72,18 @@
             $modal.find('.status').removeClass('paid blocked unpaid').addClass(status).text(status.toUpperCase());
 
             let table = '<table><tbody>';
-            for (let room_category of data.rooms_categories) {
-                table += '<tr style="border-bottom: 1px solid black;"><td><b>Room #' + room_category.room.number + '</b></td></tr>';
-                table += '<tr><td>Category ' + room_category.category.type + '</td></tr>';
-                table += '<tr><td>' + room_category.room.beds + ' beds</td></tr>';
+            for (let reservation_room of data.reservations_rooms) {
+                table += '<tr style="border-bottom: 1px solid black;"><td><b>Room #' + reservation_room.room.number + '</b></td></tr>';
+                table += '<tr><td>Category ' + reservation_room.room.room_category.type + '</td></tr>';
+                table += '<tr><td>' + reservation_room.room.beds + ' beds</td></tr>';
             }
             table += '</tbody></table>';
             $modal.find('#placeholder').html(table);
 
             $modal.find('.check').html('');
-            if (data.reservation.status == 'CHECKED_IN') {
+            if (data.status == 'CHECKED_IN') {
                 $modal.find('.check').html('You are checked in!');
-            } else if (data.reservation.status == 'CHECKED_OUT') {
+            } else if (data.status == 'CHECKED_OUT') {
                 $modal.find('.check').html('You are checked out.');
             }
 

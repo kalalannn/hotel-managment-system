@@ -18,10 +18,8 @@ from app import db
 
 @reservations.route('/reservation_list')
 def reservation_list():
-    reservations = Reservation.query.filter_by(customer_id=current_user.id).all()
-    print(reservations)
-    reservations = list(filter(lambda r: r.last_status(r.histories) != ReservationStatus.CANCELED, reservations))
-    print(reservations)
+    reservations = Reservation.subordinates_editable(Reservation.query, current_user).all()
+    reservations = list(filter(lambda r: r.last_status() != ReservationStatus.CANCELED, reservations))
 
     return render_template('reservations/list.html', reservations=reservations, submit_form=SubmitForm())
 
@@ -31,20 +29,7 @@ def reservation_details():
     reservation_id = request.args.get('reservation_id')
     reservation = Reservation.query.filter_by(id=reservation_id).first()
 
-    # serialize rooms and categories
-    rooms_categories = []
-    for reserv_room in reservation.reservations_rooms:
-        if reserv_room.is_active:
-            room_category = {}
-            room_category['room'] = reserv_room.room.serialize
-            room_category['category'] = reserv_room.room.room_category.serialize
-            rooms_categories.append(room_category)
-    details = {
-        'reservation': reservation.serialize,
-        'rooms_categories': rooms_categories,
-        'payment': reservation.payment.serialize
-    }
-    return details
+    return reservation.serialize(payment=True, reservations_rooms=True, room=True, room_category=True)
 
 
 @reservations.route('/dashboard')
@@ -108,6 +93,8 @@ def load_reservations(date_from, date_to):
     # ReservationRoom.filter -> podle ceho filtruju (Je potreba zavolat subordinates_editable pro join)
     json_arr = []
     reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, date_from, date_to), current_user).all()
+    reservations = list(filter(lambda r: r.last_status() != ReservationStatus.CANCELED, reservations))
+
     for reservation in reservations:
         json_arr.append(reservation.serialize(True, True, True, True, True))
     return jsonify(json_arr)
@@ -192,11 +179,12 @@ def delete_reservation(reservation_id):
         return redirect(url_for('reservations.reservation_list'))
 
     if form.validate_on_submit():
-        reservation.status = ReservationStatus.CANCELED.value
+        history = History(reservation, ReservationStatus.CANCELED.value, datetime.now(), current_user)
         for reserv_room in reservation.reservations_rooms:
             reserv_room.is_active = False
 
         db.session.add(reservation)
+        db.session.add(history)
         db.session.commit()
         flash('Reservation #{} was canceled.'.format(reservation.id), 'info')
     else:
@@ -223,7 +211,6 @@ def delete_reserv_room():
         if reserv_room.is_active:
             to_cancel = False
     if to_cancel:
-        reservation.status = ReservationStatus.CANCELED.value
         history = History(reservation, ReservationStatus.CANCELED.value, datetime.now(), current_user)
         db.session.add_all([reservation, history])
         db.session.commit()

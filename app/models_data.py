@@ -210,8 +210,8 @@ def load_models_data():
         room_3_0_0, room_3_0_1, room_3_0_2, room_3_0_3, room_3_1_0, room_3_1_1, room_3_1_2,
     ])
 
-    # CUSTOMER_0 RESERVATIONS
-    real_amount_0 = (room_cat_0_0.price + room_cat_0_1.price) * 5 # 5 days
+    # RESERVATION_0
+    real_amount_0 = (room_cat_0_0.price + room_cat_0_1.price) * 6 # 6 days
     tax_0 = real_amount_0 * 0.21
     full_amount_0 = real_amount_0 + tax_0
     block_amount_0 = full_amount_0 * 0.5
@@ -236,7 +236,7 @@ def load_models_data():
     db.session.add_all([payment_0, reservation_0, history_0_0, history_0_1, history_0_2, res_room_0_0_0_0, res_room_0_1_0_0])
 
 
-    #CUSTOMER_1
+    #RESERVATION_1
     real_amount_1 = (room_cat_1_0.price + room_cat_1_1.price) * 5 # 5 days
     tax_1 = real_amount_1 * 0.21
     full_amount_1 = real_amount_1 + tax_1
@@ -246,20 +246,20 @@ def load_models_data():
     reservation_1 = Reservation(customer_1, payment_1)
 
     history_1_0 = History(reservation_1, ReservationStatus.NEW.value, date(2020, 11, 24), None)
-    history_1_1 = History(reservation_1, ReservationStatus.CHECKED_IN.value, date(2020, 11, 25), receptionist_1_1)
+    history_1_1 = History(reservation_1, ReservationStatus.CHECKED_IN.value, date(2020, 12, 1), receptionist_1_1)
 
-    res_room_1_0_0_1 = ReservationRoom("2020-11-25", "2020-12-05")
+    res_room_1_0_0_1 = ReservationRoom("2020-12-01", "2020-12-05")
     res_room_1_0_0_1.room = room_1_0_0
     reservation_1.reservations_rooms.append(res_room_1_0_0_1)
 
-    res_room_1_1_0_1 = ReservationRoom("2020-11-25", "2020-12-05")
+    res_room_1_1_0_1 = ReservationRoom("2020-12-01", "2020-12-05")
     res_room_1_1_0_1.room = room_1_1_0
     reservation_1.reservations_rooms.append(res_room_1_1_0_1)
 
     db.session.add_all([payment_1, reservation_1, history_1_0, history_1_1, res_room_1_0_0_1, res_room_1_1_0_1])
 
-    #CUSTOMER_2
-    real_amount_2 = (room_cat_0_0.price + room_cat_0_1.price) * 5 # 5 days
+    #RESERVATION_2
+    real_amount_2 = (room_cat_0_0.price + room_cat_0_1.price) * 6 # 6 days
     tax_2 = real_amount_2 * 0.21
     full_amount_2 = real_amount_2 + tax_2
     block_amount_2 = full_amount_2 * 0.5
@@ -268,25 +268,25 @@ def load_models_data():
     reservation_2 = Reservation(customer_2, payment_2)
 
     history_2_0 = History(reservation_2, ReservationStatus.NEW.value, date(2020, 11, 11), None)
-    history_2_1 = History(reservation_2, ReservationStatus.CHECKED_IN.value, date(2020, 11, 26), receptionist_0_1)
+    history_2_1 = History(reservation_2, ReservationStatus.CHECKED_IN.value, date(2020, 12, 2), receptionist_0_1)
 
-    res_room_0_0_0_2 = ReservationRoom("2020-11-26", "2020-12-07")
+    res_room_0_0_0_2 = ReservationRoom("2020-12-2", "2020-12-07")
     res_room_0_0_0_2.room = room_0_0_1
     reservation_2.reservations_rooms.append(res_room_0_0_0_2)
 
-    res_room_1_1_0_2 = ReservationRoom("2020-12-26", "2020-12-07")
+    res_room_1_1_0_2 = ReservationRoom("2020-12-2", "2020-12-07")
     res_room_1_1_0_2.room = room_1_1_0
     reservation_2.reservations_rooms.append(res_room_1_1_0_2)
 
     db.session.add_all([payment_2, reservation_2, history_2_0, history_2_1, res_room_0_0_0_2, res_room_1_1_0_2])
 
-        #CUSTOMER_3
-    real_amount_3 = (room_cat_2_0.price + room_cat_2_1.price) * 5 # 5 days
+        #RESERVATION_3
+    real_amount_3 = (room_cat_2_0.price + room_cat_2_1.price) * 6 # 6 days
     tax_3 = real_amount_3 * 0.21
     full_amount_3 = real_amount_3 + tax_3
     block_amount_3 = full_amount_3 * 0.5
 
-    payment_3 = Payment(block_amount_3, full_amount_3, tax_3, True, True)
+    payment_3 = Payment(block_amount_3, full_amount_3, tax_3, False, False)
     reservation_3 = Reservation(customer_3, payment_3)
 
     history_3_0 = History(reservation_3, ReservationStatus.NEW.value, date(2020, 1, 12), None)
@@ -301,8 +301,8 @@ def load_models_data():
 
     db.session.add_all([payment_3, reservation_3, history_3_0, res_room_0_0_0_3, res_room_0_1_1_3])
 
-        #CUSTOMER_4
-    real_amount_4 = (room_cat_1_0.price + room_cat_1_1.price) * 5 # 5 days
+        #RESERVATION_4
+    real_amount_4 = (room_cat_1_0.price + room_cat_1_1.price) * 9 # 9 days
     tax_4 = real_amount_4 * 0.21
     full_amount_4 = real_amount_4 + tax_4
     block_amount_4 = full_amount_4 * 0.5
@@ -323,22 +323,22 @@ def load_models_data():
     db.session.add_all([payment_4, reservation_4, history_4_0, res_room_0_0_0_4, res_room_0_1_1_4])
 
 
-        #CUSTOMER_5
-    real_amount_5 = (room_cat_3_0.price + room_cat_3_1.price) * 5 # 5 days
+        #RESERVATION_5
+    real_amount_5 = (room_cat_3_0.price + room_cat_3_1.price) * 7 # 7 days
     tax_5 = real_amount_5 * 0.21
     full_amount_5 = real_amount_5 + tax_5
     block_amount_5 = full_amount_5 * 0.5
 
-    payment_5 = Payment(block_amount_5, full_amount_5, tax_5, True, True)
+    payment_5 = Payment(block_amount_5, full_amount_5, tax_5, True, False)
     reservation_5 = Reservation(customer_5, payment_5)
 
     history_5_0 = History(reservation_5, ReservationStatus.NEW.value, date(2020, 11, 19), None)
 
-    res_room_3_0_0_5 = ReservationRoom("2020-12-2", "2020-12-8")
+    res_room_3_0_0_5 = ReservationRoom("2020-12-12", "2020-12-18")
     res_room_3_0_0_5.room = room_3_0_0
     reservation_5.reservations_rooms.append(res_room_3_0_0_5)
 
-    res_room_3_1_0_5 = ReservationRoom("2020-12-2", "2020-12-8")
+    res_room_3_1_0_5 = ReservationRoom("2020-12-12", "2020-12-18")
     res_room_3_1_0_5.room = room_3_1_0
     reservation_5.reservations_rooms.append(res_room_3_1_0_5)
 
@@ -346,8 +346,8 @@ def load_models_data():
 
 
 
-        #CUSTOMER_6
-    real_amount_6 = (room_cat_1_0.price + room_cat_1_1.price) * 5 # 5 days
+        #RESERVATION_6
+    real_amount_6 = (room_cat_1_0.price + room_cat_1_1.price) * 9 # 9 days
     tax_6 = real_amount_0 * 0.21
     full_amount_6 = real_amount_6 + tax_6
     block_amount_6 = full_amount_6 * 0.5
@@ -356,19 +356,19 @@ def load_models_data():
     reservation_6 = Reservation(customer_6, payment_6)
 
     history_6_0 = History(reservation_6, ReservationStatus.NEW.value, date(2020, 12, 1), None)
-    res_room_1_0_0_6 = ReservationRoom("2020-12-11", "2020-12-19")
+    res_room_1_0_0_6 = ReservationRoom("2020-12-21", "2020-12-29")
     res_room_1_0_0_6.room = room_1_0_0
     reservation_6.reservations_rooms.append(res_room_1_0_0_6)
 
-    res_room_1_1_0_6 = ReservationRoom("2020-12-11", "2020-12-19")
+    res_room_1_1_0_6 = ReservationRoom("2020-12-21", "2020-12-29")
     res_room_1_1_0_6.room = room_1_1_0
     reservation_6.reservations_rooms.append(res_room_1_1_0_6)
 
     db.session.add_all([payment_6, reservation_6, history_6_0, res_room_1_0_0_6, res_room_1_1_0_6])
 
 
-        #CUSTOMER_7
-    real_amount_7 = (room_cat_2_0.price + room_cat_2_1.price) * 5 # 5 days
+        #RESERVATION_7
+    real_amount_7 = (room_cat_2_0.price + room_cat_2_1.price) * 6 # 6 days
     tax_7 = real_amount_7* 0.21
     full_amount_7 = real_amount_7 + tax_7
     block_amount_7 = full_amount_7 * 0.5
@@ -376,21 +376,107 @@ def load_models_data():
     payment_7 = Payment(block_amount_7, full_amount_7, tax_7, True, True)
     reservation_7 = Reservation(customer_7, payment_7)
 
-    history_7_0 = History(reservation_0, ReservationStatus.NEW.value, date(2020, 11, 23), None)
-    history_7_1 = History(reservation_0, ReservationStatus.CHECKED_IN.value, date(2020, 11, 24), receptionist_0_1)
+    history_7_0 = History(reservation_7, ReservationStatus.NEW.value, date(2020, 11, 23), None)
+    history_7_1 = History(reservation_7, ReservationStatus.CHECKED_IN.value, date(2020, 12, 3), receptionist_2_1)
 
-    res_room_2_0_0_7 = ReservationRoom("2020-11-24", "2020-12-04")
+    res_room_2_0_0_7 = ReservationRoom("2020-12-03", "2020-12-08")
     res_room_2_0_0_7.room = room_2_0_0
     reservation_7.reservations_rooms.append(res_room_2_0_0_7)
 
-    res_room_2_1_0_7 = ReservationRoom("2020-11-24", "2020-12-04")
+    res_room_2_1_0_7 = ReservationRoom("2020-12-03", "2020-12-08")
     res_room_2_1_0_7.room = room_2_1_0
     reservation_7.reservations_rooms.append(res_room_2_1_0_7)
 
     db.session.add_all([payment_7, reservation_7, history_7_0, history_7_1, res_room_2_0_0_7, res_room_2_1_0_7])
 
+    #RESERVATION_8
+    real_amount_8 = (room_cat_2_0.price + room_cat_2_1.price) * 6 # 6 days
+    tax_8 = real_amount_8* 0.21
+    full_amount_8 = real_amount_8 + tax_8
+    block_amount_8 = full_amount_8 * 0.5
 
-    
+    payment_8 = Payment(block_amount_8, full_amount_8, tax_8, True, True)
+    reservation_8 = Reservation(customer_7, payment_8)
+
+    history_8_0 = History(reservation_8, ReservationStatus.NEW.value, date(2020, 11, 1), None)
+    history_8_1 = History(reservation_8, ReservationStatus.CHECKED_IN.value, date(2020, 11, 1), receptionist_2_1)
+    history_8_2 = History(reservation_8, ReservationStatus.CHECKED_OUT.value, date(2020, 11, 6), receptionist_2_2)
+    res_room_2_0_0_8 = ReservationRoom("2020-11-01", "2020-11-06")
+    res_room_2_0_0_8.room = room_2_0_0
+    reservation_8.reservations_rooms.append(res_room_2_0_0_8)
+
+    res_room_2_1_0_8 = ReservationRoom("2020-11-01", "2020-11-06")
+    res_room_2_1_0_8.room = room_2_1_0
+    reservation_8.reservations_rooms.append(res_room_2_1_0_8)
+
+    db.session.add_all([payment_8, reservation_8, history_8_0, history_8_1, history_8_2, res_room_2_0_0_8, res_room_2_1_0_8])
+
+    #RESERVATION_9
+    real_amount_9 = (room_cat_1_0.price + room_cat_1_1.price) * 6 # 6 days
+    tax_9 = real_amount_9* 0.21
+    full_amount_9 = real_amount_9 + tax_9
+    block_amount_9 = full_amount_9 * 0.5
+
+    payment_9 = Payment(block_amount_9, full_amount_9, tax_9, True, True)
+    reservation_9 = Reservation(customer_3, payment_9)
+
+    history_9_0 = History(reservation_9, ReservationStatus.NEW.value, date(2020, 11, 1), None)
+    history_9_1 = History(reservation_9, ReservationStatus.CHECKED_IN.value, date(2020, 11, 1), receptionist_1_1)
+    history_9_2 = History(reservation_9, ReservationStatus.CHECKED_OUT.value, date(2020, 11, 6), receptionist_1_2)
+    res_room_1_0_0_9 = ReservationRoom("2020-11-01", "2020-11-06")
+    res_room_1_0_0_9.room = room_1_0_0
+    reservation_9.reservations_rooms.append(res_room_1_0_0_9)
+
+    res_room_1_1_0_9 = ReservationRoom("2020-11-01", "2020-11-06")
+    res_room_1_1_0_9.room = room_1_1_1
+    reservation_9.reservations_rooms.append(res_room_1_1_0_9)
+
+    db.session.add_all([payment_9, reservation_9, history_9_0, history_9_1, history_9_2, res_room_1_0_0_9, res_room_1_1_0_9])
+
+    #RESERVATION_10
+    real_amount_10 = (room_cat_3_0.price + room_cat_3_1.price) * 6 # 6 days
+    tax_10 = real_amount_10* 0.21
+    full_amount_10 = real_amount_10 + tax_10
+    block_amount_10 = full_amount_10 * 0.5
+
+    payment_10 = Payment(block_amount_10, full_amount_10, tax_10, True, True)
+    reservation_10 = Reservation(customer_2, payment_10)
+
+    history_10_0 = History(reservation_10, ReservationStatus.NEW.value, date(2020, 11, 1), None)
+    history_10_1 = History(reservation_10, ReservationStatus.CHECKED_IN.value, date(2020, 11, 2), receptionist_3_1)
+    history_10_2 = History(reservation_10, ReservationStatus.CHECKED_OUT.value, date(2020, 11, 7), receptionist_3_2)
+    res_room_3_0_0_10 = ReservationRoom("2020-11-02", "2020-11-07")
+    res_room_3_0_0_10.room = room_3_0_0
+    reservation_10.reservations_rooms.append(res_room_3_0_0_10)
+
+    res_room_3_1_1_10 = ReservationRoom("2020-11-02", "2020-11-07")
+    res_room_3_1_1_10.room = room_3_1_1
+    reservation_10.reservations_rooms.append(res_room_3_1_1_10)
+
+    db.session.add_all([payment_10, reservation_10, history_10_0, history_10_1, history_10_2, res_room_3_0_0_10, res_room_3_1_1_10])
+
+    #RESERVATION_11
+    real_amount_11 = (room_cat_3_0.price + room_cat_3_1.price) * 14 # 6 days
+    tax_11 = real_amount_11* 0.21
+    full_amount_11 = real_amount_11 + tax_11
+    block_amount_11 = full_amount_11 * 0.5
+
+    payment_11 = Payment(block_amount_11, full_amount_11, tax_11, True, False)
+    reservation_11 = Reservation(customer_6, payment_11)
+
+    history_11_0 = History(reservation_10, ReservationStatus.NEW.value, date(2020, 11, 1), None)
+    history_11_1 = History(reservation_10, ReservationStatus.CHECKED_IN.value, date(2020, 11, 2), receptionist_3_1)
+
+    res_room_3_0_0_11 = ReservationRoom("2020-12-02", "2020-12-07")
+    res_room_3_0_0_11.room = room_3_0_0
+    reservation_11.reservations_rooms.append(res_room_3_0_0_11)
+
+    res_room_3_1_1_11 = ReservationRoom("2020-12-02", "2020-12-07")
+    res_room_3_1_1_11.room = room_3_1_1
+    reservation_11.reservations_rooms.append(res_room_3_1_1_11)
+
+    db.session.add_all([payment_11, reservation_11, history_11_0, history_11_1, res_room_3_0_0_11, res_room_3_1_1_11])
+
     # db.session.add_all([payment_0, payment_1, payment_2])
 
     # payment_1 = Payment(5.4, 10.5, 1.22)

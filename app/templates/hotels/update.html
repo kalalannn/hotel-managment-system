@@ -206,14 +206,20 @@ function LoadRoomCategory(room_category_id) {
     {% if op == 'Show' %}
     <script>
     $(document).ready(function () {
-        var dates  = document.cookie.split('; ');
-        var date_from = dates[0].replace(/date_from=/, '');
-        var date_to = dates[1].replace(/date_to=/, '');
+        var dates;
+        var date_from = new Date();
+        var date_to = new Date(date_from);
+        date_to.setDate(date_to.getDate() + 6)
+        if (document.cookie != '') {
+            dates  = document.cookie.split('; ');
+            date_from = new Date(dates[0].replace(/date_from=/, ''));
+            date_to = new Date(dates[1].replace(/date_to=/, ''));
+        };
         $('#create_date_from, #create_date_to').datepicker({
             dateFormat: "dd-mm-yy",
         });
-        $('#create_date_from').datepicker('setDate', new Date(date_from));
-        $('#create_date_to').datepicker('setDate', new Date(date_to));
+        $('#create_date_from').datepicker('setDate', date_from);
+        $('#create_date_to').datepicker('setDate', date_to);
         $('#ajax_submit').on('click', function () {
             var form = $(this).parents('form')
             form.validate({

@@ -109,7 +109,7 @@ def load_reservations(date_from, date_to):
     reservations = Reservation.subordinates_editable(ReservationRoom.filter(Reservation.query, date_from, date_to), current_user).all()
     print(reservations)
     for reservation in reservations:
-        json_arr.append(reservation.serialize(True))
+        json_arr.append(reservation.serialize(True, True, True, True))
     return jsonify(json_arr)
 
 # @reservations.route('/load_reservations', methods=['GET', 'POST'])

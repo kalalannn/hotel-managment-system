@@ -12,16 +12,16 @@ from app import db
 from app.helpers import Helper
 
 
-@hotels.route('setcookie', methods=['GET', 'POST'])
-def setcookie():
-    if request.method == 'POST':
-        name = request.form['name']
-    print(name)
-    return redirect(url_for('hotels.hotel_list'))
+# @hotels.route('setcookie', methods=['GET', 'POST'])
+# def setcookie():
+#     if request.method == 'POST':
+#         name = request.form['name']
+#     print(name)
+#     return redirect(url_for('hotels.hotel_list'))
 
 
-@hotels.route('/hotel_list', methods=['GET', 'POST'])
-@hotels.route('/hotel_list/<int:owner_id>', methods=['GET', 'POST'])
+@hotels.route('/list', methods=['GET', 'POST'])
+@hotels.route('/list/<int:owner_id>', methods=['GET', 'POST'])
 def hotel_list(owner_id=None):
     form = SearchForm(request.form)
 
@@ -92,7 +92,7 @@ def update(hotel_id=None):
             )
             db.session.add(hotel)
         db.session.commit()
-        return redirect(url_for('hotels.list'))
+        return redirect(url_for('hotels.hotel_list'))
 
     if hotel_id:
         room_form       = RoomForm(hotel_id=hotel_id)

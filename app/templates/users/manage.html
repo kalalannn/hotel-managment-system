@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from 'bootstrap/form.html' import render_form %}
 
 {% block title %} Users home {% endblock %}
 
@@ -68,7 +67,7 @@ $(document).ready(function() {
 
 {% block inner_content %}
 <h2 class="p-3"> Users Management
-    (<a href="#" onClick="loadUser(); return false"> New </a>)
+    (<a href="#" onClick="LoadUser(); return false"> New </a>)
 </h2>
 <div name="search_form" class="d-inline-block mr-5 align-top">
     <form method="POST">
@@ -98,12 +97,12 @@ $(document).ready(function() {
                     <td></td>
                     <td>{{ user.first_name }} {{ user.last_name }}</td>
                     <td>
-                        <button class="btn btn-outline-primary" onClick="LoadUser({{ user.id }}); return false">
+                        <button class="btn btn-outline-primary" onClick="LoadUser('{{ user.id }}'); return false">
                             Edit {#{ user.id }#} 
                         </button>
                     </td>
                     <td> 
-                        <button class="btn btn-outline-danger" onClick="DeleteUser({{ user.id }}); return false">
+                        <button class="btn btn-outline-danger" onClick="DeleteUser('{{ user.id }}'); return false">
                             Delete {#{ user.id }#} 
                         </button>
                     </td>

@@ -206,14 +206,12 @@ def delete_reserv_room():
     # check other reservations_rooms of related reservation
     # if no one is active, cancel the whole reservation
     reservation = Reservation.query.filter_by(id=reservation_room.reservation.id).first()
-    to_cancel = True
     for reserv_room in reservation.reservations_rooms:
-        if reserv_room.is_active:
-            to_cancel = False
-    if to_cancel:
-        history = History(reservation, ReservationStatus.CANCELED.value, datetime.now(), current_user)
-        db.session.add_all([reservation, history])
-        db.session.commit()
+        reserv_room.is_active = False
+            # to_cancel = False
+    history = History(reservation, ReservationStatus.CANCELED.value, datetime.now(), current_user)
+    db.session.add_all([reservation, history])
+    db.session.commit()
 
     return jsonify(message='Reservation successfully deleted')
 

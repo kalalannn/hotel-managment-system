@@ -17,39 +17,73 @@
 <h1>Hotel: rezervace a správa ubytování</h1> 
 <dl>
 	<dt>Autoři</dt>
-	<dd>Luhin Artsiom<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor01@stud.fit.vutbr.cz">xluhin00@stud.fit.vutbr.cz</a> -
-        vedoucí
+	<dd><i>Luhin Artsiom</i><!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xluhin00@stud.fit.vutbr.cz">xluhin00@stud.fit.vutbr.cz</a>
+		<p> Návrh a implementace modelů a případů užití. </p>
+		<p> <b>Reservations:</b> založení nové rezervace, editace a mazání stávajících.
+			Dashboard rezervaci pro vlastníka a recepčních v hotelu. List rezervaci pro zákazníky a ostatní.
+		</p>
+		<p>
+			<b>Users:</b> vytvoření základů komponenty, přihlašování a odhlašování uživatelů.
+		</p>
+		<p>
+			Modální dialogy. Zapojení externích javascriptovych komponent do systému.
+		</p>
 	</dd>
-	<dd>Sharlaieva Arina<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor02@stud.fit.vutbr.cz">xsharl00@stud.fit.vutbr.cz</a> - 
-		popis činnosti v týmu
+	<hr>
+	<dd><i>Sharlaieva Arina</i><!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+	    <a href="mailto:xsharl00@stud.fit.vutbr.cz">xsharl00@stud.fit.vutbr.cz</a>
+		<p> <b>Hotels:</b> pomoct se zakládáním nových kategorií pokojů a pokojů.</p>
+		<p>
+			Aktualizace requirements. Plnění dat. Dokumentace. Rozjezd systému na heroku.
+		</p>
 	</dd>
-  <dd>Vorobiev Nikolaj<!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor03@stud.fit.vutbr.cz">xvorob00@stud.fit.vutbr.cz</a> - 
-		popis činnosti v týmu
+	<hr>
+	<dd><i>Vorobiev Nikolaj</i><!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xvorob00@stud.fit.vutbr.cz">xvorob00@stud.fit.vutbr.cz</a>
+			<p> <b>Vedení projektu.</b> Návrh a implementace modelu a případů užití. </p>
+			<p> <b>Hotels:</b> založení a editace hotelů, kategorií pokojů, pokojů.
+				Zobrazení hotelů, kategorie pokojů, pokojů podle rolí uživatelů. Nastavení oprávnění k objektům.
+			</p>
+			<p> <b>Users:</b> dolaďování komponenty, oprávnění k objektům, registrace a změna údajů objektů. </p>
+			<p>
+				Nastavení pěkného vzhledu pomocí Bootstrap. Úprava menu(navbar).
+			</p>
 	</dd>
+	<hr>
 	<dt>URL aplikace</dt>
 	<dd><a href="https://iishotel.herokuapp.com/">https://iishotel.herokuapp.com/</a></dd>
 </dl>
 
 <h2>Uživatelé systému pro testování</h2>
 <table>
-	<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-	<tr><td>admin@gmail.com</td><td>a0qwerty</td><td>Administrátor</td></tr>
-	<tr><td>director0@gmail.com</td><td>d0qwerty</td><td><strong>Director 0</strong> (Jizni Morava International, Prague Hotel Carl Inn Free Parking)</td></tr>
-	<tr><td>JMreceptionist1@gmail.com</td><td>JMr1qwerty</td><td>Recepční Jizni Morava International</td></tr>
-	<tr><td>PHreceptionist1@gmail.com</td><td>PHr1qwerty</td><td>Recepční Prague Hotel Carl Inn Free Parking</td></tr>
-	<tr><td>director1@gmail.com</td><td>d1qwerty</td><td><strong>Director 1</strong> (Praha President Hotel)</td></tr></tr>
-	<tr><td>PPreceptionist1@gmail.com</td><td>PPr1qwerty</td><td>Recepční Praha President Hotel</td></tr>
-	<tr><td>director2@gmail.com</td><td>d2qwerty</td><td><strong>Director 2</strong> (Brno Grand Hotel)</td></tr></tr>
-	<tr><td>BGreceptionist1@gmail.com</td><td>BGr1qwerty</td><td>Recepční Brno Grand Hotel</td></tr>
-	<tr><td>customer0@gmail.com</td><td>c0qwerty</td><td>Zákazník</td></tr>
+	<tr><th>Login</th><th>Heslo</th><th>Role</th><th>Pořadí</th><th>Hotel</th></tr>
+	<tr><td>admin@gmail.com</td><td>a0qwerty</td><td><strong><i>Administrátor</i></strong></td><td></td><td>Všechny</td></tr>
+
+	<tr><td>director0@gmail.com</td><td>d0qwerty</td><td><strong>Director</strong></td><td>0</td><td>Jizni Morava International, Prague Hotel Carl Inn Free Parking</td></tr>
+	<tr><td>JMreceptionist1@gmail.com</td><td>JMr1qwerty</td><td><i>Recepční</i></td><td>1</td><td>Jizni Morava International</td></tr>
+	<tr><td>JMreceptionist2@gmail.com</td><td>JMr2qwerty</td><td><i>Recepční</i></td><td>2</td><td>Jizni Morava International</td></tr>
+	<tr><td>PHreceptionist1@gmail.com</td><td>PHr1qwerty</td><td><i>Recepční</i></td><td>1</td><td>Prague Hotel Carl Inn Free Parking</td></tr>
+	<tr><td>PHreceptionist2@gmail.com</td><td>PHr2qwerty</td><td><i>Recepční</i></td><td>2</td><td>Prague Hotel Carl Inn Free Parking</td></tr>
+
+	<tr><td>director1@gmail.com</td><td>d1qwerty</td><td><strong>Director</strong></td><td>1</td><td>Praha President Hotel</td></tr></tr>
+	<tr><td>PPreceptionist1@gmail.com</td><td>PPr1qwerty</td><td>Recepční</td><td>1</td><td>Praha President Hotel</td></tr>
+	<tr><td>PPreceptionist2@gmail.com</td><td>PPr2qwerty</td><td>Recepční</td><td>2</td><td>Praha President Hotel</td></tr>
+
+	<tr><td>director2@gmail.com</td><td>d2qwerty</td><td><strong>Director</strong></td><td>2</td><td>Brno Grand Hotel</td></tr></tr>
+	<tr><td>BGreceptionist1@gmail.com</td><td>BGr1qwerty</td><td>Recepční</td><td>1</td><td>Brno Grand Hotel</td></tr>
+	<tr><td>BGreceptionist2@gmail.com</td><td>BGr2qwerty</td><td>Recepční</td><td>2</td><td>Brno Grand Hotel</td></tr>
+
+	<tr><td>customer0@gmail.com</td><td>c0qwerty</td><td>Zákazník</td><td>0</td><td></td></tr>
+	<tr><td>customer1@gmail.com</td><td>c1qwerty</td><td>Zákazník</td><td>1</td><td></td></tr>
+	<tr><td>...  Celkem 0..7 </td><td></td><td>Zákazník</td><td></td><td></td></tr>
+	<tr><td>customer&lt;poradi&gt;@gmail.com</td><td>c&lt;poradi&gt;qwerty</td><td>Zákazník</td><td>&lt;poradi&gt;</td><td></td></tr>
 </table> 
-<p>Loginy a hesla dalších zákazníků (celkem 8) jsou tvořeny podle pravidla:</p>
+<!-- <p>Loginy a hesla dalších zákazníků (celkem 8) jsou tvořeny podle pravidla:</p>
 <p style="font-size: 15px;"><strong>Login: </strong>customer{číslo od 0}@gmail.com <strong>Heslo: </strong>{<strong>c</strong>}{číslo od 0}qwerty</p>
 <pre>	<strong>login: </strong>customer<strong>1</strong>@gmail.com <strong>heslo:</strong> <strong>c1</strong>qwerty,
-<strong>	login: </strong>customer<strong>2</strong>@gmail.com <strong>heslo:</strong> <strong>c2</strong>qwerty , ... </pre>
+<strong>	login: </strong>customer<strong>2</strong>@gmail.com <strong>heslo:</strong> <strong>c2</strong>qwerty , ... </pre> -->
+<br>
 <h2>Implementace</h2>
 <p>Projekt je implementován v jazyce Python pomocí frameworku Flask. Klientská část byla napsána v jazycích JavaScript, HTML, CSS.
 	Interakce uživatele a systému probíhá bezpečně prostřednictvím forem které jsme vytvořili použitím Flask Forms.
@@ -68,10 +102,10 @@
 		<li><strong>get_or_create_user</strong> uživatel bud' existuje nebo je anonymní.</li>
 		<li><strong>new_or_update_user</strong> přidání uživatele nebo změna údajů podle role.</li>
 		<li><strong>new_password</strong> změna hesla přihlášeného uživatele.</li>
-		<li><strong>home</strong> domovská stránka.</li>
+		<li><strong>home</strong> domovská stránka, změna udajů</li>
 		<li><strong>get_user</strong> zobrazuje uživatele.</li>
-		<li><strong>manage</strong> zobrazuje seznam uživatelů.</li>
-		<li><strong>delete</strong> vymazání uživatele.</li>
+		<li><strong>manage</strong> seznam a správa uživatelů.</li>
+		<li><strong>delete</strong> vymazání uživatele(deaktivace účtu).</li>
 	</ul>
 
 	
@@ -144,7 +178,27 @@ Nainstalovat nutné balíky je možně příkazem <code>pip intstall -r requirem
 
 
 <h2>Známé problémy</h2>
+<p>
+	<ol>
+		<li> Recepční nemůže zadat rezervace do systému pro více pokojů na více datumu. Model to umožňuje, ale controller ne. </li>
+		<li> Forma zadání rezervací není ošetřena csrf tokenem, což může být napadnuto pomocí Cross-Site Scripting.
+			Posílá se AJAXem. Tohle bylo experementalni řešení. Ukázalo se, že to tak být nemá.
+		</li>
+		<li> Lze zadat reservaci pro již obsazený pokoj k datu. </li>
+		<li> Nabídka hotelů a nabídka pokojů v hotelu je vždy kompletní bez ohledu na to jsou-li tam k datu volné pokoje. </li>
+		<li> Při založení reservaci zákazník nevidí výslednou cenu. Vidí ji až po provedení v sekci My reservations. </li>
+		<li> Neexistuje stav reservaci: Zákazník nedojel. Stav rezervací se automaticky v čase nemění. </li>
+		<li> Anon se stát zákazníkem nemůže. Po odhlášení se k svému účtu nedostane, pokud nezmění heslo. Pouze přes Register a pak vytvořit reservaci. </li>
+		<li> Emaily o vytvoření nové rezervací se neposílají. </li>
+		<li> User nemá v databázi telefonní číslo. </li>
+		<li> Vlastník hotelu nemá statistiky o rezervacích, které by ho zajímali </li>
+		<li> Nejsou vyřešené zpětné vazby zákazníků </li>
+		<li> Zákazník nemůže zaplatit online ani blokační zálohu, ani výslednou částku. </li>
+		<li> Hotel, kategorií pokojů, pokoje se nedá smazat ani deaktivovat. </li>
+	</ol>
+</p>
 </div>
 </div>
+<br><br><br>
 {% endblock inner_content %}
 

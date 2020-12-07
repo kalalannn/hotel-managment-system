@@ -170,10 +170,54 @@ $(document).ready(function () {
                 }
             },
             { text: "-" },
-            { text: "Details", onClick: function (args) { console.log('select') } },
+            { text: "Details", onClick: function (args) {
+                $.ajax({
+                    url: "{{ url_for('reservations.reservation_details') }}",
+                    data: { reservation_id: args.source.data.reservation_id },
+                    success: function (data) {
+                        showReservationDetails(data);
+                    },
+                    error: function () {
+                        Utils.showToast('error', 'Some error occured. Try to reload the page')
+                    }
+                });
+            } },
         ]
     });
 
+    function showReservationDetails(data) {
+        let $modal = $('#detailsDialog');
+
+        let status;
+        if (data.payment.is_paid) {
+            status = 'paid';
+        } else if (data.payment.is_blocked) {
+            status = 'blocked';
+        } else {
+            status = 'unpaid';
+        }
+        $modal.find('.status').removeClass('paid blocked unpaid').addClass(status).text(status.toUpperCase());
+
+        let table = '<table><tbody>';
+        for (let reservation_room of data.reservations_rooms) {
+            table += '<tr style="border-bottom: 1px solid black;"><td><b>Room #' + reservation_room.room.number + '</b></td></tr>';
+            table += '<tr><td>Category ' + reservation_room.room.room_category.type + '</td></tr>';
+            table += '<tr><td>' + reservation_room.room.beds + ' beds</td></tr>';
+        }
+        table += '</tbody></table>';
+        $modal.find('#placeholder').html(table);
+
+        $modal.find('.check').html('');
+        if (data.status == 'CHECKED_IN') {
+            $modal.find('.check').html('You are checked in!');
+        } else if (data.status == 'CHECKED_OUT') {
+            $modal.find('.check').html('You are checked out.');
+        }
+
+        $modal.find('.full-price').html(data.payment.full_amount + ' Kč');
+
+        $modal.modal('show');
+    }
 
     loadRooms();
     loadReservations();
@@ -427,6 +471,7 @@ $(document).ready(function () {
             for (var obj of data) {
                 for (var reservation_room of obj.reservations_rooms) {
                     var event = {
+                        'reservation_id': obj.id,
                         'start': new Date(reservation_room.date_from).toISOString(),
                         'end': new Date(reservation_room.date_to).toISOString(),
                         'id': reservation_room.id,

@@ -212,7 +212,7 @@ class User(UserMixin, db.Model):
 
                     # Only ADMIN or DIRECTOR can activate or deactviate
                     # Only ADMIN or DIRECTOR can edit recept_hotel_id 
-                    if current_user.role <= UserRole.DIRECTOR.value:
+                    if current_user.role < UserRole.DIRECTOR.value:
                         if user.is_active != is_active:
                             return False, 'Only ADMIN or DIRECTOR can activate or deactviate'
                         if user.recept_hotel_id != recept_hotel_id:
